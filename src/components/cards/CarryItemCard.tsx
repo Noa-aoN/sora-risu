@@ -59,50 +59,42 @@ export function CarryItemCard({ item }: { item: CarryItem }) {
       onClick={() => toggle(item.id)}
       aria-pressed={checked}
       className={cn(
-        "relative w-full overflow-hidden rounded-2xl border px-4 pb-3 pt-4 text-left transition-colors",
+        "group relative w-full rounded-2xl border border-t-2 px-4 py-3 text-left transition-colors",
         checked
-          ? "border-leaf-300 bg-leaf-50/70"
+          ? "border-leaf-200 border-t-leaf-500 bg-leaf-50/70"
           : isRequired
-            ? "border-pollen-200 bg-pollen-50/60 hover:bg-pollen-50"
-            : "border-pollen-100 bg-white hover:bg-pollen-50/40",
+            ? "border-pollen-200 border-t-pollen-500 bg-pollen-50/60 hover:bg-pollen-50"
+            : "border-pollen-100 border-t-pollen-400 bg-white hover:bg-pollen-50/40",
       )}
     >
-      <span
-        aria-hidden
-        className={cn(
-          "absolute inset-x-0 top-0 h-1",
-          checked ? "bg-leaf-500" : "bg-pollen-500",
-        )}
-      />
-      <div className="flex items-start gap-3">
-        <CheckIndicator checked={checked} className="mt-0.5" />
-        <span
+      <div className="flex items-center gap-2.5">
+        <CheckIndicator checked={checked} />
+        <p
           className={cn(
-            "mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
-            checked
-              ? "bg-leaf-50 text-leaf-700"
-              : "bg-pollen-50 text-pollen-700",
+            "flex min-w-0 flex-1 items-center gap-1.5 text-sm font-medium",
+            checked ? "text-leaf-800 line-through" : "text-ink-800",
           )}
         >
-          {renderCarryIcon(item.category, 14)}
-        </span>
-        <div className="min-w-0 flex-1">
-          <p
+          <span
             className={cn(
-              "text-sm font-medium",
-              checked ? "text-leaf-800 line-through" : "text-ink-800",
+              "shrink-0",
+              checked ? "text-leaf-600" : "text-pollen-700",
             )}
           >
-            {item.name}
-          </p>
-          <p className="mt-0.5 text-[11px] leading-relaxed text-ink-500">
-            {item.reason}
-          </p>
-        </div>
+            {renderCarryIcon(item.category, 14)}
+          </span>
+          <span className="truncate">{item.name}</span>
+        </p>
         <Badge tone={isRequired ? "pollen" : "muted"}>
           {PRIORITY_LABEL[item.priority]}
         </Badge>
       </div>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute inset-x-0 top-full z-20 mt-1 rounded-xl border border-leaf-100 bg-white px-3 py-2 text-[11px] leading-relaxed text-ink-600 opacity-0 shadow-md shadow-leaf-900/[0.08] transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
+      >
+        {item.reason}
+      </span>
     </button>
   );
 }

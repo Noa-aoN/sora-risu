@@ -53,43 +53,42 @@ export function OutfitItemCard({ item }: { item: OutfitItem }) {
       onClick={() => toggle(item.id)}
       aria-pressed={checked}
       className={cn(
-        "relative w-full overflow-hidden rounded-2xl border px-4 pb-3 pt-4 text-left transition-colors",
+        "group relative w-full rounded-2xl border border-t-2 px-4 py-3 text-left transition-colors",
         checked
-          ? "border-leaf-300 bg-leaf-50/70"
+          ? "border-leaf-200 border-t-leaf-500 bg-leaf-50/70"
           : isRequired
-            ? "border-leaf-200 bg-leaf-50/60 hover:bg-leaf-50"
-            : "border-leaf-100/80 bg-white hover:bg-leaf-25",
+            ? "border-leaf-200 border-t-leaf-500 bg-leaf-50/60 hover:bg-leaf-50"
+            : "border-leaf-100/80 border-t-leaf-400 bg-white hover:bg-leaf-25",
       )}
     >
-      <span
-        aria-hidden
-        className={cn(
-          "absolute inset-x-0 top-0 h-1",
-          checked ? "bg-leaf-500" : isRequired ? "bg-leaf-500" : "bg-leaf-400",
-        )}
-      />
-      <div className="flex items-start gap-3">
-        <CheckIndicator checked={checked} className="mt-0.5" />
-        <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-leaf-50 text-leaf-700">
-          {renderOutfitIcon(item.category, 14)}
-        </span>
-        <div className="min-w-0 flex-1">
-          <p
+      <div className="flex items-center gap-2.5">
+        <CheckIndicator checked={checked} />
+        <p
+          className={cn(
+            "flex min-w-0 flex-1 items-center gap-1.5 text-sm font-medium",
+            checked ? "text-leaf-800 line-through" : "text-ink-800",
+          )}
+        >
+          <span
             className={cn(
-              "text-sm font-medium",
-              checked ? "text-leaf-800 line-through" : "text-ink-800",
+              "shrink-0",
+              checked ? "text-leaf-600" : "text-leaf-700",
             )}
           >
-            {item.name}
-          </p>
-          <p className="mt-0.5 text-[11px] leading-relaxed text-ink-500">
-            {item.reason}
-          </p>
-        </div>
+            {renderOutfitIcon(item.category, 14)}
+          </span>
+          <span className="truncate">{item.name}</span>
+        </p>
         <Badge tone={isRequired ? "leaf" : "muted"}>
           {PRIORITY_LABEL[item.priority]}
         </Badge>
       </div>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute inset-x-0 top-full z-20 mt-1 rounded-xl border border-leaf-100 bg-white px-3 py-2 text-[11px] leading-relaxed text-ink-600 opacity-0 shadow-md shadow-leaf-900/[0.08] transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
+      >
+        {item.reason}
+      </span>
     </button>
   );
 }

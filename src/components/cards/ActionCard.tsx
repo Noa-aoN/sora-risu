@@ -55,49 +55,43 @@ export function ActionCard({ item }: { item: ActionItem }) {
       onClick={() => toggle(item.id)}
       aria-pressed={checked}
       className={cn(
-        "relative w-full overflow-hidden rounded-2xl border px-4 pb-3 pt-4 text-left transition-colors",
+        "group relative w-full rounded-2xl border border-t-2 px-4 py-3 text-left transition-colors",
         checked
-          ? "border-leaf-300 bg-leaf-50/70"
-          : "border-rain-100 bg-white hover:bg-rain-50/50",
+          ? "border-leaf-200 border-t-leaf-500 bg-leaf-50/70"
+          : "border-rain-100 border-t-rain-500 bg-white hover:bg-rain-50/50",
       )}
     >
-      <span
-        aria-hidden
-        className={cn(
-          "absolute inset-x-0 top-0 h-1",
-          checked ? "bg-leaf-500" : "bg-rain-500",
-        )}
-      />
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2.5">
         <CheckIndicator checked={checked} className="mt-0.5" />
-        <span
-          className={cn(
-            "mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
-            checked
-              ? "bg-leaf-50 text-leaf-700"
-              : "bg-rain-50 text-rain-700",
-          )}
-        >
-          {renderActionIcon(item.category, 14)}
-        </span>
         <div className="min-w-0 flex-1 space-y-0.5">
           <p
             className={cn(
-              "text-sm font-medium",
+              "flex items-center gap-1.5 text-sm font-medium",
               checked ? "text-leaf-800 line-through" : "text-ink-800",
             )}
           >
-            {item.title}
+            <span
+              className={cn(
+                "shrink-0",
+                checked ? "text-leaf-600" : "text-rain-700",
+              )}
+            >
+              {renderActionIcon(item.category, 14)}
+            </span>
+            <span className="truncate">{item.title}</span>
           </p>
           <p className="text-[11px] leading-relaxed text-ink-600">
             {item.description}
           </p>
-          <p className="text-[11px] leading-relaxed text-ink-400">
-            {item.reason}
-          </p>
         </div>
         <Badge tone="rain">{INTENSITY_LABEL[item.intensity]}</Badge>
       </div>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute inset-x-0 top-full z-20 mt-1 rounded-xl border border-leaf-100 bg-white px-3 py-2 text-[11px] leading-relaxed text-ink-600 opacity-0 shadow-md shadow-leaf-900/[0.08] transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
+      >
+        {item.reason}
+      </span>
     </button>
   );
 }

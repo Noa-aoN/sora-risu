@@ -257,7 +257,7 @@ function SlotRow({
           </p>
         )}
       </div>
-      <div className="grid gap-3 lg:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-3">
         <Column tone="leaf" title="服装" empty="提案なし">
           {outfit.map((item) => (
             <OutfitItemCard key={item.id} item={item} />
