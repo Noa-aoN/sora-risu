@@ -28,6 +28,7 @@ export type FetchAirQualityInput = {
   latitude: number;
   longitude: number;
   forecastDays?: number;
+  pastDays?: number;
   signal?: AbortSignal;
 };
 
@@ -35,6 +36,7 @@ export async function fetchAirQuality({
   latitude,
   longitude,
   forecastDays = 5,
+  pastDays = 0,
   signal,
 }: FetchAirQualityInput): Promise<RawAirQualityResponse> {
   const params = new URLSearchParams({
@@ -43,6 +45,7 @@ export async function fetchAirQuality({
     hourly: POLLEN_FIELDS.join(","),
     timezone: "auto",
     forecast_days: forecastDays.toString(),
+    past_days: pastDays.toString(),
   });
 
   const response = await fetch(`${AIR_QUALITY_ENDPOINT}?${params.toString()}`, {

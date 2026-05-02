@@ -85,7 +85,7 @@ export default function HomePage() {
         />
 
         <TimelinePanel />
-        <WeatherChart weather={weather} range={range} />
+        <WeatherChart weather={weather} pollen={pollen} range={range} />
 
         <DayPicker />
         <TimeSyncedSection
