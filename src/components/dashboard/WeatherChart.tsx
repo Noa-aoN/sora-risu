@@ -318,7 +318,7 @@ function ChartRow({
   icon: ReactNode;
   label: string;
   height: string;
-  children: ReactElement;
+  children: ReactNode;
 }) {
   return (
     <div className="flex items-stretch gap-2">
@@ -328,11 +328,7 @@ function ChartRow({
         </span>
         <span className="text-[9px] tracking-wider">{label}</span>
       </div>
-      <div className={`flex-1 ${height}`}>
-        <ResponsiveContainer width="100%" height="100%">
-          {children}
-        </ResponsiveContainer>
-      </div>
+      <div className={`flex-1 ${height}`}>{children}</div>
     </div>
   );
 }
@@ -392,115 +388,130 @@ function commonOverlays(ctx: ChartContext, yAxisId?: string, withLabel = false) 
 
 function PressureChart({ ctx }: { ctx: ChartContext }) {
   return (
-    <LineChart data={ctx.data} margin={{ top: 16, right: 8, left: -8, bottom: 0 }}>
-      <CartesianGrid stroke="#e8efe6" vertical={false} />
-      <XAxis {...commonAxisProps(ctx)} />
-      <YAxis
-        yAxisId="p"
-        domain={["dataMin - 2", "dataMax + 2"]}
-        tick={{ fill: "#8d938a", fontSize: 11 }}
-        width={36}
-        axisLine={false}
-        tickLine={false}
-      />
-      <Tooltip
-        cursor={{ stroke: "#c1d3bc", strokeDasharray: "3 3" }}
-        labelFormatter={(value) => ctx.tooltipFormatter(value as number)}
-        contentStyle={{
-          borderRadius: 12,
-          border: "1px solid #dce6d8",
-          fontSize: 12,
-        }}
-      />
-      {commonOverlays(ctx, "p", true)}
-      <Line
-        yAxisId="p"
-        type="monotone"
-        dataKey="pressure"
-        stroke="#5b7a62"
-        strokeWidth={2}
-        dot={false}
-        name="気圧 (hPa)"
-      />
-    </LineChart>
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart
+        data={ctx.data}
+        margin={{ top: 16, right: 8, left: -8, bottom: 0 }}
+      >
+        <CartesianGrid stroke="#e8efe6" vertical={false} />
+        <XAxis {...commonAxisProps(ctx)} />
+        <YAxis
+          yAxisId="p"
+          domain={["dataMin - 2", "dataMax + 2"]}
+          tick={{ fill: "#8d938a", fontSize: 11 }}
+          width={36}
+          axisLine={false}
+          tickLine={false}
+        />
+        <Tooltip
+          cursor={{ stroke: "#c1d3bc", strokeDasharray: "3 3" }}
+          labelFormatter={(value) => ctx.tooltipFormatter(value as number)}
+          contentStyle={{
+            borderRadius: 12,
+            border: "1px solid #dce6d8",
+            fontSize: 12,
+          }}
+        />
+        {commonOverlays(ctx, "p", true)}
+        <Line
+          yAxisId="p"
+          type="monotone"
+          dataKey="pressure"
+          stroke="#5b7a62"
+          strokeWidth={2}
+          dot={false}
+          name="気圧 (hPa)"
+        />
+      </LineChart>
+    </ResponsiveContainer>
   );
 }
 
 function TemperatureChart({ ctx }: { ctx: ChartContext }) {
   return (
-    <AreaChart data={ctx.data} margin={{ top: 14, right: 8, left: -8, bottom: 0 }}>
-      <defs>
-        <linearGradient id="tempFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#86a48b" stopOpacity={0.45} />
-          <stop offset="100%" stopColor="#86a48b" stopOpacity={0} />
-        </linearGradient>
-      </defs>
-      <CartesianGrid stroke="#e8efe6" vertical={false} />
-      <XAxis {...commonAxisProps(ctx)} />
-      <YAxis
-        tick={{ fill: "#8d938a", fontSize: 11 }}
-        width={36}
-        axisLine={false}
-        tickLine={false}
-      />
-      <Tooltip
-        cursor={{ stroke: "#c1d3bc", strokeDasharray: "3 3" }}
-        labelFormatter={(value) => ctx.tooltipFormatter(value as number)}
-        contentStyle={{
-          borderRadius: 12,
-          border: "1px solid #dce6d8",
-          fontSize: 12,
-        }}
-      />
-      {commonOverlays(ctx, undefined, !ctx.isHourly)}
-      <Area
-        type="monotone"
-        dataKey="temperature"
-        stroke="#6f8f75"
-        fill="url(#tempFill)"
-        strokeWidth={2}
-        name="気温 (℃)"
-      />
-    </AreaChart>
+    <ResponsiveContainer width="100%" height="100%">
+      <AreaChart
+        data={ctx.data}
+        margin={{ top: 14, right: 8, left: -8, bottom: 0 }}
+      >
+        <defs>
+          <linearGradient id="tempFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#86a48b" stopOpacity={0.45} />
+            <stop offset="100%" stopColor="#86a48b" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid stroke="#e8efe6" vertical={false} />
+        <XAxis {...commonAxisProps(ctx)} />
+        <YAxis
+          tick={{ fill: "#8d938a", fontSize: 11 }}
+          width={36}
+          axisLine={false}
+          tickLine={false}
+        />
+        <Tooltip
+          cursor={{ stroke: "#c1d3bc", strokeDasharray: "3 3" }}
+          labelFormatter={(value) => ctx.tooltipFormatter(value as number)}
+          contentStyle={{
+            borderRadius: 12,
+            border: "1px solid #dce6d8",
+            fontSize: 12,
+          }}
+        />
+        {commonOverlays(ctx, undefined, !ctx.isHourly)}
+        <Area
+          type="monotone"
+          dataKey="temperature"
+          stroke="#6f8f75"
+          fill="url(#tempFill)"
+          strokeWidth={2}
+          name="気温 (℃)"
+        />
+      </AreaChart>
+    </ResponsiveContainer>
   );
 }
 
 function PrecipChart({ ctx }: { ctx: ChartContext }) {
   return (
-    <AreaChart data={ctx.data} margin={{ top: 6, right: 8, left: -8, bottom: 0 }}>
-      <defs>
-        <linearGradient id="rainFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#6c9bd2" stopOpacity={0.5} />
-          <stop offset="100%" stopColor="#6c9bd2" stopOpacity={0} />
-        </linearGradient>
-      </defs>
-      <CartesianGrid stroke="#e8efe6" vertical={false} />
-      <XAxis {...commonAxisProps(ctx)} />
-      <YAxis
-        domain={[0, 100]}
-        tick={{ fill: "#8d938a", fontSize: 11 }}
-        width={36}
-        axisLine={false}
-        tickLine={false}
-      />
-      <Tooltip
-        cursor={{ stroke: "#c1d3bc", strokeDasharray: "3 3" }}
-        labelFormatter={(value) => ctx.tooltipFormatter(value as number)}
-        contentStyle={{
-          borderRadius: 12,
-          border: "1px solid #dce6d8",
-          fontSize: 12,
-        }}
-      />
-      {commonOverlays(ctx)}
-      <Area
-        type="monotone"
-        dataKey="precipProb"
-        stroke="#6c9bd2"
-        fill="url(#rainFill)"
-        strokeWidth={2}
-        name="降水確率 (%)"
-      />
-    </AreaChart>
+    <ResponsiveContainer width="100%" height="100%">
+      <AreaChart
+        data={ctx.data}
+        margin={{ top: 6, right: 8, left: -8, bottom: 0 }}
+      >
+        <defs>
+          <linearGradient id="rainFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#6c9bd2" stopOpacity={0.5} />
+            <stop offset="100%" stopColor="#6c9bd2" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid stroke="#e8efe6" vertical={false} />
+        <XAxis {...commonAxisProps(ctx)} />
+        <YAxis
+          domain={[0, 100]}
+          tick={{ fill: "#8d938a", fontSize: 11 }}
+          width={36}
+          axisLine={false}
+          tickLine={false}
+        />
+        <Tooltip
+          cursor={{ stroke: "#c1d3bc", strokeDasharray: "3 3" }}
+          labelFormatter={(value) => ctx.tooltipFormatter(value as number)}
+          contentStyle={{
+            borderRadius: 12,
+            border: "1px solid #dce6d8",
+            fontSize: 12,
+          }}
+        />
+        {commonOverlays(ctx)}
+        <Area
+          type="monotone"
+          dataKey="precipProb"
+          stroke="#6c9bd2"
+          fill="url(#rainFill)"
+          strokeWidth={2}
+          name="降水確率 (%)"
+        />
+      </AreaChart>
+    </ResponsiveContainer>
   );
 }
