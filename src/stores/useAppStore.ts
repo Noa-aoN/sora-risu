@@ -19,7 +19,9 @@ type Actions = {
   setDisplayTarget: (target: DisplayTarget) => void;
   setProfile: (profile: Partial<UserProfile>) => void;
   toggleCarryCheck: (id: string) => void;
-  resetCarryChecks: () => void;
+  toggleOutfitCheck: (id: string) => void;
+  toggleActionCheck: (id: string) => void;
+  resetAllCardChecks: () => void;
   setDayWindowStart: (n: number) => void;
   toggleChartSeries: (key: ChartSeriesKey) => void;
   resetChartSeries: () => void;
@@ -27,6 +29,8 @@ type Actions = {
 
 type AppStore = AppSettings & {
   dayWindowStart: number;
+  outfitChecks: Record<string, boolean>;
+  actionChecks: Record<string, boolean>;
 } & Actions;
 
 const initial: AppSettings = {
@@ -49,6 +53,8 @@ export const useAppStore = create<AppStore>()(
     (set) => ({
       ...initial,
       dayWindowStart: 0,
+      outfitChecks: {},
+      actionChecks: {},
       setLocation: (location) => set({ location }),
       setTimelineRange: (timelineRange) => set({ timelineRange }),
       setDisplayTarget: (displayTarget) => set({ displayTarget }),
@@ -61,7 +67,22 @@ export const useAppStore = create<AppStore>()(
             [id]: !state.carryChecks[id],
           },
         })),
-      resetCarryChecks: () => set({ carryChecks: {} }),
+      toggleOutfitCheck: (id) =>
+        set((state) => ({
+          outfitChecks: {
+            ...state.outfitChecks,
+            [id]: !state.outfitChecks[id],
+          },
+        })),
+      toggleActionCheck: (id) =>
+        set((state) => ({
+          actionChecks: {
+            ...state.actionChecks,
+            [id]: !state.actionChecks[id],
+          },
+        })),
+      resetAllCardChecks: () =>
+        set({ carryChecks: {}, outfitChecks: {}, actionChecks: {} }),
       setDayWindowStart: (n) => set({ dayWindowStart: clampDayWindow(n) }),
       toggleChartSeries: (key) =>
         set((state) => ({
@@ -74,19 +95,30 @@ export const useAppStore = create<AppStore>()(
     }),
     {
       name: "weather-dash:settings",
-      version: 3,
+      version: 4,
       migrate: (persisted: unknown, version: number) => {
-        const state = (persisted as Partial<AppSettings>) ?? {};
-        if (version < 2 || !state.chartSeries) {
-          return { ...state, chartSeries: DEFAULT_CHART_SERIES };
+        const state = (persisted as Partial<AppSettings> & {
+          outfitChecks?: Record<string, boolean>;
+          actionChecks?: Record<string, boolean>;
+        }) ?? {};
+        let next = { ...state };
+        if (version < 2 || !next.chartSeries) {
+          next = { ...next, chartSeries: DEFAULT_CHART_SERIES };
         }
-        if (version < 3 && state.chartSeries) {
-          return {
-            ...state,
-            chartSeries: { ...DEFAULT_CHART_SERIES, ...state.chartSeries },
+        if (version < 3 && next.chartSeries) {
+          next = {
+            ...next,
+            chartSeries: { ...DEFAULT_CHART_SERIES, ...next.chartSeries },
           };
         }
-        return state;
+        if (version < 4) {
+          next = {
+            ...next,
+            outfitChecks: next.outfitChecks ?? {},
+            actionChecks: next.actionChecks ?? {},
+          };
+        }
+        return next;
       },
       partialize: (state) => ({
         location: state.location,
@@ -94,6 +126,8 @@ export const useAppStore = create<AppStore>()(
         timelineRange: state.timelineRange,
         displayTarget: state.displayTarget,
         carryChecks: state.carryChecks,
+        outfitChecks: state.outfitChecks,
+        actionChecks: state.actionChecks,
         chartSeries: state.chartSeries,
       }),
     },

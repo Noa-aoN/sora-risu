@@ -1,6 +1,11 @@
+"use client";
+
 import { Shirt } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { CheckIndicator } from "@/components/ui/check-indicator";
+import { cn } from "@/lib/cn";
+import { useAppStore } from "@/stores/useAppStore";
 import type { OutfitItem } from "@/types/recommendation";
 
 const PRIORITY_LABEL: Record<OutfitItem["priority"], string> = {
@@ -10,28 +15,52 @@ const PRIORITY_LABEL: Record<OutfitItem["priority"], string> = {
 };
 
 export function OutfitItemCard({ item }: { item: OutfitItem }) {
+  const checked = useAppStore((s) => Boolean(s.outfitChecks[item.id]));
+  const toggle = useAppStore((s) => s.toggleOutfitCheck);
+
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-leaf-100/80 bg-white px-4 pb-3 pt-4">
+    <button
+      type="button"
+      onClick={() => toggle(item.id)}
+      aria-pressed={checked}
+      className={cn(
+        "relative w-full overflow-hidden rounded-2xl border px-4 pb-3 pt-4 text-left transition-colors",
+        checked
+          ? "border-leaf-300 bg-leaf-50/70"
+          : "border-leaf-100/80 bg-white hover:bg-leaf-25",
+      )}
+    >
       <span
         aria-hidden
-        className="absolute inset-x-0 top-0 h-1 bg-leaf-400"
+        className={cn(
+          "absolute inset-x-0 top-0 h-1",
+          checked ? "bg-leaf-500" : "bg-leaf-400",
+        )}
       />
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-2">
-          <span className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full bg-leaf-50 text-leaf-700">
-            <Shirt size={14} />
-          </span>
-          <div>
-            <p className="text-sm font-medium text-ink-800">{item.name}</p>
-            <p className="mt-0.5 text-[11px] leading-relaxed text-ink-500">
-              {item.reason}
-            </p>
-          </div>
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-leaf-50 text-leaf-700">
+          <Shirt size={14} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p
+            className={cn(
+              "text-sm font-medium",
+              checked ? "text-leaf-800 line-through" : "text-ink-800",
+            )}
+          >
+            {item.name}
+          </p>
+          <p className="mt-0.5 text-[11px] leading-relaxed text-ink-500">
+            {item.reason}
+          </p>
         </div>
-        <Badge tone={item.priority === "required" ? "leaf" : "muted"}>
-          {PRIORITY_LABEL[item.priority]}
-        </Badge>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <Badge tone={item.priority === "required" ? "leaf" : "muted"}>
+            {PRIORITY_LABEL[item.priority]}
+          </Badge>
+          <CheckIndicator checked={checked} />
+        </div>
       </div>
-    </div>
+    </button>
   );
 }
