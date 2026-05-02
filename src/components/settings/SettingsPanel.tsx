@@ -2,6 +2,7 @@
 
 import { Settings } from "lucide-react";
 
+import { CheckIndicator } from "@/components/ui/check-indicator";
 import {
   Card,
   CardContent,
@@ -10,8 +11,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
+import { cn } from "@/lib/cn";
 import { useAppStore } from "@/stores/useAppStore";
-import type { BodyType, StyleTag } from "@/types/recommendation";
+import type {
+  BodyType,
+  SceneSelection,
+  StyleTag,
+} from "@/types/recommendation";
 
 const STYLE_OPTIONS: Array<{ value: StyleTag; label: string }> = [
   { value: "simple", label: "シンプル" },
@@ -31,6 +37,12 @@ export function SettingsPanel() {
   const setProfile = useAppStore((s) => s.setProfile);
   const resetAllCardChecks = useAppStore((s) => s.resetAllCardChecks);
 
+  const setScene = (key: keyof SceneSelection, value: boolean) => {
+    const next: SceneSelection = { ...profile.scenes, [key]: value };
+    if (!next.indoor && !next.outdoor) return;
+    setProfile({ scenes: next });
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -39,11 +51,11 @@ export function SettingsPanel() {
           <CardTitle className="text-leaf-800">設定</CardTitle>
         </div>
         <CardDescription>
-          ジャンルと体質補正は服装・持ち物の提案に反映されます
+          ジャンル / 体質 / シーンは服装・持ち物・アクションの提案に反映されます
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Field label="服装ジャンル">
             <Select
               value={profile.styleGenre}
@@ -72,6 +84,20 @@ export function SettingsPanel() {
               ))}
             </Select>
           </Field>
+          <Field label="シーン">
+            <div className="flex flex-wrap gap-2 pt-1">
+              <SceneChip
+                label="室内"
+                checked={profile.scenes.indoor}
+                onClick={() => setScene("indoor", !profile.scenes.indoor)}
+              />
+              <SceneChip
+                label="室外"
+                checked={profile.scenes.outdoor}
+                onClick={() => setScene("outdoor", !profile.scenes.outdoor)}
+              />
+            </div>
+          </Field>
           <Field label="カードのチェック">
             <button
               type="button"
@@ -84,6 +110,33 @@ export function SettingsPanel() {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function SceneChip({
+  label,
+  checked,
+  onClick,
+}: {
+  label: string;
+  checked: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={checked}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors",
+        checked
+          ? "border-leaf-300 bg-leaf-50 text-leaf-800"
+          : "border-leaf-100 bg-white text-ink-400 hover:bg-leaf-25",
+      )}
+    >
+      <CheckIndicator checked={checked} />
+      {label}
+    </button>
   );
 }
 
