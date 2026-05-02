@@ -25,7 +25,7 @@ export function SeasonalWordCard() {
   const word = useMemo(() => (mounted ? pickSeasonalWord() : null), [mounted]);
 
   return (
-    <Card className="flex h-full flex-col overflow-hidden bg-[linear-gradient(160deg,rgba(246,249,245,0.98),rgba(255,255,255,0.98))]">
+    <Card className="flex h-full flex-col">
       <CardHeader>
         <div className="flex items-center gap-2 text-leaf-700">
           <Leaf size={14} />
@@ -36,7 +36,7 @@ export function SeasonalWordCard() {
       </CardHeader>
       <CardContent className="pt-3">
         {word ? (
-          <div className="rounded-[1.25rem] border border-leaf-100/80 bg-white/80 px-4 py-4 shadow-sm shadow-leaf-900/[0.03]">
+          <div className="rounded-[1.25rem] border border-leaf-100/80 bg-[linear-gradient(160deg,rgba(238,243,236,0.6),rgba(248,250,246,0.95))] px-4 py-4">
             <div className="space-y-3">
               <div className="space-y-1">
                 <p className="text-lg font-medium tracking-[0.04em] text-ink-800">

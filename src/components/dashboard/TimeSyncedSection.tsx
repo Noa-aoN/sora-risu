@@ -195,12 +195,10 @@ function DayBlock({
               action={recommendations.action.filter((a) => a.slotId === slot.id)}
             />
             {index < group.slots.length - 1 && (
-              <div className="flex items-center justify-center gap-2 px-2 text-ink-300">
-                <span className="h-px flex-1 bg-gradient-to-r from-transparent via-leaf-100 to-transparent" />
-                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-leaf-100 bg-white text-leaf-500">
-                  <ArrowDown size={14} />
-                </span>
-                <span className="h-px flex-1 bg-gradient-to-r from-transparent via-leaf-100 to-transparent" />
+              <div className="my-2 flex items-center justify-center gap-2 text-leaf-400">
+                <span className="h-px flex-1 bg-leaf-100" />
+                <ArrowDown size={12} />
+                <span className="h-px flex-1 bg-leaf-100" />
               </div>
             )}
           </div>

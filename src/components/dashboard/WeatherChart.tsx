@@ -663,7 +663,7 @@ function WeatherIconRow({ ctx }: { ctx: ChartContext }) {
           label={{
             value: "現在",
             position: "top",
-            offset: 8,
+            offset: 11,
             fill: NOW_LINE_COLOR,
             fontSize: 10,
           }}
