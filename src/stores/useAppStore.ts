@@ -6,7 +6,7 @@ import type { UserProfile } from "@/types/recommendation";
 import type { AppSettings } from "@/types/settings";
 import type { DisplayTarget, TimelineRange } from "@/types/timeline";
 
-export const DAY_WINDOW_MAX_START = 5;
+export const DAY_WINDOW_MAX_START = 6;
 
 type Actions = {
   setLocation: (location: GeoLocation | null) => void;

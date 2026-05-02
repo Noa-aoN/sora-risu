@@ -29,20 +29,12 @@ function relativeDayName(offset: number): string {
   return `${offset}日後`;
 }
 
-function primaryLabel(start: number): string {
-  if (start <= 1) {
-    return `${relativeDayName(start)} + ${relativeDayName(start + 1)}`;
-  }
-  return `${relativeDayName(start)} + ${relativeDayName(start + 1)}`;
-}
-
 export function DayPicker() {
   const dayWindowStart = useAppStore((s) => s.dayWindowStart);
   const setDayWindowStart = useAppStore((s) => s.setDayWindowStart);
 
   const today = new Date();
-  const day1 = shiftDate(today, dayWindowStart);
-  const day2 = shiftDate(today, dayWindowStart + 1);
+  const day = shiftDate(today, dayWindowStart);
 
   const canPrev = dayWindowStart > 0;
   const canNext = dayWindowStart < DAY_WINDOW_MAX_START;
@@ -69,11 +61,9 @@ export function DayPicker() {
           カードの対象日
         </p>
         <p className="text-sm font-medium text-ink-800">
-          {primaryLabel(dayWindowStart)}
+          {relativeDayName(dayWindowStart)}
         </p>
-        <p className="text-[11px] text-ink-500">
-          {shortDate(day1)} – {shortDate(day2)}
-        </p>
+        <p className="text-[11px] text-ink-500">{shortDate(day)}</p>
       </div>
 
       <button
