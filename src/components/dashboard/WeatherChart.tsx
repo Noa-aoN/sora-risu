@@ -87,10 +87,6 @@ function dayStartMs(ms: number, dayOffset = 0): number {
   return d.getTime();
 }
 
-function todayMidnightMs(): number {
-  return dayStartMs(Date.now());
-}
-
 function formatHourTick(ms: number): string {
   return pad2(new Date(ms).getHours()) + "時";
 }
@@ -193,35 +189,49 @@ function build24hWindow(
   return sliced.map((p) => ({ ...p, pollen: pollenMap.get(p.t) }));
 }
 
+function dailyAveragePressure(
+  hourly: NormalizedWeather["hourly"],
+  dayMidnightMs: number,
+): number {
+  const dayEnd = dayStartMs(dayMidnightMs, 1);
+  let sum = 0;
+  let count = 0;
+  for (const p of hourly) {
+    const t = parseLocalISOToMs(p.time);
+    if (t < dayMidnightMs || t >= dayEnd) continue;
+    sum += p.pressure;
+    count += 1;
+  }
+  return count > 0 ? sum / count : 1013;
+}
+
 function buildDailyWindow(
   weather: NormalizedWeather,
   pollen: NormalizedPollen | null,
   count: number,
 ): ChartPoint[] {
-  const points: ChartPoint[] = weather.daily.map((d) => ({
-    t: parseLocalISOToMs(d.date),
-    pressure: 1013,
-    temperature: Math.round((d.tempMax + d.tempMin) / 2),
-    precip: d.precipitationSum,
-    precipProb: d.precipitationProbabilityMax,
-    weatherCode: d.weatherCode,
-  }));
+  const halfRangeMs = (count * 24 * 60 * 60 * 1000) / 2;
+  const nowMs = Date.now();
+  const minMs = nowMs - halfRangeMs;
+  const maxMs = nowMs + halfRangeMs;
 
-  if (points.length === 0) return points;
+  const points: ChartPoint[] = weather.daily
+    .map((d) => {
+      const t = parseLocalISOToMs(d.date);
+      return {
+        t,
+        pressure: Math.round(dailyAveragePressure(weather.hourly, t)),
+        temperature: Math.round((d.tempMax + d.tempMin) / 2),
+        precip: d.precipitationSum,
+        precipProb: d.precipitationProbabilityMax,
+        weatherCode: d.weatherCode,
+      } satisfies ChartPoint;
+    })
+    .filter((p) => p.t >= minMs && p.t <= maxMs);
 
-  const todayMs = todayMidnightMs();
-  let todayIdx = points.findIndex((p) => p.t === todayMs);
-  if (todayIdx < 0) todayIdx = 0;
-
-  const halfBefore = Math.floor((count - 1) / 2);
-  const halfAfter = count - 1 - halfBefore;
-  const startIdx = Math.max(0, todayIdx - halfBefore);
-  const endIdx = Math.min(points.length, todayIdx + halfAfter + 1);
-  const sliced = points.slice(startIdx, endIdx);
-
-  if (!pollen || !pollen.available) return sliced;
+  if (!pollen || !pollen.available) return points;
   const pollenDailyMap = buildPollenDailyMap(pollen);
-  return sliced.map((p) => ({
+  return points.map((p) => ({
     ...p,
     pollen: pollenDailyMap.get(localDateStringFromMs(p.t)),
   }));
@@ -312,6 +322,19 @@ type ChartContext = {
   pollenGrayoutFromMs: number | null;
 };
 
+function rangeHalfMs(range: TimelineRange): number {
+  switch (range) {
+    case "24h":
+      return 12 * 60 * 60 * 1000;
+    case "3d":
+      return 1.5 * 24 * 60 * 60 * 1000;
+    case "7d":
+      return 3.5 * 24 * 60 * 60 * 1000;
+    case "14d":
+      return 7 * 24 * 60 * 60 * 1000;
+  }
+}
+
 function buildChartContext(
   weather: NormalizedWeather,
   pollen: NormalizedPollen | null,
@@ -322,12 +345,9 @@ function buildChartContext(
     ? build24hWindow(weather, pollen)
     : buildDailyWindow(weather, pollen, dailyCountForRange(range));
 
-  const first = data[0];
-  const last = data[data.length - 1];
-  const domain: [number, number] = [
-    first?.t ?? Date.now(),
-    last?.t ?? Date.now(),
-  ];
+  const nowMs = Date.now();
+  const halfMs = rangeHalfMs(range);
+  const domain: [number, number] = [nowMs - halfMs, nowMs + halfMs];
 
   const showPollen = pollen !== null && pollen.available;
   let pollenGrayoutFromMs: number | null = null;
@@ -341,7 +361,7 @@ function buildChartContext(
   return {
     data,
     isHourly,
-    nowX: isHourly ? Date.now() : todayMidnightMs(),
+    nowX: nowMs,
     bands: isHourly ? buildHourlyBands(data) : [],
     domain,
     tickFormatter: isHourly ? formatHourTick : formatDayTick,
@@ -378,7 +398,7 @@ export function WeatherChart({ weather, pollen, range }: Props) {
 
   const ctx = buildChartContext(weather, pollen, range);
 
-  const showPressure = ctx.isHourly && chartSeries.pressure;
+  const showPressure = chartSeries.pressure;
   const showTemperature = chartSeries.temperature;
   const showPrecipitation = chartSeries.precipitation;
   const showWeather = chartSeries.weather;
@@ -400,7 +420,7 @@ export function WeatherChart({ weather, pollen, range }: Props) {
         <div className="pt-1">
           <ChartSeriesPicker
             showPollen={ctx.showPollen}
-            showPressure={ctx.isHourly}
+            showPressure
           />
         </div>
         {range === "24h" && (
@@ -437,7 +457,7 @@ export function WeatherChart({ weather, pollen, range }: Props) {
         ) : (
           <div className="space-y-4">
             {showPressure && (
-              <ChartRow icon={<Gauge size={14} />} label="気圧" height="h-40">
+              <ChartRow icon={<Gauge size={14} />} label="気圧" height="h-36">
                 <PressureChart ctx={ctx} />
               </ChartRow>
             )}
@@ -491,10 +511,10 @@ export function WeatherChart({ weather, pollen, range }: Props) {
 
 function buildTitle(
   chartSeries: ChartSeriesVisibility,
-  ctx: { isHourly: boolean; showPollen: boolean },
+  ctx: { showPollen: boolean },
 ): string {
   const parts: string[] = [];
-  if (ctx.isHourly && chartSeries.pressure) parts.push("気圧");
+  if (chartSeries.pressure) parts.push("気圧");
   if (chartSeries.temperature) parts.push("気温");
   if (chartSeries.precipitation) parts.push("降水");
   if (chartSeries.weather) parts.push("天気");
@@ -650,7 +670,7 @@ function commonOverlays(ctx: ChartContext, yAxisId?: string, withLabel = false) 
       {...(withLabel
         ? {
             label: {
-              value: ctx.isHourly ? "現在" : "今日",
+              value: "現在",
               position: "top",
               fill: NOW_LINE_COLOR,
               fontSize: 10,
@@ -733,7 +753,7 @@ function TemperatureChart({ ctx }: { ctx: ChartContext }) {
             fontSize: 12,
           }}
         />
-        {commonOverlays(ctx, undefined, !ctx.isHourly)}
+        {commonOverlays(ctx, undefined, false)}
         <Area
           type="monotone"
           dataKey="temperature"
