@@ -3,7 +3,7 @@
 import { useMemo, useSyncExternalStore } from "react";
 
 import { ComingSoonSection } from "@/components/cards/ComingSoonSection";
-import { PollenCard } from "@/components/cards/PollenCard";
+import { SeasonalWordCard } from "@/components/cards/SeasonalWordCard";
 import { SkyLetterCard } from "@/components/cards/SkyLetterCard";
 import { DayPicker } from "@/components/dashboard/DayPicker";
 import { SummaryCard } from "@/components/dashboard/SummaryCard";
@@ -98,11 +98,7 @@ export default function HomePage() {
           <div className="lg:col-span-2">
             <SkyLetterCard letter={recommendations.letter} />
           </div>
-          <PollenCard
-            level={cardConditions[0]?.pollen.level ?? "unknown"}
-            types={cardConditions[0]?.pollen.types ?? []}
-            available={pollen?.available ?? false}
-          />
+          <SeasonalWordCard />
         </div>
 
         <SettingsPanel />

@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { searchLocations } from "@/features/weather/api/geocodingClient";
+import { reverseGeocode } from "@/features/weather/api/reverseGeocodingClient";
 import { useAppStore } from "@/stores/useAppStore";
 import type { GeoLocation } from "@/types/location";
 
@@ -50,14 +51,21 @@ export function LocationHeader() {
     }
     let cancelled = false;
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         if (cancelled) return;
-        setLocation({
+        const base: GeoLocation = {
           id: "current",
           name: "現在地",
           latitude: pos.coords.latitude,
           longitude: pos.coords.longitude,
+        };
+        setLocation(base);
+        const name = await reverseGeocode({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
         });
+        if (cancelled || !name) return;
+        setLocation({ ...base, admin: name });
       },
       () => {
         if (cancelled) return;
@@ -89,14 +97,21 @@ export function LocationHeader() {
   function pickCurrent() {
     if (typeof navigator === "undefined" || !navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setLocation({
+      async (pos) => {
+        const base: GeoLocation = {
           id: "current",
           name: "現在地",
           latitude: pos.coords.latitude,
           longitude: pos.coords.longitude,
-        });
+        };
+        setLocation(base);
         setOpen(false);
+        const name = await reverseGeocode({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+        });
+        if (!name) return;
+        setLocation({ ...base, admin: name });
       },
       () => {},
       { timeout: 6000, maximumAge: 60_000 },
