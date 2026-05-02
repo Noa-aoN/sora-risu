@@ -85,7 +85,12 @@ export default function HomePage() {
         />
 
         <TimelinePanel />
-        <WeatherChart weather={weather} pollen={pollen} range={range} />
+        <WeatherChart
+          weather={weather}
+          pollen={pollen}
+          range={range}
+          isError={isError}
+        />
 
         <DayPicker />
         <TimeSyncedSection
@@ -94,7 +99,7 @@ export default function HomePage() {
           recommendations={recommendations}
         />
 
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-3 lg:items-stretch">
           <div className="lg:col-span-2">
             <SkyLetterCard letter={recommendations.letter} />
           </div>

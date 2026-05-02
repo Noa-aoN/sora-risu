@@ -376,20 +376,21 @@ type Props = {
   weather: NormalizedWeather | null;
   pollen: NormalizedPollen | null;
   range: TimelineRange;
+  isError?: boolean;
 };
 
-export function WeatherChart({ weather, pollen, range }: Props) {
+export function WeatherChart({ weather, pollen, range, isError }: Props) {
   const chartSeries = useAppStore((s) => s.chartSeries);
 
   if (!weather) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>気圧 / 気温 / 降水 / 花粉</CardTitle>
+          <CardTitle>気圧 / 気温 / 降水 / 天気 / 花粉</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex h-48 items-center justify-center text-xs text-ink-400">
-            データを取得しています
+            {isError ? "天気データを取得できません" : "データを取得しています"}
           </div>
         </CardContent>
       </Card>
@@ -417,7 +418,7 @@ export function WeatherChart({ weather, pollen, range }: Props) {
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <CardTitle>{buildTitle(chartSeries, ctx)}</CardTitle>
         </div>
-        <div className="pt-1">
+        <div className="pt-3">
           <ChartSeriesPicker
             showPollen={ctx.showPollen}
             showPressure
