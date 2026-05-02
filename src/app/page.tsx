@@ -38,7 +38,7 @@ export default function HomePage() {
   const { weather, pollen, isLoading, isError } = useWeather(location);
 
   const cardSlots = useMemo(
-    () => (mounted ? buildCardSlots(dayWindowStart, 2) : []),
+    () => (mounted ? buildCardSlots(dayWindowStart, 1) : []),
     [mounted, dayWindowStart],
   );
   const cardConditions = useMemo(
