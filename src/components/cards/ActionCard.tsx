@@ -78,13 +78,15 @@ export function ActionCard({ item }: { item: ActionItem }) {
             >
               {renderActionIcon(item.category, 14)}
             </span>
-            <span className="truncate">{item.title}</span>
+            <span className="min-w-0 flex-1 truncate">{item.title}</span>
           </p>
-          <p className="text-[11px] leading-relaxed text-ink-600">
+          <p className="break-words text-[11px] leading-relaxed text-ink-600">
             {item.description}
           </p>
         </div>
-        <Badge tone="rain">{INTENSITY_LABEL[item.intensity]}</Badge>
+        <Badge tone="rain" className="shrink-0">
+          {INTENSITY_LABEL[item.intensity]}
+        </Badge>
       </div>
       <span
         role="tooltip"

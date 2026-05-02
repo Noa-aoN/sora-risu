@@ -83,9 +83,9 @@ export function CarryItemCard({ item }: { item: CarryItem }) {
           >
             {renderCarryIcon(item.category, 14)}
           </span>
-          <span className="truncate">{item.name}</span>
+          <span className="min-w-0 flex-1 truncate">{item.name}</span>
         </p>
-        <Badge tone={isRequired ? "pollen" : "muted"}>
+        <Badge tone={isRequired ? "pollen" : "muted"} className="shrink-0">
           {PRIORITY_LABEL[item.priority]}
         </Badge>
       </div>

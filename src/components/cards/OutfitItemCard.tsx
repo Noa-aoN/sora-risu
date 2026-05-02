@@ -77,9 +77,9 @@ export function OutfitItemCard({ item }: { item: OutfitItem }) {
           >
             {renderOutfitIcon(item.category, 14)}
           </span>
-          <span className="truncate">{item.name}</span>
+          <span className="min-w-0 flex-1 truncate">{item.name}</span>
         </p>
-        <Badge tone={isRequired ? "leaf" : "muted"}>
+        <Badge tone={isRequired ? "leaf" : "muted"} className="shrink-0">
           {PRIORITY_LABEL[item.priority]}
         </Badge>
       </div>
