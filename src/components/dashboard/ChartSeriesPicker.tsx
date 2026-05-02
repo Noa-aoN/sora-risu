@@ -1,6 +1,6 @@
 "use client";
 
-import { CloudRain, Flower, Gauge, Thermometer } from "lucide-react";
+import { CloudRain, CloudSun, Flower, Gauge, Thermometer } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/cn";
@@ -32,6 +32,12 @@ const ITEMS: Item[] = [
     label: "降水",
     icon: <CloudRain size={12} />,
     activeClass: "border-rain-100 bg-rain-50 text-rain-700",
+  },
+  {
+    key: "weather",
+    label: "天気",
+    icon: <CloudSun size={12} />,
+    activeClass: "border-leaf-300 bg-leaf-50 text-leaf-800",
   },
   {
     key: "pollen",

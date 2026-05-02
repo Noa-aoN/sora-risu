@@ -74,11 +74,17 @@ export const useAppStore = create<AppStore>()(
     }),
     {
       name: "weather-dash:settings",
-      version: 2,
+      version: 3,
       migrate: (persisted: unknown, version: number) => {
         const state = (persisted as Partial<AppSettings>) ?? {};
         if (version < 2 || !state.chartSeries) {
           return { ...state, chartSeries: DEFAULT_CHART_SERIES };
+        }
+        if (version < 3 && state.chartSeries) {
+          return {
+            ...state,
+            chartSeries: { ...DEFAULT_CHART_SERIES, ...state.chartSeries },
+          };
         }
         return state;
       },

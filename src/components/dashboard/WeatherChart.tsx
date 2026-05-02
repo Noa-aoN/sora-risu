@@ -1,6 +1,19 @@
 "use client";
 
-import { CloudRain, Flower, Gauge, Thermometer } from "lucide-react";
+import {
+  Cloud,
+  CloudDrizzle,
+  CloudFog,
+  CloudLightning,
+  CloudRain,
+  CloudSnow,
+  CloudSun,
+  Flower,
+  Gauge,
+  Snowflake,
+  Sun,
+  Thermometer,
+} from "lucide-react";
 import type { ReactElement, ReactNode } from "react";
 import {
   Area,
@@ -18,6 +31,7 @@ import {
 
 import { ChartSeriesPicker } from "@/components/dashboard/ChartSeriesPicker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { weatherCodeLabel } from "@/lib/labels";
 import { useAppStore } from "@/stores/useAppStore";
 import type { ChartSeriesVisibility } from "@/types/settings";
 import type { TimelineRange } from "@/types/timeline";
@@ -34,6 +48,7 @@ type ChartPoint = {
   precip: number;
   precipProb: number;
   pollen?: number;
+  weatherCode?: number;
 };
 
 const HOURLY_BAND_BASE = [
@@ -150,6 +165,7 @@ function build24hWindow(
     temperature: Math.round(p.temperature * 10) / 10,
     precip: p.precipitation,
     precipProb: p.precipitationProbability,
+    weatherCode: p.weatherCode,
   }));
 
   if (points.length === 0) return points;
@@ -187,6 +203,7 @@ function buildDailyWindow(
     temperature: Math.round((d.tempMax + d.tempMin) / 2),
     precip: d.precipitationSum,
     precipProb: d.precipitationProbabilityMax,
+    weatherCode: d.weatherCode,
   }));
 
   if (points.length === 0) return points;
@@ -265,6 +282,20 @@ function buildHourlyBands(data: ChartPoint[]): Band[] {
     dayMs = dayStartMs(dayMs, 1);
   }
   return bands;
+}
+
+function renderWeatherIcon(code: number, size: number): ReactNode {
+  const props = { size, color: "#5b7a62", strokeWidth: 1.6 };
+  if (code === 0) return <Sun {...props} />;
+  if (code <= 3) return <CloudSun {...props} />;
+  if (code >= 45 && code <= 48) return <CloudFog {...props} />;
+  if (code >= 51 && code <= 57) return <CloudDrizzle {...props} />;
+  if (code >= 61 && code <= 67) return <CloudRain {...props} />;
+  if (code >= 71 && code <= 77) return <Snowflake {...props} />;
+  if (code >= 80 && code <= 82) return <CloudRain {...props} />;
+  if (code >= 85 && code <= 86) return <CloudSnow {...props} />;
+  if (code >= 95) return <CloudLightning {...props} />;
+  return <Cloud {...props} />;
 }
 
 type ChartContext = {
@@ -349,11 +380,13 @@ export function WeatherChart({ weather, pollen, range }: Props) {
   const showPressure = ctx.isHourly && chartSeries.pressure;
   const showTemperature = chartSeries.temperature;
   const showPrecipitation = chartSeries.precipitation;
+  const showWeather = chartSeries.weather;
   const showPollenChart = ctx.showPollen && chartSeries.pollen;
   const visibleCount = [
     showPressure,
     showTemperature,
     showPrecipitation,
+    showWeather,
     showPollenChart,
   ].filter(Boolean).length;
 
@@ -425,6 +458,15 @@ export function WeatherChart({ weather, pollen, range }: Props) {
                 <PrecipChart ctx={ctx} />
               </ChartRow>
             )}
+            {showWeather && (
+              <ChartRow
+                icon={<CloudSun size={14} />}
+                label="天気"
+                height="h-16"
+              >
+                <WeatherIconRow ctx={ctx} />
+              </ChartRow>
+            )}
             {showPollenChart && (
               <ChartRow
                 icon={<Flower size={14} />}
@@ -454,8 +496,86 @@ function buildTitle(
   if (ctx.isHourly && chartSeries.pressure) parts.push("気圧");
   if (chartSeries.temperature) parts.push("気温");
   if (chartSeries.precipitation) parts.push("降水");
+  if (chartSeries.weather) parts.push("天気");
   if (ctx.showPollen && chartSeries.pollen) parts.push("花粉");
   return parts.length > 0 ? parts.join(" / ") : "表示なし";
+}
+
+type DotProps = {
+  cx?: number;
+  cy?: number;
+  payload?: { code?: number };
+};
+
+function WeatherIconDot({ cx, cy, payload }: DotProps) {
+  if (typeof cx !== "number" || typeof cy !== "number") return null;
+  const code = payload?.code;
+  if (typeof code !== "number") return null;
+  const size = 16;
+  return (
+    <g transform={`translate(${cx - size / 2}, ${cy - size / 2})`}>
+      {renderWeatherIcon(code, size)}
+    </g>
+  );
+}
+
+type WeatherRowPoint = { t: number; weatherY: number; code: number };
+
+function WeatherIconRow({ ctx }: { ctx: ChartContext }) {
+  const data: WeatherRowPoint[] = ctx.data
+    .filter((p) => typeof p.weatherCode === "number")
+    .map((p) => ({ t: p.t, weatherY: 0.5, code: p.weatherCode as number }));
+
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <LineChart
+        data={data}
+        margin={{ top: 4, right: 8, left: -8, bottom: 0 }}
+      >
+        <XAxis {...commonAxisProps(ctx)} tick={false} axisLine={false} />
+        <YAxis hide domain={[0, 1]} />
+        <Tooltip
+          cursor={false}
+          labelFormatter={(value) => ctx.tooltipFormatter(value as number)}
+          formatter={(_value, _name, item) => {
+            const code = (item as unknown as { payload?: { code?: number } })
+              ?.payload?.code;
+            return [weatherCodeLabel(code), "天気"];
+          }}
+          contentStyle={{
+            borderRadius: 12,
+            border: "1px solid #dce6d8",
+            fontSize: 12,
+          }}
+        />
+        {ctx.bands.map((b) => (
+          <ReferenceArea
+            key={b.key}
+            x1={b.x1}
+            x2={b.x2}
+            fill={b.fill}
+            fillOpacity={b.opacity}
+            ifOverflow="hidden"
+          />
+        ))}
+        <ReferenceLine
+          x={ctx.nowX}
+          stroke={NOW_LINE_COLOR}
+          strokeOpacity={0.65}
+          strokeDasharray="4 3"
+          strokeWidth={1.5}
+          ifOverflow="extendDomain"
+        />
+        <Line
+          dataKey="weatherY"
+          stroke="transparent"
+          dot={<WeatherIconDot />}
+          activeDot={false}
+          isAnimationActive={false}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  );
 }
 
 function ChartRow({
