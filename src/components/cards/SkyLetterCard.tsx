@@ -6,23 +6,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { cn } from "@/lib/cn";
 import type { SkyLetter } from "@/types/recommendation";
-
-const TONE_CLASS: Record<SkyLetter["tone"], string> = {
-  calm: "from-leaf-25 to-white",
-  gentle: "from-leaf-50 to-white",
-  alert: "from-alert-50 to-white",
-};
 
 export function SkyLetterCard({ letter }: { letter: SkyLetter }) {
   return (
-    <Card
-      className={cn(
-        "flex h-full flex-col bg-gradient-to-br",
-        TONE_CLASS[letter.tone],
-      )}
-    >
+    <Card className="flex h-full flex-col bg-gradient-to-br from-leaf-25 to-white">
       <CardHeader>
         <div className="flex items-center gap-2 text-leaf-700">
           <Mail size={14} />

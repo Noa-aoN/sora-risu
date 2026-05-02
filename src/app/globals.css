@@ -38,6 +38,11 @@
   --color-rain-500: #6c9bd2;
   --color-rain-700: #4f7ba9;
 
+  --color-dusk-50: #ecedf5;
+  --color-dusk-100: #c5cce0;
+  --color-dusk-500: #4a5278;
+  --color-dusk-700: #2a3258;
+
   --font-sans:
     "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui,
     -apple-system, "Segoe UI", sans-serif;
