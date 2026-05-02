@@ -11,7 +11,11 @@ const PRIORITY_LABEL: Record<OutfitItem["priority"], string> = {
 
 export function OutfitItemCard({ item }: { item: OutfitItem }) {
   return (
-    <div className="rounded-2xl border border-leaf-100/80 bg-white px-4 py-3">
+    <div className="relative overflow-hidden rounded-2xl border border-leaf-100/80 bg-white px-4 pb-3 pt-4">
+      <span
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-1 bg-leaf-400"
+      />
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2">
           <span className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full bg-leaf-50 text-leaf-700">
