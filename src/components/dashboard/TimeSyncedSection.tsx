@@ -228,12 +228,12 @@ function SlotRow({
         SLOT_BG_TINT[slot.period],
       )}
     >
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <p className="flex items-center gap-2 text-sm font-medium text-ink-700">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <p className="flex min-w-0 shrink-0 items-center gap-2 text-sm font-medium text-ink-700">
           <span
             aria-hidden
             className={cn(
-              "inline-block h-2 w-2 rounded-full",
+              "inline-block h-2 w-2 shrink-0 rounded-full",
               SLOT_DOT_COLOR[slot.period],
             )}
           />
@@ -245,7 +245,7 @@ function SlotRow({
           )}
         </p>
         {condition && (
-          <p className="text-[11px] text-ink-500">
+          <p className="min-w-0 flex-1 break-words text-right text-[11px] leading-relaxed text-ink-500">
             {pressureTrendLabel(condition.pressure.trend)} ・
             {" "}
             {condition.temperature.value}℃
