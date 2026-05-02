@@ -82,3 +82,38 @@ export function buildTimeSlots(
       return buildDailyRangeSlots(now, 14);
   }
 }
+
+export function buildCardSlots(
+  dayOffset: number,
+  dayCount: number = 2,
+  now: Date = new Date(),
+): TimeSlot[] {
+  const slots: TimeSlot[] = [];
+  for (let d = 0; d < dayCount; d++) {
+    const day = startOfDay(now, dayOffset + d);
+    const dateLabel = formatDateLabel(day);
+    for (const part of DAY_PARTS) {
+      slots.push({
+        id: `${day.toISOString().slice(0, 10)}-${part.period}`,
+        label: part.label,
+        start: toLocalISO(day, part.startHour),
+        end: toLocalISO(day, part.endHour),
+        dateLabel,
+        period: part.period,
+      });
+    }
+  }
+  return slots;
+}
+
+export function relativeDayLabel(dateStr: string, now: Date = new Date()): string {
+  const today = startOfDay(now, 0).getTime();
+  const target = startOfDay(new Date(dateStr + "T00:00"), 0).getTime();
+  const diffDays = Math.round((target - today) / (24 * 60 * 60 * 1000));
+  if (diffDays === 0) return "今日";
+  if (diffDays === 1) return "明日";
+  if (diffDays === 2) return "明後日";
+  if (diffDays === -1) return "昨日";
+  if (diffDays < 0) return `${Math.abs(diffDays)}日前`;
+  return `${diffDays}日後`;
+}

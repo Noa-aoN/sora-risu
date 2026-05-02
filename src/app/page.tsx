@@ -5,6 +5,7 @@ import { useMemo, useSyncExternalStore } from "react";
 import { ComingSoonSection } from "@/components/cards/ComingSoonSection";
 import { PollenCard } from "@/components/cards/PollenCard";
 import { SkyLetterCard } from "@/components/cards/SkyLetterCard";
+import { DayPicker } from "@/components/dashboard/DayPicker";
 import { SummaryCard } from "@/components/dashboard/SummaryCard";
 import { TimeSyncedSection } from "@/components/dashboard/TimeSyncedSection";
 import { TimelinePanel } from "@/components/dashboard/TimelinePanel";
@@ -14,6 +15,8 @@ import { LocationHeader } from "@/components/layout/LocationHeader";
 import { SettingsPanel } from "@/components/settings/SettingsPanel";
 import { useWeather } from "@/components/weather/useWeather";
 import { buildRecommendations } from "@/features/recommendations/buildRecommendations";
+import { buildCardSlots } from "@/features/weather/services/buildTimeSlots";
+import { buildWeatherConditions } from "@/features/weather/services/buildWeatherConditions";
 import { useAppStore } from "@/stores/useAppStore";
 
 const subscribeNoop = () => () => undefined;
@@ -30,15 +33,30 @@ export default function HomePage() {
   const location = useAppStore((s) => s.location);
   const range = useAppStore((s) => s.timelineRange);
   const profile = useAppStore((s) => s.profile);
+  const dayWindowStart = useAppStore((s) => s.dayWindowStart);
 
-  const { weather, pollen, slots, conditions, isLoading, isError } = useWeather(
-    location,
-    range,
+  const { weather, pollen, isLoading, isError } = useWeather(location);
+
+  const cardSlots = useMemo(
+    () => (mounted ? buildCardSlots(dayWindowStart, 2) : []),
+    [mounted, dayWindowStart],
+  );
+  const cardConditions = useMemo(
+    () => (weather ? buildWeatherConditions(cardSlots, weather, pollen) : []),
+    [weather, pollen, cardSlots],
+  );
+  const recommendations = useMemo(
+    () => buildRecommendations(cardConditions, profile),
+    [cardConditions, profile],
   );
 
-  const recommendations = useMemo(
-    () => buildRecommendations(conditions, profile),
-    [conditions, profile],
+  const todaySlots = useMemo(
+    () => (mounted ? buildCardSlots(0, 1) : []),
+    [mounted],
+  );
+  const todayConditions = useMemo(
+    () => (weather ? buildWeatherConditions(todaySlots, weather, pollen) : []),
+    [weather, pollen, todaySlots],
   );
 
   if (!mounted) {
@@ -61,17 +79,18 @@ export default function HomePage() {
         )}
 
         <SummaryCard
-          conditions={conditions}
-          slots={slots}
+          conditions={todayConditions}
+          slots={todaySlots}
           weather={weather}
         />
 
         <TimelinePanel />
         <WeatherChart weather={weather} range={range} />
 
+        <DayPicker />
         <TimeSyncedSection
-          slots={slots}
-          conditions={conditions}
+          slots={cardSlots}
+          conditions={cardConditions}
           recommendations={recommendations}
         />
 
@@ -80,8 +99,8 @@ export default function HomePage() {
             <SkyLetterCard letter={recommendations.letter} />
           </div>
           <PollenCard
-            level={conditions[0]?.pollen.level ?? "unknown"}
-            types={conditions[0]?.pollen.types ?? []}
+            level={cardConditions[0]?.pollen.level ?? "unknown"}
+            types={cardConditions[0]?.pollen.types ?? []}
             available={pollen?.available ?? false}
           />
         </div>
