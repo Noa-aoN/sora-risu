@@ -52,8 +52,8 @@ function build24hSlots(now: Date): TimeSlot[] {
   }));
 }
 
-function build3dSlots(now: Date): TimeSlot[] {
-  return [0, 1, 2].map((offset) => {
+function buildDailyRangeSlots(now: Date, count: number): TimeSlot[] {
+  return Array.from({ length: count }, (_, offset) => {
     const day = startOfDay(now, offset);
     const dateLabel = formatDateLabel(day);
     return {
@@ -75,9 +75,10 @@ export function buildTimeSlots(
     case "24h":
       return build24hSlots(now);
     case "3d":
-      return build3dSlots(now);
+      return buildDailyRangeSlots(now, 3);
     case "7d":
+      return buildDailyRangeSlots(now, 7);
     case "14d":
-      return [];
+      return buildDailyRangeSlots(now, 14);
   }
 }

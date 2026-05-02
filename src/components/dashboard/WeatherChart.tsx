@@ -130,14 +130,30 @@ function buildHourlyChartData(weather: NormalizedWeather): ChartPoint[] {
   }));
 }
 
-function buildDailyChartData(weather: NormalizedWeather): ChartPoint[] {
-  return weather.daily.slice(0, 3).map((d) => ({
+function buildDailyChartData(
+  weather: NormalizedWeather,
+  count: number,
+): ChartPoint[] {
+  return weather.daily.slice(0, count).map((d) => ({
     label: d.date.slice(5).replace("-", "/"),
     pressure: 1013,
     temperature: Math.round((d.tempMax + d.tempMin) / 2),
     precip: d.precipitationSum,
     precipProb: d.precipitationProbabilityMax,
   }));
+}
+
+function dailyCountForRange(range: TimelineRange): number {
+  switch (range) {
+    case "3d":
+      return 3;
+    case "7d":
+      return 7;
+    case "14d":
+      return 14;
+    default:
+      return 0;
+  }
 }
 
 type Props = {
@@ -164,24 +180,10 @@ export function WeatherChart({ weather, range }: Props) {
   const data =
     range === "24h"
       ? buildHourlyChartData(weather)
-      : range === "3d"
-        ? buildDailyChartData(weather)
-        : [];
+      : buildDailyChartData(weather, dailyCountForRange(range));
 
-  if (data.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>準備中</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex h-48 items-center justify-center text-center text-xs text-ink-400">
-            このレンジは近日対応予定です
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const xInterval =
+    range === "24h" ? 2 : range === "14d" ? 1 : 0;
 
   const overlays = (yAxisId?: string, withLabel = false) =>
     range === "24h"
@@ -218,6 +220,11 @@ export function WeatherChart({ weather, range }: Props) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
+          {range === "14d" && (
+            <p className="rounded-2xl bg-leaf-25 px-4 py-2.5 text-[11px] leading-relaxed text-ink-500">
+              14 日先までは予報の精度が下がります。「これからの傾向」の目安としてご覧ください。
+            </p>
+          )}
           {range === "24h" && (
             <div className="h-40">
               <ResponsiveContainer width="100%" height="100%">
@@ -280,7 +287,7 @@ export function WeatherChart({ weather, range }: Props) {
                 <XAxis
                   dataKey="label"
                   tick={{ fill: "#8d938a", fontSize: 11 }}
-                  interval={range === "24h" ? 2 : 0}
+                  interval={xInterval}
                   axisLine={{ stroke: "#dce6d8" }}
                   tickLine={false}
                 />
@@ -327,7 +334,7 @@ export function WeatherChart({ weather, range }: Props) {
                 <XAxis
                   dataKey="label"
                   tick={{ fill: "#8d938a", fontSize: 11 }}
-                  interval={range === "24h" ? 2 : 0}
+                  interval={xInterval}
                   axisLine={{ stroke: "#dce6d8" }}
                   tickLine={false}
                 />

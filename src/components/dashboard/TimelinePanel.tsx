@@ -11,8 +11,8 @@ const TIMELINE_OPTIONS: Array<{
 }> = [
   { value: "24h", label: "24H" },
   { value: "3d", label: "3D" },
-  { value: "7d", label: "7D 準備中", disabled: true },
-  { value: "14d", label: "14D 準備中", disabled: true },
+  { value: "7d", label: "7D" },
+  { value: "14d", label: "14D" },
 ];
 
 export function TimelinePanel() {
