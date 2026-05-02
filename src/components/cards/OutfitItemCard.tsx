@@ -1,6 +1,14 @@
 "use client";
 
-import { Shirt } from "lucide-react";
+import {
+  Footprints,
+  Glasses,
+  Home,
+  Package,
+  Shirt,
+  Wind,
+} from "lucide-react";
+import type { ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { CheckIndicator } from "@/components/ui/check-indicator";
@@ -13,6 +21,26 @@ const PRIORITY_LABEL: Record<OutfitItem["priority"], string> = {
   recommended: "推奨",
   optional: "任意",
 };
+
+function renderOutfitIcon(
+  category: OutfitItem["category"],
+  size: number,
+): ReactNode {
+  switch (category) {
+    case "outer":
+      return <Wind size={size} />;
+    case "top":
+      return <Shirt size={size} />;
+    case "bottom":
+      return <Package size={size} />;
+    case "shoes":
+      return <Footprints size={size} />;
+    case "accessory":
+      return <Glasses size={size} />;
+    case "indoor":
+      return <Home size={size} />;
+  }
+}
 
 export function OutfitItemCard({ item }: { item: OutfitItem }) {
   const checked = useAppStore((s) => Boolean(s.outfitChecks[item.id]));
@@ -43,7 +71,7 @@ export function OutfitItemCard({ item }: { item: OutfitItem }) {
       <div className="flex items-start gap-3">
         <CheckIndicator checked={checked} className="mt-0.5" />
         <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-leaf-50 text-leaf-700">
-          <Shirt size={14} />
+          {renderOutfitIcon(item.category, 14)}
         </span>
         <div className="min-w-0 flex-1">
           <p

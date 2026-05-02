@@ -26,7 +26,7 @@ import type { WeatherCondition } from "@/types/weather";
 const SLOT_DOT_COLOR: Record<SlotPeriod, string> = {
   morning: "bg-pollen-500",
   daytime: "bg-leaf-500",
-  evening: "bg-alert-500",
+  evening: "bg-dusk-700",
   night: "bg-ink-700",
   daily: "bg-ink-300",
 };
@@ -34,7 +34,7 @@ const SLOT_DOT_COLOR: Record<SlotPeriod, string> = {
 const SLOT_BG_TINT: Record<SlotPeriod, string> = {
   morning: "bg-pollen-50/60",
   daytime: "bg-leaf-50/60",
-  evening: "bg-alert-50/60",
+  evening: "bg-dusk-50/60",
   night: "bg-ink-50",
   daily: "",
 };

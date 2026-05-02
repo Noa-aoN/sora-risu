@@ -1,6 +1,16 @@
 "use client";
 
-import { Package } from "lucide-react";
+import {
+  Flame,
+  Flower,
+  GlassWater,
+  Package,
+  Pill,
+  ShieldCheck,
+  Sun,
+  Umbrella,
+} from "lucide-react";
+import type { ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { CheckIndicator } from "@/components/ui/check-indicator";
@@ -13,6 +23,30 @@ const PRIORITY_LABEL: Record<CarryItem["priority"], string> = {
   recommended: "推奨",
   optional: "任意",
 };
+
+function renderCarryIcon(
+  category: CarryItem["category"],
+  size: number,
+): ReactNode {
+  switch (category) {
+    case "umbrella":
+      return <Umbrella size={size} />;
+    case "mask":
+      return <ShieldCheck size={size} />;
+    case "medicine":
+      return <Pill size={size} />;
+    case "sunshade":
+      return <Sun size={size} />;
+    case "water":
+      return <GlassWater size={size} />;
+    case "warmth":
+      return <Flame size={size} />;
+    case "pollen":
+      return <Flower size={size} />;
+    case "other":
+      return <Package size={size} />;
+  }
+}
 
 export function CarryItemCard({ item }: { item: CarryItem }) {
   const checked = useAppStore((s) => Boolean(s.carryChecks[item.id]));
@@ -50,7 +84,7 @@ export function CarryItemCard({ item }: { item: CarryItem }) {
               : "bg-pollen-50 text-pollen-700",
           )}
         >
-          <Package size={14} />
+          {renderCarryIcon(item.category, 14)}
         </span>
         <div className="min-w-0 flex-1">
           <p

@@ -1,6 +1,15 @@
 "use client";
 
-import { Sparkles } from "lucide-react";
+import {
+  Activity,
+  BedDouble,
+  Briefcase,
+  Cloud,
+  Dumbbell,
+  Footprints,
+  Wind,
+} from "lucide-react";
+import type { ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { CheckIndicator } from "@/components/ui/check-indicator";
@@ -13,6 +22,28 @@ const INTENSITY_LABEL: Record<ActionItem["intensity"], string> = {
   medium: "強度 中",
   high: "強度 強",
 };
+
+function renderActionIcon(
+  category: ActionItem["category"],
+  size: number,
+): ReactNode {
+  switch (category) {
+    case "stretch":
+      return <Activity size={size} />;
+    case "training":
+      return <Dumbbell size={size} />;
+    case "rest":
+      return <BedDouble size={size} />;
+    case "work":
+      return <Briefcase size={size} />;
+    case "outing":
+      return <Footprints size={size} />;
+    case "pollen_care":
+      return <Wind size={size} />;
+    case "weather_care":
+      return <Cloud size={size} />;
+  }
+}
 
 export function ActionCard({ item }: { item: ActionItem }) {
   const checked = useAppStore((s) => Boolean(s.actionChecks[item.id]));
@@ -47,7 +78,7 @@ export function ActionCard({ item }: { item: ActionItem }) {
               : "bg-rain-50 text-rain-700",
           )}
         >
-          <Sparkles size={14} />
+          {renderActionIcon(item.category, 14)}
         </span>
         <div className="min-w-0 flex-1 space-y-0.5">
           <p
