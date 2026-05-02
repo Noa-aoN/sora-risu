@@ -469,9 +469,13 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
           </p>
         ) : (
           <div className="space-y-4">
-            {showPressure && (
-              <ChartRow icon={<Gauge size={14} />} label="気圧" height="h-36">
-                <PressureChart ctx={ctx} />
+            {showWeather && (
+              <ChartRow
+                icon={<CloudSun size={14} />}
+                label="天気"
+                height="h-16"
+              >
+                <WeatherIconRow ctx={ctx} />
               </ChartRow>
             )}
             {showTemperature && (
@@ -492,13 +496,9 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
                 <PrecipChart ctx={ctx} />
               </ChartRow>
             )}
-            {showWeather && (
-              <ChartRow
-                icon={<CloudSun size={14} />}
-                label="天気"
-                height="h-16"
-              >
-                <WeatherIconRow ctx={ctx} />
+            {showPressure && (
+              <ChartRow icon={<Gauge size={14} />} label="気圧" height="h-36">
+                <PressureChart ctx={ctx} />
               </ChartRow>
             )}
             {showPollenChart && (
@@ -529,10 +529,10 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
 
 function buildTitle(chartSeries: ChartSeriesVisibility): string {
   const parts: string[] = [];
-  if (chartSeries.pressure) parts.push("気圧");
+  if (chartSeries.weather) parts.push("天気");
   if (chartSeries.temperature) parts.push("気温");
   if (chartSeries.precipitation) parts.push("降水");
-  if (chartSeries.weather) parts.push("天気");
+  if (chartSeries.pressure) parts.push("気圧");
   if (chartSeries.pollen) parts.push("花粉");
   return parts.length > 0 ? parts.join(" / ") : "表示なし";
 }
@@ -566,7 +566,7 @@ function WeatherIconRow({ ctx }: { ctx: ChartContext }) {
     <ResponsiveContainer width="100%" height="100%">
       <LineChart
         data={data}
-        margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
+        margin={{ top: 4, right: 8, left: 0, bottom: 4 }}
       >
         <XAxis {...commonAxisProps(ctx)} tick={false} axisLine={false} />
         <YAxis

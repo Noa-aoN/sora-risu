@@ -16,9 +16,9 @@ type Item = {
 
 const ITEMS: Item[] = [
   {
-    key: "pressure",
-    label: "気圧",
-    icon: <Gauge size={12} />,
+    key: "weather",
+    label: "天気",
+    icon: <CloudSun size={12} />,
     activeClass: "border-leaf-300 bg-leaf-50 text-leaf-800",
   },
   {
@@ -34,9 +34,9 @@ const ITEMS: Item[] = [
     activeClass: "border-rain-100 bg-rain-50 text-rain-700",
   },
   {
-    key: "weather",
-    label: "天気",
-    icon: <CloudSun size={12} />,
+    key: "pressure",
+    label: "気圧",
+    icon: <Gauge size={12} />,
     activeClass: "border-leaf-300 bg-leaf-50 text-leaf-800",
   },
   {
