@@ -60,6 +60,7 @@ const HOURLY_BAND_BASE = [
 
 const NOW_LINE_COLOR = "#b86a6a";
 const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
+const Y_AXIS_WIDTH = 48;
 
 function pad2(n: number): string {
   return n.toString().padStart(2, "0");
@@ -530,10 +531,16 @@ function WeatherIconRow({ ctx }: { ctx: ChartContext }) {
     <ResponsiveContainer width="100%" height="100%">
       <LineChart
         data={data}
-        margin={{ top: 4, right: 8, left: -8, bottom: 0 }}
+        margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
       >
         <XAxis {...commonAxisProps(ctx)} tick={false} axisLine={false} />
-        <YAxis hide domain={[0, 1]} />
+        <YAxis
+          width={Y_AXIS_WIDTH}
+          domain={[0, 1]}
+          tick={false}
+          axisLine={false}
+          tickLine={false}
+        />
         <Tooltip
           cursor={false}
           labelFormatter={(value) => ctx.tooltipFormatter(value as number)}
@@ -660,7 +667,7 @@ function PressureChart({ ctx }: { ctx: ChartContext }) {
     <ResponsiveContainer width="100%" height="100%">
       <LineChart
         data={ctx.data}
-        margin={{ top: 16, right: 8, left: -8, bottom: 0 }}
+        margin={{ top: 16, right: 8, left: 0, bottom: 0 }}
       >
         <CartesianGrid stroke="#e8efe6" vertical={false} />
         <XAxis {...commonAxisProps(ctx)} />
@@ -668,7 +675,7 @@ function PressureChart({ ctx }: { ctx: ChartContext }) {
           yAxisId="p"
           domain={["dataMin - 2", "dataMax + 2"]}
           tick={{ fill: "#8d938a", fontSize: 11 }}
-          width={36}
+          width={Y_AXIS_WIDTH}
           axisLine={false}
           tickLine={false}
         />
@@ -701,7 +708,7 @@ function TemperatureChart({ ctx }: { ctx: ChartContext }) {
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart
         data={ctx.data}
-        margin={{ top: 14, right: 8, left: -8, bottom: 0 }}
+        margin={{ top: 14, right: 8, left: 0, bottom: 0 }}
       >
         <defs>
           <linearGradient id="tempFill" x1="0" y1="0" x2="0" y2="1">
@@ -713,7 +720,7 @@ function TemperatureChart({ ctx }: { ctx: ChartContext }) {
         <XAxis {...commonAxisProps(ctx)} />
         <YAxis
           tick={{ fill: "#8d938a", fontSize: 11 }}
-          width={36}
+          width={Y_AXIS_WIDTH}
           axisLine={false}
           tickLine={false}
         />
@@ -745,7 +752,7 @@ function PrecipChart({ ctx }: { ctx: ChartContext }) {
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart
         data={ctx.data}
-        margin={{ top: 6, right: 8, left: -8, bottom: 0 }}
+        margin={{ top: 6, right: 8, left: 0, bottom: 0 }}
       >
         <defs>
           <linearGradient id="rainFill" x1="0" y1="0" x2="0" y2="1">
@@ -758,7 +765,7 @@ function PrecipChart({ ctx }: { ctx: ChartContext }) {
         <YAxis
           domain={[0, 100]}
           tick={{ fill: "#8d938a", fontSize: 11 }}
-          width={36}
+          width={Y_AXIS_WIDTH}
           axisLine={false}
           tickLine={false}
         />
@@ -790,7 +797,7 @@ function PollenChart({ ctx }: { ctx: ChartContext }) {
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart
         data={ctx.data}
-        margin={{ top: 6, right: 8, left: -8, bottom: 0 }}
+        margin={{ top: 6, right: 8, left: 0, bottom: 0 }}
       >
         <defs>
           <linearGradient id="pollenFill" x1="0" y1="0" x2="0" y2="1">
@@ -803,7 +810,7 @@ function PollenChart({ ctx }: { ctx: ChartContext }) {
         <YAxis
           domain={[0, "auto"]}
           tick={{ fill: "#8d938a", fontSize: 11 }}
-          width={36}
+          width={Y_AXIS_WIDTH}
           axisLine={false}
           tickLine={false}
         />
