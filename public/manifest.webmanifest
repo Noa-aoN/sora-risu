@@ -1,0 +1,26 @@
+{
+  "name": "Weather Dash",
+  "short_name": "Weather Dash",
+  "description": "今日の空と、うまく付き合う。気圧・天気・気温・降水・花粉から、服装・持ち物・行動を一画面で提案する PWA。",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8faf6",
+  "theme_color": "#5b7a62",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

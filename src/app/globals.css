@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --color-leaf-25: #f8faf6;
+  --color-leaf-50: #eef3ec;
+  --color-leaf-100: #dde6d8;
+  --color-leaf-200: #c1d3bc;
+  --color-leaf-300: #a3bd9d;
+  --color-leaf-400: #86a48b;
+  --color-leaf-500: #6f8f75;
+  --color-leaf-600: #5b7a62;
+  --color-leaf-700: #4a634f;
+  --color-leaf-800: #3a4f3f;
+  --color-leaf-900: #2c3c30;
+
+  --color-ink-50: #f4f5f3;
+  --color-ink-100: #e3e5e1;
+  --color-ink-200: #cdd1c9;
+  --color-ink-300: #b3b8af;
+  --color-ink-400: #8d938a;
+  --color-ink-500: #6f766d;
+  --color-ink-600: #545a52;
+  --color-ink-700: #3d423b;
+  --color-ink-800: #2f352e;
+
+  --color-alert-50: #fdf2f1;
+  --color-alert-100: #f7d8d6;
+  --color-alert-500: #e08a8a;
+  --color-alert-700: #b86a6a;
+
+  --color-pollen-50: #fbf6e8;
+  --color-pollen-100: #f3e6b9;
+  --color-pollen-500: #e6b85c;
+  --color-pollen-700: #b08e3f;
+
+  --color-rain-50: #eff4fb;
+  --color-rain-100: #d2e0f1;
+  --color-rain-500: #6c9bd2;
+  --color-rain-700: #4f7ba9;
+
+  --font-sans:
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+}
+
+html,
+body {
+  background: var(--color-leaf-25);
+  color: var(--color-ink-800);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
