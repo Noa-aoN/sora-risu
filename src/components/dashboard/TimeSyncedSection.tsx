@@ -84,12 +84,12 @@ export function TimeSyncedSection({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>準備中</CardTitle>
-          <CardDescription>このレンジは近日対応予定です</CardDescription>
+          <CardTitle>カード表示なし</CardTitle>
+          <CardDescription>この表示範囲では詳細カードを出していません</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-xs leading-relaxed text-ink-500">
-            7日 / 14日の空だよりは、週次レポートと一緒に追加していく予定です。今は 24H と 3D を中心にお使いください。
+            服装・持ち物・行動の提案は、24H と 3D を中心に表示しています。
           </p>
         </CardContent>
       </Card>

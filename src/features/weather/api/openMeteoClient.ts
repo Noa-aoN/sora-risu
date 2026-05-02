@@ -62,7 +62,7 @@ export async function fetchForecast({
   forecastDays = 14,
   pastDays = 0,
   signal,
-}: FetchForecastInput): Promise<RawForecastResponse> {
+}: FetchForecastInput): Promise<RawForecastResponse | null> {
   const params = new URLSearchParams({
     latitude: latitude.toString(),
     longitude: longitude.toString(),
@@ -73,9 +73,15 @@ export async function fetchForecast({
     past_days: pastDays.toString(),
   });
 
-  const response = await fetch(`${FORECAST_ENDPOINT}?${params.toString()}`, {
-    signal,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${FORECAST_ENDPOINT}?${params.toString()}`, {
+      signal,
+    });
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") return null;
+    throw err;
+  }
 
   if (!response.ok) {
     throw new Error(`Open-Meteo forecast failed: ${response.status}`);

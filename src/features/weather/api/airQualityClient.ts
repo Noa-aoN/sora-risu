@@ -38,7 +38,7 @@ export async function fetchAirQuality({
   forecastDays = 5,
   pastDays = 0,
   signal,
-}: FetchAirQualityInput): Promise<RawAirQualityResponse> {
+}: FetchAirQualityInput): Promise<RawAirQualityResponse | null> {
   const params = new URLSearchParams({
     latitude: latitude.toString(),
     longitude: longitude.toString(),
@@ -48,9 +48,15 @@ export async function fetchAirQuality({
     past_days: pastDays.toString(),
   });
 
-  const response = await fetch(`${AIR_QUALITY_ENDPOINT}?${params.toString()}`, {
-    signal,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${AIR_QUALITY_ENDPOINT}?${params.toString()}`, {
+      signal,
+    });
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") return null;
+    throw err;
+  }
 
   if (!response.ok) {
     throw new Error(`Air quality failed: ${response.status}`);

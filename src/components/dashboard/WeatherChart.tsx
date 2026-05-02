@@ -557,18 +557,40 @@ function WeatherIconDot({ cx, cy, payload }: DotProps) {
 
 type WeatherRowPoint = { t: number; weatherY: number; code: number };
 
+function sampleWeatherRowPoints(
+  data: WeatherRowPoint[],
+  isHourly: boolean,
+): WeatherRowPoint[] {
+  if (!isHourly || data.length <= 10) return data;
+
+  const sampled = data.filter((_, index) => index % 3 === 0);
+  const last = data[data.length - 1];
+  if (last && sampled[sampled.length - 1]?.t !== last.t) {
+    sampled.push(last);
+  }
+  return sampled;
+}
+
 function WeatherIconRow({ ctx }: { ctx: ChartContext }) {
-  const data: WeatherRowPoint[] = ctx.data
+  const data = sampleWeatherRowPoints(
+    ctx.data
     .filter((p) => typeof p.weatherCode === "number")
-    .map((p) => ({ t: p.t, weatherY: 0.5, code: p.weatherCode as number }));
+    .map((p) => ({ t: p.t, weatherY: 0.5, code: p.weatherCode as number })),
+    ctx.isHourly,
+  );
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={1}>
       <LineChart
         data={data}
-        margin={{ top: 4, right: 8, left: 0, bottom: 4 }}
+        margin={{ top: 0, right: 8, left: 0, bottom: 0 }}
       >
-        <XAxis {...commonAxisProps(ctx)} tick={false} axisLine={false} />
+        <XAxis
+          {...commonAxisProps(ctx)}
+          tick={false}
+          axisLine={false}
+          height={0}
+        />
         <YAxis
           width={Y_AXIS_WIDTH}
           domain={[0, 1]}
@@ -633,13 +655,13 @@ function ChartRow({
 }) {
   return (
     <div className="flex items-stretch gap-2">
-      <div className="flex w-10 flex-col items-center justify-center gap-1 text-ink-500">
+      <div className="flex w-10 flex-col items-center justify-center gap-0.5 text-ink-500">
         <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-leaf-50 text-leaf-700">
           {icon}
         </span>
-        <span className="text-[9px] tracking-wider">{label}</span>
+        <span className="text-[9px] leading-none tracking-wider">{label}</span>
       </div>
-      <div className={`flex-1 ${height}`}>{children}</div>
+      <div className={`min-w-0 flex-1 ${height}`}>{children}</div>
     </div>
   );
 }
@@ -699,7 +721,7 @@ function commonOverlays(ctx: ChartContext, yAxisId?: string, withLabel = false) 
 
 function PressureChart({ ctx }: { ctx: ChartContext }) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={1}>
       <LineChart
         data={ctx.data}
         margin={{ top: 16, right: 8, left: 0, bottom: 0 }}
@@ -740,7 +762,7 @@ function PressureChart({ ctx }: { ctx: ChartContext }) {
 
 function TemperatureChart({ ctx }: { ctx: ChartContext }) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={1}>
       <AreaChart
         data={ctx.data}
         margin={{ top: 14, right: 8, left: 0, bottom: 0 }}
@@ -784,7 +806,7 @@ function TemperatureChart({ ctx }: { ctx: ChartContext }) {
 
 function PrecipChart({ ctx }: { ctx: ChartContext }) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={1}>
       <AreaChart
         data={ctx.data}
         margin={{ top: 6, right: 8, left: 0, bottom: 0 }}
@@ -829,7 +851,7 @@ function PrecipChart({ ctx }: { ctx: ChartContext }) {
 
 function PollenChart({ ctx }: { ctx: ChartContext }) {
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={1}>
       <AreaChart
         data={ctx.data}
         margin={{ top: 6, right: 8, left: 0, bottom: 0 }}

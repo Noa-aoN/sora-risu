@@ -2,7 +2,6 @@
 
 import { useMemo, useSyncExternalStore } from "react";
 
-import { ComingSoonSection } from "@/components/cards/ComingSoonSection";
 import { SeasonalWordCard } from "@/components/cards/SeasonalWordCard";
 import { SkyLetterCard } from "@/components/cards/SkyLetterCard";
 import { SummaryCard } from "@/components/dashboard/SummaryCard";
@@ -105,7 +104,6 @@ export default function HomePage() {
         </div>
 
         <SettingsPanel />
-        <ComingSoonSection />
 
         <footer className="pt-2 text-center text-[11px] text-ink-400">
           {isLoading
