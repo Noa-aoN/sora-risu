@@ -24,6 +24,8 @@ build/
 .nuxt/
 .output/
 out/
+*.tsbuildinfo
+next-env.d.ts
 
 # Env
 .env
@@ -41,3 +43,11 @@ coverage/
 # Claude Code (個人ローカル設定・履歴)
 .claude/settings.local.json
 .claude/.session/
+
+# 個人ログ・作業メモ (CLAUDE.md 規約)
+docs/notes/
+
+# Serwist が生成する成果物
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js
