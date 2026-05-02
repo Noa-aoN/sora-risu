@@ -611,7 +611,7 @@ function WeatherIconRow({ ctx }: { ctx: ChartContext }) {
   );
 
   return (
-    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={1}>
+    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
       <LineChart
         data={data}
         margin={{ top: 24, right: 8, left: 0, bottom: 0 }}
@@ -764,7 +764,7 @@ function commonOverlays(ctx: ChartContext, yAxisId?: string, withLabel = false) 
 
 function PressureChart({ ctx }: { ctx: ChartContext }) {
   return (
-    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={1}>
+    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
       <LineChart
         data={ctx.data}
         margin={{ top: 16, right: 8, left: 0, bottom: 0 }}
@@ -805,7 +805,7 @@ function PressureChart({ ctx }: { ctx: ChartContext }) {
 
 function TemperatureChart({ ctx }: { ctx: ChartContext }) {
   return (
-    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={1}>
+    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
       <AreaChart
         data={ctx.data}
         margin={{ top: 14, right: 8, left: 0, bottom: 0 }}
@@ -849,7 +849,7 @@ function TemperatureChart({ ctx }: { ctx: ChartContext }) {
 
 function PrecipChart({ ctx }: { ctx: ChartContext }) {
   return (
-    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={1}>
+    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
       <AreaChart
         data={ctx.data}
         margin={{ top: 6, right: 8, left: 0, bottom: 0 }}
@@ -894,7 +894,7 @@ function PrecipChart({ ctx }: { ctx: ChartContext }) {
 
 function PollenChart({ ctx }: { ctx: ChartContext }) {
   return (
-    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={1}>
+    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
       <AreaChart
         data={ctx.data}
         margin={{ top: 6, right: 8, left: 0, bottom: 0 }}
