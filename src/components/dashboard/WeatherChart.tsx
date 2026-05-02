@@ -29,11 +29,12 @@ import {
   YAxis,
 } from "recharts";
 
+import { ChartAnchorToggle } from "@/components/dashboard/ChartAnchorToggle";
 import { ChartSeriesPicker } from "@/components/dashboard/ChartSeriesPicker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { weatherCodeLabel } from "@/lib/labels";
 import { useAppStore } from "@/stores/useAppStore";
-import type { ChartSeriesVisibility } from "@/types/settings";
+import type { ChartAnchor, ChartSeriesVisibility } from "@/types/settings";
 import type { TimelineRange } from "@/types/timeline";
 import type {
   NormalizedPollen,
@@ -155,6 +156,7 @@ function localDateStringFromMs(ms: number): string {
 function build24hWindow(
   weather: NormalizedWeather,
   pollen: NormalizedPollen | null,
+  anchor: ChartAnchor,
 ): ChartPoint[] {
   const points: ChartPoint[] = weather.hourly.map((p) => ({
     t: parseLocalISOToMs(p.time),
@@ -180,8 +182,12 @@ function build24hWindow(
     }
   }
 
-  const startIdx = Math.max(0, nowIdx - 12);
-  const endIdx = Math.min(points.length, nowIdx + 13);
+  const startIdx =
+    anchor === "left" ? nowIdx : Math.max(0, nowIdx - 12);
+  const endIdx =
+    anchor === "left"
+      ? Math.min(points.length, nowIdx + 24)
+      : Math.min(points.length, nowIdx + 13);
   const sliced = points.slice(startIdx, endIdx);
 
   if (!pollen || !pollen.available) return sliced;
@@ -209,11 +215,12 @@ function buildDailyWindow(
   weather: NormalizedWeather,
   pollen: NormalizedPollen | null,
   count: number,
+  anchor: ChartAnchor,
 ): ChartPoint[] {
-  const halfRangeMs = (count * 24 * 60 * 60 * 1000) / 2;
+  const fullRangeMs = count * 24 * 60 * 60 * 1000;
   const nowMs = Date.now();
-  const minMs = nowMs - halfRangeMs;
-  const maxMs = nowMs + halfRangeMs;
+  const minMs = anchor === "left" ? nowMs : nowMs - fullRangeMs / 2;
+  const maxMs = anchor === "left" ? nowMs + fullRangeMs : nowMs + fullRangeMs / 2;
 
   const points: ChartPoint[] = weather.daily
     .map((d) => {
@@ -318,7 +325,7 @@ type ChartContext = {
   tickFormatter: (ms: number) => string;
   tooltipFormatter: (ms: number) => string;
   minTickGap: number;
-  showPollen: boolean;
+  pollenAvailable: boolean;
   pollenGrayoutFromMs: number | null;
 };
 
@@ -339,19 +346,25 @@ function buildChartContext(
   weather: NormalizedWeather,
   pollen: NormalizedPollen | null,
   range: TimelineRange,
+  anchor: ChartAnchor,
 ): ChartContext {
   const isHourly = range === "24h";
   const data = isHourly
-    ? build24hWindow(weather, pollen)
-    : buildDailyWindow(weather, pollen, dailyCountForRange(range));
+    ? build24hWindow(weather, pollen, anchor)
+    : buildDailyWindow(weather, pollen, dailyCountForRange(range), anchor);
 
   const nowMs = Date.now();
   const halfMs = rangeHalfMs(range);
-  const domain: [number, number] = [nowMs - halfMs, nowMs + halfMs];
+  const domain: [number, number] =
+    anchor === "left"
+      ? [nowMs, nowMs + 2 * halfMs]
+      : [nowMs - halfMs, nowMs + halfMs];
 
-  const showPollen = pollen !== null && pollen.available;
+  const pollenAvailable = pollen !== null && pollen.available;
   let pollenGrayoutFromMs: number | null = null;
-  if (showPollen && pollen) {
+  if (!pollenAvailable) {
+    pollenGrayoutFromMs = domain[0];
+  } else if (pollen) {
     const lastPollenMs = pollenLastAvailableMs(pollen);
     if (lastPollenMs !== null && lastPollenMs < domain[1]) {
       pollenGrayoutFromMs = lastPollenMs;
@@ -367,7 +380,7 @@ function buildChartContext(
     tickFormatter: isHourly ? formatHourTick : formatDayTick,
     tooltipFormatter: isHourly ? formatHourTooltip : formatDayTooltip,
     minTickGap: isHourly ? 30 : range === "14d" ? 60 : 0,
-    showPollen,
+    pollenAvailable,
     pollenGrayoutFromMs,
   };
 }
@@ -381,6 +394,7 @@ type Props = {
 
 export function WeatherChart({ weather, pollen, range, isError }: Props) {
   const chartSeries = useAppStore((s) => s.chartSeries);
+  const chartAnchor = useAppStore((s) => s.chartAnchor);
 
   if (!weather) {
     return (
@@ -397,13 +411,13 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
     );
   }
 
-  const ctx = buildChartContext(weather, pollen, range);
+  const ctx = buildChartContext(weather, pollen, range, chartAnchor);
 
   const showPressure = chartSeries.pressure;
   const showTemperature = chartSeries.temperature;
   const showPrecipitation = chartSeries.precipitation;
   const showWeather = chartSeries.weather;
-  const showPollenChart = ctx.showPollen && chartSeries.pollen;
+  const showPollenChart = chartSeries.pollen;
   const visibleCount = [
     showPressure,
     showTemperature,
@@ -416,13 +430,11 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
     <Card>
       <CardHeader>
         <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <CardTitle>{buildTitle(chartSeries, ctx)}</CardTitle>
+          <CardTitle>{buildTitle(chartSeries)}</CardTitle>
         </div>
-        <div className="pt-3">
-          <ChartSeriesPicker
-            showPollen={ctx.showPollen}
-            showPressure
-          />
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-3">
+          <ChartSeriesPicker showPollen showPressure />
+          <ChartAnchorToggle />
         </div>
         {range === "24h" && (
           <div className="flex items-center gap-3 pt-1 text-[10px] text-ink-400">
@@ -500,9 +512,14 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
             )}
           </div>
         )}
-        {showPollenChart && ctx.pollenGrayoutFromMs !== null && (
+        {showPollenChart && ctx.pollenAvailable && ctx.pollenGrayoutFromMs !== null && (
           <p className="mt-2 text-[10px] leading-relaxed text-ink-400">
             花粉データは Open-Meteo Air Quality (CAMS) の都合で 5 日先までしか取得できません。グラフ右側のグレー部分はデータ未提供の範囲です。
+          </p>
+        )}
+        {showPollenChart && !ctx.pollenAvailable && (
+          <p className="mt-2 text-[10px] leading-relaxed text-ink-400">
+            花粉データはこの地域では未提供です。Phase 2 で Google Pollen API などへの差し替えを検討します。
           </p>
         )}
       </CardContent>
@@ -510,16 +527,13 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
   );
 }
 
-function buildTitle(
-  chartSeries: ChartSeriesVisibility,
-  ctx: { showPollen: boolean },
-): string {
+function buildTitle(chartSeries: ChartSeriesVisibility): string {
   const parts: string[] = [];
   if (chartSeries.pressure) parts.push("気圧");
   if (chartSeries.temperature) parts.push("気温");
   if (chartSeries.precipitation) parts.push("降水");
   if (chartSeries.weather) parts.push("天気");
-  if (ctx.showPollen && chartSeries.pollen) parts.push("花粉");
+  if (chartSeries.pollen) parts.push("花粉");
   return parts.length > 0 ? parts.join(" / ") : "表示なし";
 }
 
@@ -852,7 +866,9 @@ function PollenChart({ ctx }: { ctx: ChartContext }) {
             fillOpacity={0.35}
             ifOverflow="hidden"
             label={{
-              value: "データ未提供",
+              value: ctx.pollenAvailable
+                ? "データ未提供"
+                : "データを取得できません",
               position: "center",
               fill: "#6f766d",
               fontSize: 10,

@@ -48,11 +48,14 @@ const ITEMS: Item[] = [
 ];
 
 type Props = {
-  showPollen: boolean;
-  showPressure: boolean;
+  showPollen?: boolean;
+  showPressure?: boolean;
 };
 
-export function ChartSeriesPicker({ showPollen, showPressure }: Props) {
+export function ChartSeriesPicker({
+  showPollen = true,
+  showPressure = true,
+}: Props) {
   const chartSeries = useAppStore((s) => s.chartSeries);
   const toggleChartSeries = useAppStore((s) => s.toggleChartSeries);
 
