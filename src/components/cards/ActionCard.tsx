@@ -78,7 +78,9 @@ export function ActionCard({ item }: { item: ActionItem }) {
             >
               {renderActionIcon(item.category, 14)}
             </span>
-            <span className="min-w-0 flex-1 truncate">{item.title}</span>
+            <span className="line-clamp-2 min-w-0 flex-1 break-words leading-snug">
+              {item.title}
+            </span>
           </p>
           <p className="break-words text-[11px] leading-relaxed text-ink-600">
             {item.description}
