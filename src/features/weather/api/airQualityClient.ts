@@ -32,6 +32,31 @@ export type FetchAirQualityInput = {
   signal?: AbortSignal;
 };
 
+function ensureAirQualityResponse(json: unknown): RawAirQualityResponse {
+  if (!json || typeof json !== "object") {
+    throw new Error("Open-Meteo air quality: response root is not an object");
+  }
+  const root = json as Record<string, unknown>;
+  if (!root.hourly || typeof root.hourly !== "object") {
+    throw new Error("Open-Meteo air quality: missing hourly section");
+  }
+  const hourly = root.hourly as Record<string, unknown>;
+  const time = hourly.time;
+  if (!Array.isArray(time)) {
+    throw new Error("Open-Meteo air quality: hourly.time is not an array");
+  }
+  for (const field of POLLEN_FIELDS) {
+    const arr = hourly[field];
+    if (!Array.isArray(arr) || arr.length !== time.length) {
+      throw new Error(
+        `Open-Meteo air quality: hourly.${field} length mismatch ` +
+          `(got ${Array.isArray(arr) ? arr.length : typeof arr}, expected ${time.length})`,
+      );
+    }
+  }
+  return json as RawAirQualityResponse;
+}
+
 export async function fetchAirQuality({
   latitude,
   longitude,
@@ -62,5 +87,5 @@ export async function fetchAirQuality({
     throw new Error(`Air quality failed: ${response.status}`);
   }
 
-  return (await response.json()) as RawAirQualityResponse;
+  return ensureAirQualityResponse(await response.json());
 }

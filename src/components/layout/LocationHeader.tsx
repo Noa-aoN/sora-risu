@@ -42,6 +42,12 @@ export function LocationHeader() {
   const [open, setOpen] = useState(false);
   const debounced = useDebounced(query);
   const containerRef = useRef<HTMLDivElement>(null);
+  const reverseAbortRef = useRef<AbortController | null>(null);
+
+  function abortPendingReverse() {
+    reverseAbortRef.current?.abort();
+    reverseAbortRef.current = null;
+  }
 
   useEffect(() => {
     if (location) return;
@@ -50,10 +56,10 @@ export function LocationHeader() {
       return;
     }
     const controller = new AbortController();
-    let cancelled = false;
+    reverseAbortRef.current = controller;
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        if (cancelled) return;
+        if (controller.signal.aborted) return;
         const base: GeoLocation = {
           id: "current",
           name: "現在地",
@@ -66,28 +72,37 @@ export function LocationHeader() {
           longitude: pos.coords.longitude,
           signal: controller.signal,
         });
-        if (cancelled || !name) return;
+        if (controller.signal.aborted || !name) return;
         setLocation({ ...base, admin: name });
       },
       () => {
-        if (cancelled) return;
+        if (controller.signal.aborted) return;
         setLocation(DEFAULT_LOCATION);
       },
       { timeout: 6000, maximumAge: 60_000 },
     );
     return () => {
-      cancelled = true;
       controller.abort();
+      if (reverseAbortRef.current === controller) {
+        reverseAbortRef.current = null;
+      }
     };
   }, [location, setLocation]);
 
   useEffect(() => {
-    function onClick(e: MouseEvent) {
+    function onPointerDown(e: PointerEvent) {
       if (!containerRef.current) return;
       if (!containerRef.current.contains(e.target as Node)) setOpen(false);
     }
-    window.addEventListener("mousedown", onClick);
-    return () => window.removeEventListener("mousedown", onClick);
+    window.addEventListener("pointerdown", onPointerDown);
+    return () => window.removeEventListener("pointerdown", onPointerDown);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      reverseAbortRef.current?.abort();
+      reverseAbortRef.current = null;
+    };
   }, []);
 
   const search = useQuery({
@@ -99,8 +114,12 @@ export function LocationHeader() {
 
   function pickCurrent() {
     if (typeof navigator === "undefined" || !navigator.geolocation) return;
+    abortPendingReverse();
+    const controller = new AbortController();
+    reverseAbortRef.current = controller;
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
+        if (controller.signal.aborted) return;
         const base: GeoLocation = {
           id: "current",
           name: "現在地",
@@ -112,8 +131,9 @@ export function LocationHeader() {
         const name = await reverseGeocode({
           latitude: pos.coords.latitude,
           longitude: pos.coords.longitude,
+          signal: controller.signal,
         });
-        if (!name) return;
+        if (controller.signal.aborted || !name) return;
         setLocation({ ...base, admin: name });
       },
       () => {},
@@ -122,6 +142,7 @@ export function LocationHeader() {
   }
 
   function pickResult(loc: GeoLocation) {
+    abortPendingReverse();
     setLocation(loc);
     setOpen(false);
     setQuery("");
