@@ -29,7 +29,7 @@ const BODY_OPTIONS: Array<{ value: BodyType; label: string }> = [
 export function SettingsPanel() {
   const profile = useAppStore((s) => s.profile);
   const setProfile = useAppStore((s) => s.setProfile);
-  const resetCarryChecks = useAppStore((s) => s.resetCarryChecks);
+  const resetAllCardChecks = useAppStore((s) => s.resetAllCardChecks);
 
   return (
     <Card>
@@ -72,10 +72,10 @@ export function SettingsPanel() {
               ))}
             </Select>
           </Field>
-          <Field label="持ち物チェック">
+          <Field label="カードのチェック">
             <button
               type="button"
-              onClick={resetCarryChecks}
+              onClick={resetAllCardChecks}
               className="h-9 rounded-full border border-leaf-200 bg-white px-4 text-xs text-ink-600 hover:bg-leaf-25"
             >
               すべて未チェックに戻す

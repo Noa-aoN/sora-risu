@@ -3,7 +3,6 @@ import { Mail } from "lucide-react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -29,7 +28,6 @@ export function SkyLetterCard({ letter }: { letter: SkyLetter }) {
           <Mail size={14} />
           <CardTitle className="text-leaf-800">{letter.title}</CardTitle>
         </div>
-        <CardDescription>今日の空からのひとこと</CardDescription>
       </CardHeader>
       <CardContent>
         <p className="text-sm leading-relaxed text-ink-700">{letter.body}</p>

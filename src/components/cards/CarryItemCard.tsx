@@ -1,8 +1,9 @@
 "use client";
 
-import { Check, Package } from "lucide-react";
+import { Package } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { CheckIndicator } from "@/components/ui/check-indicator";
 import { cn } from "@/lib/cn";
 import { useAppStore } from "@/stores/useAppStore";
 import type { CarryItem } from "@/types/recommendation";
@@ -33,38 +34,39 @@ export function CarryItemCard({ item }: { item: CarryItem }) {
         aria-hidden
         className={cn(
           "absolute inset-x-0 top-0 h-1",
-          checked ? "bg-leaf-400" : "bg-pollen-500",
+          checked ? "bg-leaf-500" : "bg-pollen-500",
         )}
       />
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-2">
-          <span
+      <div className="flex items-start gap-3">
+        <span
+          className={cn(
+            "mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
+            checked
+              ? "bg-leaf-50 text-leaf-700"
+              : "bg-pollen-50 text-pollen-700",
+          )}
+        >
+          <Package size={14} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p
             className={cn(
-              "mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full",
-              checked
-                ? "bg-leaf-600 text-white"
-                : "bg-pollen-50 text-pollen-700",
+              "text-sm font-medium",
+              checked ? "text-leaf-800 line-through" : "text-ink-800",
             )}
           >
-            {checked ? <Check size={14} /> : <Package size={14} />}
-          </span>
-          <div>
-            <p
-              className={cn(
-                "text-sm font-medium",
-                checked ? "text-leaf-800 line-through" : "text-ink-800",
-              )}
-            >
-              {item.name}
-            </p>
-            <p className="mt-0.5 text-[11px] leading-relaxed text-ink-500">
-              {item.reason}
-            </p>
-          </div>
+            {item.name}
+          </p>
+          <p className="mt-0.5 text-[11px] leading-relaxed text-ink-500">
+            {item.reason}
+          </p>
         </div>
-        <Badge tone={item.priority === "required" ? "pollen" : "muted"}>
-          {PRIORITY_LABEL[item.priority]}
-        </Badge>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <Badge tone={item.priority === "required" ? "pollen" : "muted"}>
+            {PRIORITY_LABEL[item.priority]}
+          </Badge>
+          <CheckIndicator checked={checked} />
+        </div>
       </div>
     </button>
   );
