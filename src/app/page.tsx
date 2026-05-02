@@ -5,7 +5,6 @@ import { useMemo, useSyncExternalStore } from "react";
 import { ComingSoonSection } from "@/components/cards/ComingSoonSection";
 import { SeasonalWordCard } from "@/components/cards/SeasonalWordCard";
 import { SkyLetterCard } from "@/components/cards/SkyLetterCard";
-import { DayPicker } from "@/components/dashboard/DayPicker";
 import { SummaryCard } from "@/components/dashboard/SummaryCard";
 import { TimeSyncedSection } from "@/components/dashboard/TimeSyncedSection";
 import { TimelinePanel } from "@/components/dashboard/TimelinePanel";
@@ -92,7 +91,6 @@ export default function HomePage() {
           isError={isError}
         />
 
-        <DayPicker />
         <TimeSyncedSection
           slots={cardSlots}
           conditions={cardConditions}

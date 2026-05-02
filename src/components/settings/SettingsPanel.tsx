@@ -35,7 +35,6 @@ const BODY_OPTIONS: Array<{ value: BodyType; label: string }> = [
 export function SettingsPanel() {
   const profile = useAppStore((s) => s.profile);
   const setProfile = useAppStore((s) => s.setProfile);
-  const resetAllCardChecks = useAppStore((s) => s.resetAllCardChecks);
 
   const setScene = (key: keyof SceneSelection, value: boolean) => {
     const next: SceneSelection = { ...profile.scenes, [key]: value };
@@ -55,8 +54,7 @@ export function SettingsPanel() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-3">
             <Field label="服装ジャンル">
               <Select
                 value={profile.styleGenre}
@@ -99,19 +97,6 @@ export function SettingsPanel() {
                 />
               </div>
             </Field>
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-leaf-100/60 pt-3">
-            <p className="text-[11px] text-ink-400">
-              設定はすべてのアドバイスカードに反映されます
-            </p>
-            <button
-              type="button"
-              onClick={resetAllCardChecks}
-              className="h-8 rounded-full border border-leaf-200 bg-white px-3 text-xs text-ink-600 hover:bg-leaf-25"
-            >
-              チェックをすべて戻す
-            </button>
-          </div>
         </div>
       </CardContent>
     </Card>
