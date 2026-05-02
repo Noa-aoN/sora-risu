@@ -16,7 +16,7 @@ function pickToneAndBody(conditions: WeatherCondition[]): SkyLetter {
 
   if (hasBigPressureSwing) {
     return {
-      title: "今日のアドバイス",
+      title: "今日のメッセージ",
       tone: "alert",
       body: "気圧の動きが大きい目安の一日です。だるさを感じやすいかもしれないので、無理せず予定に少し余白を作ると過ごしやすいかもしれません。深呼吸を挟みながら、自分のペースで大丈夫ですよ。",
     };
@@ -24,7 +24,7 @@ function pickToneAndBody(conditions: WeatherCondition[]): SkyLetter {
 
   if (hasHeavyRain) {
     return {
-      title: "今日のアドバイス",
+      title: "今日のメッセージ",
       tone: "gentle",
       body: "雨が強くなる時間帯がある見込みです。傘と濡れに強い靴を用意しつつ、屋内で進められる予定を中心に組むと安心です。雨音を楽しむ気持ちで、今日もゆっくりいきましょう。",
     };
@@ -32,7 +32,7 @@ function pickToneAndBody(conditions: WeatherCondition[]): SkyLetter {
 
   if (hasHighPollen) {
     return {
-      title: "今日のアドバイス",
+      title: "今日のメッセージ",
       tone: "gentle",
       body: "花粉が多めの一日になりそうです。マスクや帰宅後のひと払いを忘れずに、洗濯物は室内干しの目安で。小さな対策の積み重ねが、夜のラクさにつながります。",
     };
@@ -40,7 +40,7 @@ function pickToneAndBody(conditions: WeatherCondition[]): SkyLetter {
 
   if (tempSwing >= 8) {
     return {
-      title: "今日のアドバイス",
+      title: "今日のメッセージ",
       tone: "gentle",
       body: "朝晩と日中で気温差が大きい一日です。脱ぎ着しやすい羽織りで体温を整えながら過ごしてください。体に優しく、ゆったりとした一日になりますように。",
     };
@@ -56,7 +56,7 @@ function pickToneAndBody(conditions: WeatherCondition[]): SkyLetter {
 export function buildSkyLetter(conditions: WeatherCondition[]): SkyLetter {
   if (conditions.length === 0) {
     return {
-      title: "今日のアドバイス",
+      title: "今日のメッセージ",
       tone: "calm",
       body: "天気データを取得しています。少しお待ちください。",
     };

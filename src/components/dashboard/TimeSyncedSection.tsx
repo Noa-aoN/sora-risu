@@ -34,10 +34,10 @@ const SLOT_DOT_COLOR: Record<SlotPeriod, string> = {
 };
 
 const SLOT_BG_TINT: Record<SlotPeriod, string> = {
-  morning: "bg-pollen-50/60",
-  daytime: "bg-leaf-50/60",
-  evening: "bg-dusk-50/60",
-  night: "bg-ink-50",
+  morning: "bg-pollen-50/30",
+  daytime: "bg-leaf-50/30",
+  evening: "bg-dusk-50/25",
+  night: "bg-ink-50/55",
   daily: "",
 };
 
