@@ -25,23 +25,32 @@ export function SeasonalWordCard() {
   const word = useMemo(() => (mounted ? pickSeasonalWord() : null), [mounted]);
 
   return (
-    <Card className="flex h-full flex-col bg-gradient-to-br from-leaf-25 to-white">
+    <Card className="flex h-full flex-col overflow-hidden bg-[linear-gradient(160deg,rgba(246,249,245,0.98),rgba(255,255,255,0.98))]">
       <CardHeader>
         <div className="flex items-center gap-2 text-leaf-700">
           <Leaf size={14} />
-          <CardTitle className="text-leaf-800">今日の季節の言葉</CardTitle>
+          <CardTitle className="text-base text-ink-800">
+            今日の季節の言葉
+          </CardTitle>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-3">
         {word ? (
-          <div className="space-y-2">
-            <div className="flex items-baseline gap-2">
-              <p className="text-lg font-medium text-ink-800">{word.term}</p>
-              <p className="text-[11px] text-ink-400">{word.reading}</p>
+          <div className="rounded-[1.25rem] border border-leaf-100/80 bg-white/80 px-4 py-4 shadow-sm shadow-leaf-900/[0.03]">
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <p className="text-lg font-medium tracking-[0.04em] text-ink-800">
+                  {word.term}
+                </p>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-ink-400">
+                  {word.reading}
+                </p>
+              </div>
+              <div className="h-px bg-gradient-to-r from-leaf-100 via-leaf-200/70 to-transparent" />
+              <p className="text-[13px] leading-6 text-ink-600">
+                {word.description}
+              </p>
             </div>
-            <p className="text-xs leading-relaxed text-ink-600">
-              {word.description}
-            </p>
           </div>
         ) : (
           <p className="text-xs text-ink-400">読み込み中…</p>

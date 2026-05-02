@@ -6,7 +6,6 @@ import { SeasonalWordCard } from "@/components/cards/SeasonalWordCard";
 import { SkyLetterCard } from "@/components/cards/SkyLetterCard";
 import { SummaryCard } from "@/components/dashboard/SummaryCard";
 import { TimeSyncedSection } from "@/components/dashboard/TimeSyncedSection";
-import { TimelinePanel } from "@/components/dashboard/TimelinePanel";
 import { WeatherChart } from "@/components/dashboard/WeatherChart";
 import { AppShell } from "@/components/layout/AppShell";
 import { LocationHeader } from "@/components/layout/LocationHeader";
@@ -82,7 +81,6 @@ export default function HomePage() {
           weather={weather}
         />
 
-        <TimelinePanel />
         <WeatherChart
           weather={weather}
           pollen={pollen}

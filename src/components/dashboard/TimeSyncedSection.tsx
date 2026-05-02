@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
+import { ArrowDown, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { ActionCard } from "@/components/cards/ActionCard";
@@ -130,8 +130,13 @@ function DayBlock({
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+        <div className="grid gap-3 md:grid-cols-[1fr_auto_1fr] md:items-center">
+          <div className="flex items-center justify-start">
+            <CardTitle className="text-base text-ink-800">
+              アドバイスカード
+            </CardTitle>
+          </div>
+          <div className="flex items-center justify-center gap-2">
             <button
               type="button"
               onClick={() => setDayWindowStart(dayWindowStart - 1)}
@@ -167,26 +172,38 @@ function DayBlock({
               <ChevronRight size={18} />
             </button>
           </div>
-          <button
-            type="button"
-            onClick={resetAllCardChecks}
-            className="inline-flex items-center gap-1 rounded-full border border-leaf-100 bg-white px-3 py-1 text-[11px] text-ink-500 transition-colors hover:bg-leaf-25 hover:text-ink-700"
-          >
-            <RotateCcw size={12} />
-            チェックを戻す
-          </button>
+          <div className="flex justify-start md:justify-end">
+            <button
+              type="button"
+              onClick={resetAllCardChecks}
+              className="inline-flex items-center gap-1 rounded-full border border-leaf-100 bg-white px-3 py-1 text-[11px] text-ink-500 transition-colors hover:bg-leaf-25 hover:text-ink-700"
+            >
+              <RotateCcw size={12} />
+              チェックを戻す
+            </button>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        {group.slots.map((slot) => (
-          <SlotRow
-            key={slot.id}
-            slot={slot}
-            condition={conditions.find((c) => c.slotId === slot.id)}
-            outfit={recommendations.outfit.filter((o) => o.slotId === slot.id)}
-            carry={recommendations.carry.filter((c) => c.slotId === slot.id)}
-            action={recommendations.action.filter((a) => a.slotId === slot.id)}
-          />
+        {group.slots.map((slot, index) => (
+          <div key={slot.id} className="space-y-2">
+            <SlotRow
+              slot={slot}
+              condition={conditions.find((c) => c.slotId === slot.id)}
+              outfit={recommendations.outfit.filter((o) => o.slotId === slot.id)}
+              carry={recommendations.carry.filter((c) => c.slotId === slot.id)}
+              action={recommendations.action.filter((a) => a.slotId === slot.id)}
+            />
+            {index < group.slots.length - 1 && (
+              <div className="flex items-center justify-center gap-2 px-2 text-ink-300">
+                <span className="h-px flex-1 bg-gradient-to-r from-transparent via-leaf-100 to-transparent" />
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-leaf-100 bg-white text-leaf-500">
+                  <ArrowDown size={14} />
+                </span>
+                <span className="h-px flex-1 bg-gradient-to-r from-transparent via-leaf-100 to-transparent" />
+              </div>
+            )}
+          </div>
         ))}
       </CardContent>
     </Card>

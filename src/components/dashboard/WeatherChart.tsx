@@ -14,6 +14,7 @@ import {
   Sun,
   Thermometer,
 } from "lucide-react";
+import { useSyncExternalStore } from "react";
 import type { ReactElement, ReactNode } from "react";
 import {
   Area,
@@ -31,6 +32,7 @@ import {
 
 import { ChartAnchorToggle } from "@/components/dashboard/ChartAnchorToggle";
 import { ChartSeriesPicker } from "@/components/dashboard/ChartSeriesPicker";
+import { TimelinePanel } from "@/components/dashboard/TimelinePanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { weatherCodeLabel } from "@/lib/labels";
 import { useAppStore } from "@/stores/useAppStore";
@@ -429,8 +431,14 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <CardTitle>{buildTitle(chartSeries)}</CardTitle>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="space-y-1">
+            <CardTitle>{buildTitle(chartSeries)}</CardTitle>
+            <p className="text-[11px] leading-relaxed text-ink-400">
+              24H は時刻ごと、3D / 7D / 14D は日次で傾向を見られます
+            </p>
+          </div>
+          <TimelinePanel />
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 pt-3">
           <ChartSeriesPicker showPollen showPressure />
@@ -474,6 +482,7 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
                 icon={<CloudSun size={14} />}
                 label="天気"
                 height="h-16"
+                iconPaddingTop={24}
               >
                 <WeatherIconRow ctx={ctx} />
               </ChartRow>
@@ -557,13 +566,29 @@ function WeatherIconDot({ cx, cy, payload }: DotProps) {
 
 type WeatherRowPoint = { t: number; weatherY: number; code: number };
 
+const MOBILE_MEDIA_QUERY = "(max-width: 767px)";
+
+function subscribeViewport(onStoreChange: () => void) {
+  if (typeof window === "undefined") return () => undefined;
+  const mediaQuery = window.matchMedia(MOBILE_MEDIA_QUERY);
+  mediaQuery.addEventListener("change", onStoreChange);
+  return () => mediaQuery.removeEventListener("change", onStoreChange);
+}
+
+function getIsMobileSnapshot() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia(MOBILE_MEDIA_QUERY).matches;
+}
+
 function sampleWeatherRowPoints(
   data: WeatherRowPoint[],
   isHourly: boolean,
+  isMobile: boolean,
 ): WeatherRowPoint[] {
   if (!isHourly || data.length <= 10) return data;
 
-  const sampled = data.filter((_, index) => index % 3 === 0);
+  const step = isMobile ? 3 : 2;
+  const sampled = data.filter((_, index) => index % step === 0);
   const last = data[data.length - 1];
   if (last && sampled[sampled.length - 1]?.t !== last.t) {
     sampled.push(last);
@@ -572,18 +597,24 @@ function sampleWeatherRowPoints(
 }
 
 function WeatherIconRow({ ctx }: { ctx: ChartContext }) {
+  const isMobile = useSyncExternalStore(
+    subscribeViewport,
+    getIsMobileSnapshot,
+    () => false,
+  );
   const data = sampleWeatherRowPoints(
     ctx.data
-    .filter((p) => typeof p.weatherCode === "number")
-    .map((p) => ({ t: p.t, weatherY: 0.5, code: p.weatherCode as number })),
+      .filter((p) => typeof p.weatherCode === "number")
+      .map((p) => ({ t: p.t, weatherY: 0.5, code: p.weatherCode as number })),
     ctx.isHourly,
+    isMobile,
   );
 
   return (
     <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={1}>
       <LineChart
         data={data}
-        margin={{ top: 0, right: 8, left: 0, bottom: 0 }}
+        margin={{ top: 24, right: 8, left: 0, bottom: 0 }}
       >
         <XAxis
           {...commonAxisProps(ctx)}
@@ -629,6 +660,13 @@ function WeatherIconRow({ ctx }: { ctx: ChartContext }) {
           strokeDasharray="4 3"
           strokeWidth={1.5}
           ifOverflow="extendDomain"
+          label={{
+            value: "現在",
+            position: "top",
+            offset: 8,
+            fill: NOW_LINE_COLOR,
+            fontSize: 10,
+          }}
         />
         <Line
           dataKey="weatherY"
@@ -646,16 +684,21 @@ function ChartRow({
   icon,
   label,
   height,
+  iconPaddingTop = 0,
   children,
 }: {
   icon: ReactNode;
   label: string;
   height: string;
+  iconPaddingTop?: number;
   children: ReactNode;
 }) {
   return (
     <div className="flex items-stretch gap-2">
-      <div className="flex w-10 flex-col items-center justify-center gap-0.5 text-ink-500">
+      <div
+        className="flex w-10 flex-col items-center justify-center gap-0.5 text-ink-500"
+        style={iconPaddingTop ? { paddingTop: iconPaddingTop } : undefined}
+      >
         <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-leaf-50 text-leaf-700">
           {icon}
         </span>
@@ -745,7 +788,7 @@ function PressureChart({ ctx }: { ctx: ChartContext }) {
             fontSize: 12,
           }}
         />
-        {commonOverlays(ctx, "p", true)}
+        {commonOverlays(ctx, "p", false)}
         <Line
           yAxisId="p"
           type="monotone"

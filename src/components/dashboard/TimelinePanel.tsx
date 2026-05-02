@@ -20,19 +20,15 @@ export function TimelinePanel() {
   const setRange = useAppStore((s) => s.setTimelineRange);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="space-y-1">
-        <p className="text-sm text-ink-700">
-          グラフの時間軸を選んでください
-        </p>
-        <p className="text-[11px] text-ink-400">
-          24H は時刻ごと、3D / 7D / 14D は日次でグラフが切り替わります
-        </p>
-      </div>
+    <div className="inline-flex items-center gap-2">
+      <span className="text-[10px] uppercase tracking-[0.22em] text-ink-400">
+        時間軸
+      </span>
       <Segmented<TimelineRange>
         value={range}
         onChange={setRange}
         options={TIMELINE_OPTIONS}
+        size="sm"
       />
     </div>
   );
