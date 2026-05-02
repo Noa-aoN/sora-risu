@@ -85,17 +85,17 @@ export function TimeSyncedSection({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-3 lg:grid-cols-3">
-                <Column title="服装" empty="提案なし">
+                <Column tone="leaf" title="服装" empty="提案なし">
                   {outfit.map((item) => (
                     <OutfitItemCard key={item.id} item={item} />
                   ))}
                 </Column>
-                <Column title="持ち物" empty="この時間帯はとくに必要なし">
+                <Column tone="pollen" title="持ち物" empty="この時間帯はとくに必要なし">
                   {carry.map((item) => (
                     <CarryItemCard key={item.id} item={item} />
                   ))}
                 </Column>
-                <Column title="アクション" empty="無理のない範囲で過ごせる目安">
+                <Column tone="rain" title="アクション" empty="無理のない範囲で過ごせる目安">
                   {action.map((item) => (
                     <ActionCard key={item.id} item={item} />
                   ))}
@@ -109,11 +109,27 @@ export function TimeSyncedSection({
   );
 }
 
+type ColumnTone = "leaf" | "pollen" | "rain";
+
+const TONE_HEADER_CLASS: Record<ColumnTone, string> = {
+  leaf: "text-leaf-700",
+  pollen: "text-pollen-700",
+  rain: "text-rain-700",
+};
+
+const TONE_DOT_CLASS: Record<ColumnTone, string> = {
+  leaf: "bg-leaf-400",
+  pollen: "bg-pollen-500",
+  rain: "bg-rain-500",
+};
+
 function Column({
+  tone,
   title,
   empty,
   children,
 }: {
+  tone: ColumnTone;
   title: string;
   empty: string;
   children: React.ReactNode;
@@ -122,7 +138,13 @@ function Column({
   const hasContent = items.some(Boolean) && items.length > 0;
   return (
     <div className="space-y-2">
-      <p className="text-[11px] uppercase tracking-[0.2em] text-ink-400">
+      <p
+        className={`flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.2em] ${TONE_HEADER_CLASS[tone]}`}
+      >
+        <span
+          className={`inline-block h-1.5 w-1.5 rounded-full ${TONE_DOT_CLASS[tone]}`}
+          aria-hidden
+        />
         {title}
       </p>
       {hasContent ? (

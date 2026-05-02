@@ -11,10 +11,14 @@ const INTENSITY_LABEL: Record<ActionItem["intensity"], string> = {
 
 export function ActionCard({ item }: { item: ActionItem }) {
   return (
-    <div className="rounded-2xl border border-leaf-100/80 bg-white px-4 py-3">
+    <div className="relative overflow-hidden rounded-2xl border border-rain-100 bg-white px-4 pb-3 pt-4">
+      <span
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-1 bg-rain-500"
+      />
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2">
-          <span className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full bg-leaf-50 text-leaf-700">
+          <span className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full bg-rain-50 text-rain-700">
             <Sparkles size={14} />
           </span>
           <div className="space-y-0.5">
@@ -27,7 +31,7 @@ export function ActionCard({ item }: { item: ActionItem }) {
             </p>
           </div>
         </div>
-        <Badge tone="muted">{INTENSITY_LABEL[item.intensity]}</Badge>
+        <Badge tone="rain">{INTENSITY_LABEL[item.intensity]}</Badge>
       </div>
     </div>
   );

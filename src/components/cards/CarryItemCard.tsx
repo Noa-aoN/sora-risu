@@ -23,12 +23,19 @@ export function CarryItemCard({ item }: { item: CarryItem }) {
       onClick={() => toggle(item.id)}
       aria-pressed={checked}
       className={cn(
-        "w-full rounded-2xl border px-4 py-3 text-left transition-colors",
+        "relative w-full overflow-hidden rounded-2xl border px-4 pb-3 pt-4 text-left transition-colors",
         checked
           ? "border-leaf-300 bg-leaf-50/70"
-          : "border-leaf-100/80 bg-white hover:bg-leaf-25",
+          : "border-pollen-100 bg-white hover:bg-pollen-50/50",
       )}
     >
+      <span
+        aria-hidden
+        className={cn(
+          "absolute inset-x-0 top-0 h-1",
+          checked ? "bg-leaf-400" : "bg-pollen-500",
+        )}
+      />
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2">
           <span
@@ -36,7 +43,7 @@ export function CarryItemCard({ item }: { item: CarryItem }) {
               "mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-full",
               checked
                 ? "bg-leaf-600 text-white"
-                : "bg-leaf-50 text-leaf-700",
+                : "bg-pollen-50 text-pollen-700",
             )}
           >
             {checked ? <Check size={14} /> : <Package size={14} />}
@@ -55,7 +62,7 @@ export function CarryItemCard({ item }: { item: CarryItem }) {
             </p>
           </div>
         </div>
-        <Badge tone={item.priority === "required" ? "leaf" : "muted"}>
+        <Badge tone={item.priority === "required" ? "pollen" : "muted"}>
           {PRIORITY_LABEL[item.priority]}
         </Badge>
       </div>
