@@ -11,7 +11,41 @@ type RawResult = {
   admin1?: string;
   timezone?: string;
   population?: number;
+  feature_code?: string;
 };
+
+const FEATURE_CODE_PRIORITY: Record<string, number> = {
+  PPLC: 100,
+  PPLA: 90,
+  PPLA2: 80,
+  PPLA3: 70,
+  PPLA4: 60,
+  PPLA5: 50,
+  PPL: 40,
+  PPLG: 35,
+  PPLX: 30,
+  PPLF: 10,
+  PPLL: 5,
+};
+
+const EXCLUDED_FEATURE_CODES = new Set(["PPLH", "PPLQ", "PPLW"]);
+
+function isWorthShowing(item: RawResult): boolean {
+  const fc = item.feature_code ?? "";
+  if (!fc.startsWith("PPL")) return false;
+  if (EXCLUDED_FEATURE_CODES.has(fc)) return false;
+  if ((fc === "PPLL" || fc === "PPLF") && !item.population) return false;
+  return true;
+}
+
+function compareResults(a: RawResult, b: RawResult): number {
+  const pa = a.population ?? -1;
+  const pb = b.population ?? -1;
+  if (pa !== pb) return pb - pa;
+  const fa = FEATURE_CODE_PRIORITY[a.feature_code ?? ""] ?? 0;
+  const fb = FEATURE_CODE_PRIORITY[b.feature_code ?? ""] ?? 0;
+  return fb - fa;
+}
 
 type RawSearchResponse = {
   results?: RawResult[];
@@ -81,15 +115,12 @@ export async function searchLocations({
   for (const r of settled) {
     if (r.status !== "fulfilled") continue;
     for (const item of r.value) {
+      if (!isWorthShowing(item)) continue;
       if (!seen.has(item.id)) seen.set(item.id, item);
     }
   }
 
-  const merged = Array.from(seen.values()).sort((a, b) => {
-    const ap = a.population ?? -1;
-    const bp = b.population ?? -1;
-    return bp - ap;
-  });
+  const merged = Array.from(seen.values()).sort(compareResults);
 
   return merged.slice(0, count).map((r) => ({
     id: `${r.id}`,
