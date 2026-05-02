@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Compass, MapPin, Search } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,8 +40,11 @@ export function LocationHeader() {
   const setLocation = useAppStore((s) => s.setLocation);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const debounced = useDebounced(query);
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const reverseAbortRef = useRef<AbortController | null>(null);
 
   function abortPendingReverse() {
@@ -112,6 +115,47 @@ export function LocationHeader() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const results = search.data ?? [];
+
+  useEffect(() => {
+    setHighlightedIndex(-1);
+  }, [debounced]);
+
+  useEffect(() => {
+    if (highlightedIndex < 0) return;
+    itemRefs.current[highlightedIndex]?.scrollIntoView({ block: "nearest" });
+  }, [highlightedIndex]);
+
+  function onInputKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setOpen(true);
+      if (results.length === 0) return;
+      setHighlightedIndex((i) => Math.min(i + 1, results.length - 1));
+      return;
+    }
+    if (e.key === "ArrowUp") {
+      if (!open || results.length === 0) return;
+      e.preventDefault();
+      setHighlightedIndex((i) => Math.max(i - 1, 0));
+      return;
+    }
+    if (e.key === "Enter") {
+      if (!open || highlightedIndex < 0) return;
+      const r = results[highlightedIndex];
+      if (!r) return;
+      e.preventDefault();
+      pickResult(r);
+      return;
+    }
+    if (e.key === "Escape") {
+      if (!open && query.length === 0) return;
+      e.preventDefault();
+      setOpen(false);
+      setHighlightedIndex(-1);
+    }
+  }
+
   function pickCurrent() {
     if (typeof navigator === "undefined" || !navigator.geolocation) return;
     abortPendingReverse();
@@ -146,9 +190,9 @@ export function LocationHeader() {
     setLocation(loc);
     setOpen(false);
     setQuery("");
+    setHighlightedIndex(-1);
+    inputRef.current?.blur();
   }
-
-  const results = search.data ?? [];
 
   return (
     <header className="space-y-3">
@@ -177,14 +221,25 @@ export function LocationHeader() {
                 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400"
               />
               <Input
+                ref={inputRef}
                 value={query}
                 onChange={(e) => {
                   setQuery(e.target.value);
                   setOpen(true);
                 }}
                 onFocus={() => setOpen(true)}
+                onKeyDown={onInputKeyDown}
                 placeholder="地点を検索 (例: 京都)"
                 className="pl-9"
+                role="combobox"
+                aria-expanded={open}
+                aria-autocomplete="list"
+                aria-controls="location-search-listbox"
+                aria-activedescendant={
+                  highlightedIndex >= 0 && results[highlightedIndex]
+                    ? `location-search-item-${results[highlightedIndex]!.id}`
+                    : undefined
+                }
               />
             </div>
             <Button
@@ -200,7 +255,11 @@ export function LocationHeader() {
           </div>
 
           {open && (debounced.length > 0 || results.length > 0) && (
-            <div className="absolute left-0 right-0 top-12 z-20 max-h-72 overflow-y-auto rounded-2xl border border-leaf-100 bg-white p-1 shadow-lg shadow-leaf-900/[0.06]">
+            <div
+              id="location-search-listbox"
+              role="listbox"
+              className="absolute left-0 right-0 top-12 z-20 max-h-72 overflow-y-auto rounded-2xl border border-leaf-100 bg-white p-1 shadow-lg shadow-leaf-900/[0.06]"
+            >
               {search.isFetching && (
                 <p className="px-3 py-2 text-xs text-ink-400">検索中…</p>
               )}
@@ -209,16 +268,26 @@ export function LocationHeader() {
                   該当する地点が見つかりません
                 </p>
               )}
-              {results.map((r) => {
+              {results.map((r, index) => {
                 const breadcrumb = [r.admin3, r.admin2, r.admin, r.country]
                   .filter(Boolean)
                   .join(" / ");
+                const highlighted = index === highlightedIndex;
                 return (
                   <button
                     key={r.id}
+                    id={`location-search-item-${r.id}`}
+                    role="option"
+                    aria-selected={highlighted}
+                    ref={(el) => {
+                      itemRefs.current[index] = el;
+                    }}
                     type="button"
                     onClick={() => pickResult(r)}
-                    className="flex w-full flex-col items-start gap-0.5 rounded-xl px-3 py-2 text-left hover:bg-leaf-25"
+                    onMouseEnter={() => setHighlightedIndex(index)}
+                    className={`flex w-full flex-col items-start gap-0.5 rounded-xl px-3 py-2 text-left transition-colors ${
+                      highlighted ? "bg-leaf-50" : "hover:bg-leaf-25"
+                    }`}
                   >
                     <span className="text-sm text-ink-800">{r.name}</span>
                     <span className="text-[11px] text-ink-500">

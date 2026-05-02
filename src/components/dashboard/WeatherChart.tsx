@@ -394,9 +394,19 @@ type Props = {
   isError?: boolean;
 };
 
+function useNowTick(intervalMs = 60_000): number {
+  const [tick, setTick] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setTick(Date.now()), intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs]);
+  return tick;
+}
+
 export function WeatherChart({ weather, pollen, range, isError }: Props) {
   const chartSeries = useAppStore((s) => s.chartSeries);
   const chartAnchor = useAppStore((s) => s.chartAnchor);
+  useNowTick();
 
   if (!weather) {
     return (

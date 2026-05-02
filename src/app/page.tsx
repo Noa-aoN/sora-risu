@@ -1,12 +1,12 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useMemo, useSyncExternalStore } from "react";
 
 import { SeasonalWordCard } from "@/components/cards/SeasonalWordCard";
 import { SkyLetterCard } from "@/components/cards/SkyLetterCard";
 import { SummaryCard } from "@/components/dashboard/SummaryCard";
 import { TimeSyncedSection } from "@/components/dashboard/TimeSyncedSection";
-import { WeatherChart } from "@/components/dashboard/WeatherChart";
 import { AppShell } from "@/components/layout/AppShell";
 import { LocationHeader } from "@/components/layout/LocationHeader";
 import { SettingsPanel } from "@/components/settings/SettingsPanel";
@@ -15,6 +15,19 @@ import { buildRecommendations } from "@/features/recommendations/buildRecommenda
 import { buildCardSlots } from "@/features/weather/services/buildTimeSlots";
 import { buildWeatherConditions } from "@/features/weather/services/buildWeatherConditions";
 import { useAppStore } from "@/stores/useAppStore";
+
+const WeatherChart = dynamic(
+  () =>
+    import("@/components/dashboard/WeatherChart").then((m) => ({
+      default: m.WeatherChart,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-72 animate-pulse rounded-2xl border border-leaf-100/80 bg-white" />
+    ),
+  },
+);
 
 const subscribeNoop = () => () => undefined;
 const getClientSnapshot = () => true;
@@ -115,7 +128,13 @@ export default function HomePage() {
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-6" aria-hidden>
+    <div
+      className="space-y-6"
+      role="status"
+      aria-busy="true"
+      aria-live="polite"
+    >
+      <span className="sr-only">天気ダッシュボードを読み込み中</span>
       <div className="space-y-2">
         <div className="h-3 w-24 animate-pulse rounded-full bg-leaf-100" />
         <div className="h-6 w-44 animate-pulse rounded-full bg-leaf-100" />
