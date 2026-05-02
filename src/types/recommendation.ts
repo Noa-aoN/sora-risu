@@ -66,7 +66,18 @@ export type SkyLetter = {
 
 export type BodyType = "neutral" | "cold_sensitive" | "heat_sensitive";
 
+export type SceneSelection = {
+  indoor: boolean;
+  outdoor: boolean;
+};
+
+export const DEFAULT_SCENES: SceneSelection = {
+  indoor: true,
+  outdoor: true,
+};
+
 export type UserProfile = {
   styleGenre: StyleTag;
   bodyType: BodyType;
+  scenes: SceneSelection;
 };

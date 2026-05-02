@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 
 import type { GeoLocation } from "@/types/location";
 import type { UserProfile } from "@/types/recommendation";
+import { DEFAULT_SCENES } from "@/types/recommendation";
 import type {
   AppSettings,
   ChartSeriesKey,
@@ -35,7 +36,11 @@ type AppStore = AppSettings & {
 
 const initial: AppSettings = {
   location: null,
-  profile: { styleGenre: "simple", bodyType: "neutral" },
+  profile: {
+    styleGenre: "simple",
+    bodyType: "neutral",
+    scenes: DEFAULT_SCENES,
+  },
   timelineRange: "24h",
   displayTarget: "summary",
   carryChecks: {},
@@ -95,7 +100,7 @@ export const useAppStore = create<AppStore>()(
     }),
     {
       name: "weather-dash:settings",
-      version: 4,
+      version: 5,
       migrate: (persisted: unknown, version: number) => {
         const state = (persisted as Partial<AppSettings> & {
           outfitChecks?: Record<string, boolean>;
@@ -116,6 +121,12 @@ export const useAppStore = create<AppStore>()(
             ...next,
             outfitChecks: next.outfitChecks ?? {},
             actionChecks: next.actionChecks ?? {},
+          };
+        }
+        if (version < 5 && next.profile && !next.profile.scenes) {
+          next = {
+            ...next,
+            profile: { ...next.profile, scenes: DEFAULT_SCENES },
           };
         }
         return next;
