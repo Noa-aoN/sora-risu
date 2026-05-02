@@ -19,6 +19,8 @@ export const DEFAULT_CHART_SERIES: ChartSeriesVisibility = {
   pollen: true,
 };
 
+export type ChartAnchor = "center" | "left";
+
 export type AppSettings = {
   location: GeoLocation | null;
   profile: UserProfile;
@@ -26,4 +28,5 @@ export type AppSettings = {
   displayTarget: DisplayTarget;
   carryChecks: Record<string, boolean>;
   chartSeries: ChartSeriesVisibility;
+  chartAnchor: ChartAnchor;
 };

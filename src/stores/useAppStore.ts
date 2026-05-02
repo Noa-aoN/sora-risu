@@ -6,6 +6,7 @@ import type { UserProfile } from "@/types/recommendation";
 import { DEFAULT_SCENES } from "@/types/recommendation";
 import type {
   AppSettings,
+  ChartAnchor,
   ChartSeriesKey,
   ChartSeriesVisibility,
 } from "@/types/settings";
@@ -26,6 +27,7 @@ type Actions = {
   setDayWindowStart: (n: number) => void;
   toggleChartSeries: (key: ChartSeriesKey) => void;
   resetChartSeries: () => void;
+  setChartAnchor: (anchor: ChartAnchor) => void;
 };
 
 type AppStore = AppSettings & {
@@ -45,6 +47,7 @@ const initial: AppSettings = {
   displayTarget: "summary",
   carryChecks: {},
   chartSeries: DEFAULT_CHART_SERIES,
+  chartAnchor: "center",
 };
 
 function clampDayWindow(n: number): number {
@@ -97,10 +100,11 @@ export const useAppStore = create<AppStore>()(
           },
         })),
       resetChartSeries: () => set({ chartSeries: DEFAULT_CHART_SERIES }),
+      setChartAnchor: (chartAnchor) => set({ chartAnchor }),
     }),
     {
       name: "weather-dash:settings",
-      version: 5,
+      version: 6,
       migrate: (persisted: unknown, version: number) => {
         const state = (persisted as Partial<AppSettings> & {
           outfitChecks?: Record<string, boolean>;
@@ -129,6 +133,9 @@ export const useAppStore = create<AppStore>()(
             profile: { ...next.profile, scenes: DEFAULT_SCENES },
           };
         }
+        if (version < 6 && !next.chartAnchor) {
+          next = { ...next, chartAnchor: "center" };
+        }
         return next;
       },
       partialize: (state) => ({
@@ -140,6 +147,7 @@ export const useAppStore = create<AppStore>()(
         outfitChecks: state.outfitChecks,
         actionChecks: state.actionChecks,
         chartSeries: state.chartSeries,
+        chartAnchor: state.chartAnchor,
       }),
     },
   ),
