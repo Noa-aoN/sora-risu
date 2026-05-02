@@ -188,19 +188,24 @@ export function LocationHeader() {
                   該当する地点が見つかりません
                 </p>
               )}
-              {results.map((r) => (
-                <button
-                  key={r.id}
-                  type="button"
-                  onClick={() => pickResult(r)}
-                  className="flex w-full items-baseline justify-between gap-2 rounded-xl px-3 py-2 text-left hover:bg-leaf-25"
-                >
-                  <span className="text-sm text-ink-800">{r.name}</span>
-                  <span className="text-[11px] text-ink-500">
-                    {[r.admin, r.country].filter(Boolean).join(" / ")}
-                  </span>
-                </button>
-              ))}
+              {results.map((r) => {
+                const breadcrumb = [r.admin3, r.admin2, r.admin, r.country]
+                  .filter(Boolean)
+                  .join(" / ");
+                return (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => pickResult(r)}
+                    className="flex w-full flex-col items-start gap-0.5 rounded-xl px-3 py-2 text-left hover:bg-leaf-25"
+                  >
+                    <span className="text-sm text-ink-800">{r.name}</span>
+                    <span className="text-[11px] text-ink-500">
+                      {breadcrumb || "—"}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>

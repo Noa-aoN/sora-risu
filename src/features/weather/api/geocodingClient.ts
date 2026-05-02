@@ -9,9 +9,22 @@ type RawResult = {
   longitude: number;
   country?: string;
   admin1?: string;
+  admin2?: string;
+  admin3?: string;
   timezone?: string;
   population?: number;
   feature_code?: string;
+};
+
+type RawSearchResponse = {
+  results?: RawResult[];
+};
+
+export type SearchLocationsInput = {
+  query: string;
+  language?: string;
+  count?: number;
+  signal?: AbortSignal;
 };
 
 const FEATURE_CODE_PRIORITY: Record<string, number> = {
@@ -30,34 +43,6 @@ const FEATURE_CODE_PRIORITY: Record<string, number> = {
 
 const EXCLUDED_FEATURE_CODES = new Set(["PPLH", "PPLQ", "PPLW"]);
 
-function isWorthShowing(item: RawResult): boolean {
-  const fc = item.feature_code ?? "";
-  if (!fc.startsWith("PPL")) return false;
-  if (EXCLUDED_FEATURE_CODES.has(fc)) return false;
-  if ((fc === "PPLL" || fc === "PPLF") && !item.population) return false;
-  return true;
-}
-
-function compareResults(a: RawResult, b: RawResult): number {
-  const pa = a.population ?? -1;
-  const pb = b.population ?? -1;
-  if (pa !== pb) return pb - pa;
-  const fa = FEATURE_CODE_PRIORITY[a.feature_code ?? ""] ?? 0;
-  const fb = FEATURE_CODE_PRIORITY[b.feature_code ?? ""] ?? 0;
-  return fb - fa;
-}
-
-type RawSearchResponse = {
-  results?: RawResult[];
-};
-
-export type SearchLocationsInput = {
-  query: string;
-  language?: string;
-  count?: number;
-  signal?: AbortSignal;
-};
-
 const JP_PLACE_SUFFIX = /[市町村区県府都道]$/;
 
 function buildQueryVariants(rawQuery: string): string[] {
@@ -68,6 +53,22 @@ function buildQueryVariants(rawQuery: string): string[] {
     variants.add(`${trimmed}市`);
   }
   return Array.from(variants);
+}
+
+function isWorthShowing(item: RawResult): boolean {
+  const fc = item.feature_code ?? "";
+  if (!fc.startsWith("PPL")) return false;
+  if (EXCLUDED_FEATURE_CODES.has(fc)) return false;
+  return true;
+}
+
+function compareResults(a: RawResult, b: RawResult): number {
+  const pa = a.population ?? -1;
+  const pb = b.population ?? -1;
+  if (pa !== pb) return pb - pa;
+  const fa = FEATURE_CODE_PRIORITY[a.feature_code ?? ""] ?? 0;
+  const fb = FEATURE_CODE_PRIORITY[b.feature_code ?? ""] ?? 0;
+  return fb - fa;
 }
 
 async function fetchOne(
@@ -101,14 +102,15 @@ async function fetchOne(
 export async function searchLocations({
   query,
   language = "ja",
-  count = 8,
+  count = 12,
   signal,
 }: SearchLocationsInput): Promise<GeoLocation[]> {
   const variants = buildQueryVariants(query);
   if (variants.length === 0) return [];
 
+  const fetchCount = Math.max(count, 10);
   const settled = await Promise.allSettled(
-    variants.map((v) => fetchOne(v, language, count, signal)),
+    variants.map((v) => fetchOne(v, language, fetchCount, signal)),
   );
 
   const seen = new Map<number, RawResult>();
@@ -126,6 +128,8 @@ export async function searchLocations({
     id: `${r.id}`,
     name: r.name,
     admin: r.admin1,
+    admin2: r.admin2,
+    admin3: r.admin3,
     country: r.country,
     latitude: r.latitude,
     longitude: r.longitude,
