@@ -52,6 +52,7 @@ export type FetchForecastInput = {
   latitude: number;
   longitude: number;
   forecastDays?: number;
+  pastDays?: number;
   signal?: AbortSignal;
 };
 
@@ -59,6 +60,7 @@ export async function fetchForecast({
   latitude,
   longitude,
   forecastDays = 14,
+  pastDays = 0,
   signal,
 }: FetchForecastInput): Promise<RawForecastResponse> {
   const params = new URLSearchParams({
@@ -68,6 +70,7 @@ export async function fetchForecast({
     daily: DAILY_FIELDS.join(","),
     timezone: "auto",
     forecast_days: forecastDays.toString(),
+    past_days: pastDays.toString(),
   });
 
   const response = await fetch(`${FORECAST_ENDPOINT}?${params.toString()}`, {
