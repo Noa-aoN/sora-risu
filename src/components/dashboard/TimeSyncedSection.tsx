@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { ActionCard } from "@/components/cards/ActionCard";
@@ -20,6 +21,7 @@ import {
 import { cn } from "@/lib/cn";
 import type { Recommendations } from "@/features/recommendations/buildRecommendations";
 import { relativeDayLabel } from "@/features/weather/services/buildTimeSlots";
+import { DAY_WINDOW_MAX_START, useAppStore } from "@/stores/useAppStore";
 import type { SlotPeriod, TimeSlot } from "@/types/timeline";
 import type { WeatherCondition } from "@/types/weather";
 
@@ -119,16 +121,60 @@ function DayBlock({
   conditions: WeatherCondition[];
   recommendations: Recommendations;
 }) {
+  const dayWindowStart = useAppStore((s) => s.dayWindowStart);
+  const setDayWindowStart = useAppStore((s) => s.setDayWindowStart);
+  const resetAllCardChecks = useAppStore((s) => s.resetAllCardChecks);
+  const canPrev = dayWindowStart > 0;
+  const canNext = dayWindowStart < DAY_WINDOW_MAX_START;
+
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-baseline justify-between gap-2">
-          <CardTitle className="text-base text-ink-800">
-            {group.relativeLabel}
-            <span className="ml-2 text-[11px] font-normal text-ink-400">
-              {group.dateLabel}
-            </span>
-          </CardTitle>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setDayWindowStart(dayWindowStart - 1)}
+              disabled={!canPrev}
+              aria-label="前の日へ"
+              className={cn(
+                "inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors",
+                canPrev
+                  ? "text-leaf-700 hover:bg-leaf-50"
+                  : "cursor-not-allowed text-ink-200",
+              )}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <div className="text-center">
+              <CardTitle className="text-base text-ink-800">
+                {group.relativeLabel}
+              </CardTitle>
+              <p className="text-[11px] text-ink-400">{group.dateLabel}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setDayWindowStart(dayWindowStart + 1)}
+              disabled={!canNext}
+              aria-label="次の日へ"
+              className={cn(
+                "inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors",
+                canNext
+                  ? "text-leaf-700 hover:bg-leaf-50"
+                  : "cursor-not-allowed text-ink-200",
+              )}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={resetAllCardChecks}
+            className="inline-flex items-center gap-1 rounded-full border border-leaf-100 bg-white px-3 py-1 text-[11px] text-ink-500 transition-colors hover:bg-leaf-25 hover:text-ink-700"
+          >
+            <RotateCcw size={12} />
+            チェックを戻す
+          </button>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
