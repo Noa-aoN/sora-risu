@@ -324,6 +324,34 @@ MVP では Open-Meteo を第一候補。理由：
 - Open-Meteo Forecast API（気温/気圧/降水/風/湿度/天気コード）
 - Open-Meteo JMA API（日本向け天気予報）
 - Open-Meteo Air Quality API（花粉/PM2.5/大気質）
+- Open-Meteo Geocoding API（地点検索）
+- BigDataCloud Reverse Geocode (`reverse-geocode-client`、no-key の client-side 用エンドポイント)
+
+### 8.2.1 地点検索の挙動と日本語ハンドリング
+
+Open-Meteo Geocoding API は `name` パラメータに対して**完全一致寄りの挙動**を取る。Geonames データベース上の地名そのものに一致するかどうかが優先される。
+
+そのまま日本のユーザに「福岡」と打たせると、**"福岡"** という名前の小さな地名（例：鹿児島県大崎町福岡）が一件返り、メジャーな福岡市（DB 上の name は「福岡市」）はヒットしない問題がある。
+
+対策：`searchLocations()` 側で**クエリのバリエーション**を作ってまとめて引く。
+
+- 入力末尾が `市 / 町 / 村 / 区 / 県 / 府 / 都 / 道` のいずれでもない場合、`{入力} + "市"` も同時に検索する
+- 結果は `id` で重複排除し、`population` 降順（無いものは末尾）でマージ
+- これにより「福岡」と打っても福岡市が上位に出る
+
+将来的にはローカル別名辞書（"とうきょう" → "東京"、"おおさか" → "大阪市" 等）や、Mapbox / Google Places のリッチな fuzzy search への差し替えを検討する。
+
+### 8.2.2 Reverse Geocoding（現在地名の自動取得）
+
+「現在地」ボタン使用時、緯度経度から行政区分名を取得する。Open-Meteo Geocoding API は forward search のみで reverse 機能を持たない。
+
+採用 API：BigDataCloud `reverse-geocode-client` エンドポイント
+
+- API キー不要、CORS 対応、client-side から直接呼べる
+- レスポンスは `locality / city / localityInfo.administrative / principalSubdivision` を含み、最も詳しい地名から fallback で拾う
+- 失敗時は `null` を返す。UI 側は admin が空のまま「現在地」だけが残る安全側挙動
+
+将来商用化時には Mapbox / Google などの安定供給される reverse geocode に差し替える前提。
 
 ### 8.3 商用化フェーズ候補
 
