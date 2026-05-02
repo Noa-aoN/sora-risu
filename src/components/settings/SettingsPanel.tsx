@@ -55,58 +55,63 @@ export function SettingsPanel() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Field label="服装ジャンル">
-            <Select
-              value={profile.styleGenre}
-              onChange={(e) =>
-                setProfile({ styleGenre: e.target.value as StyleTag })
-              }
-            >
-              {STYLE_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="体質補正">
-            <Select
-              value={profile.bodyType}
-              onChange={(e) =>
-                setProfile({ bodyType: e.target.value as BodyType })
-              }
-            >
-              {BODY_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="シーン">
-            <div className="flex flex-wrap gap-2 pt-1">
-              <SceneChip
-                label="室内"
-                checked={profile.scenes.indoor}
-                onClick={() => setScene("indoor", !profile.scenes.indoor)}
-              />
-              <SceneChip
-                label="室外"
-                checked={profile.scenes.outdoor}
-                onClick={() => setScene("outdoor", !profile.scenes.outdoor)}
-              />
-            </div>
-          </Field>
-          <Field label="カードのチェック">
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Field label="服装ジャンル">
+              <Select
+                value={profile.styleGenre}
+                onChange={(e) =>
+                  setProfile({ styleGenre: e.target.value as StyleTag })
+                }
+              >
+                {STYLE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="体質補正">
+              <Select
+                value={profile.bodyType}
+                onChange={(e) =>
+                  setProfile({ bodyType: e.target.value as BodyType })
+                }
+              >
+                {BODY_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="シーン">
+              <div className="flex flex-wrap gap-2 pt-0.5">
+                <SceneChip
+                  label="室内"
+                  checked={profile.scenes.indoor}
+                  onClick={() => setScene("indoor", !profile.scenes.indoor)}
+                />
+                <SceneChip
+                  label="室外"
+                  checked={profile.scenes.outdoor}
+                  onClick={() => setScene("outdoor", !profile.scenes.outdoor)}
+                />
+              </div>
+            </Field>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-leaf-100/60 pt-3">
+            <p className="text-[11px] text-ink-400">
+              設定はすべてのアドバイスカードに反映されます
+            </p>
             <button
               type="button"
               onClick={resetAllCardChecks}
-              className="h-9 rounded-full border border-leaf-200 bg-white px-4 text-xs text-ink-600 hover:bg-leaf-25"
+              className="h-8 rounded-full border border-leaf-200 bg-white px-3 text-xs text-ink-600 hover:bg-leaf-25"
             >
-              すべて未チェックに戻す
+              チェックをすべて戻す
             </button>
-          </Field>
+          </div>
         </div>
       </CardContent>
     </Card>

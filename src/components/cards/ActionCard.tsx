@@ -38,6 +38,7 @@ export function ActionCard({ item }: { item: ActionItem }) {
         )}
       />
       <div className="flex items-start gap-3">
+        <CheckIndicator checked={checked} className="mt-0.5" />
         <span
           className={cn(
             "mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
@@ -64,10 +65,7 @@ export function ActionCard({ item }: { item: ActionItem }) {
             {item.reason}
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-1.5">
-          <Badge tone="rain">{INTENSITY_LABEL[item.intensity]}</Badge>
-          <CheckIndicator checked={checked} />
-        </div>
+        <Badge tone="rain">{INTENSITY_LABEL[item.intensity]}</Badge>
       </div>
     </button>
   );

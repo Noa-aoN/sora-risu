@@ -48,8 +48,8 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
       <CardContent className="space-y-5 pt-5">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div className="space-y-1">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-ink-400">
-              Today
+            <p className="text-[11px] tracking-[0.05em] text-ink-400">
+              今日のサマリー
             </p>
             <p className="text-2xl font-medium text-ink-800">
               {weatherCodeLabel(weatherCode)}

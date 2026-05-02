@@ -17,6 +17,7 @@ const PRIORITY_LABEL: Record<CarryItem["priority"], string> = {
 export function CarryItemCard({ item }: { item: CarryItem }) {
   const checked = useAppStore((s) => Boolean(s.carryChecks[item.id]));
   const toggle = useAppStore((s) => s.toggleCarryCheck);
+  const isRequired = item.priority === "required";
 
   return (
     <button
@@ -27,7 +28,9 @@ export function CarryItemCard({ item }: { item: CarryItem }) {
         "relative w-full overflow-hidden rounded-2xl border px-4 pb-3 pt-4 text-left transition-colors",
         checked
           ? "border-leaf-300 bg-leaf-50/70"
-          : "border-pollen-100 bg-white hover:bg-pollen-50/50",
+          : isRequired
+            ? "border-pollen-200 bg-pollen-50/60 hover:bg-pollen-50"
+            : "border-pollen-100 bg-white hover:bg-pollen-50/40",
       )}
     >
       <span
@@ -38,6 +41,7 @@ export function CarryItemCard({ item }: { item: CarryItem }) {
         )}
       />
       <div className="flex items-start gap-3">
+        <CheckIndicator checked={checked} className="mt-0.5" />
         <span
           className={cn(
             "mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
@@ -61,12 +65,9 @@ export function CarryItemCard({ item }: { item: CarryItem }) {
             {item.reason}
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-1.5">
-          <Badge tone={item.priority === "required" ? "pollen" : "muted"}>
-            {PRIORITY_LABEL[item.priority]}
-          </Badge>
-          <CheckIndicator checked={checked} />
-        </div>
+        <Badge tone={isRequired ? "pollen" : "muted"}>
+          {PRIORITY_LABEL[item.priority]}
+        </Badge>
       </div>
     </button>
   );

@@ -22,11 +22,11 @@ export function TimelinePanel() {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="space-y-1">
-        <p className="text-[11px] uppercase tracking-[0.2em] text-ink-400">
-          Timeline
-        </p>
         <p className="text-sm text-ink-700">
-          選んだ時間軸に沿って、グラフとカードが揃って動きます
+          グラフの時間軸を選んでください
+        </p>
+        <p className="text-[11px] text-ink-400">
+          24H は時刻ごと、3D / 7D / 14D は日次でグラフが切り替わります
         </p>
       </div>
       <Segmented<TimelineRange>
