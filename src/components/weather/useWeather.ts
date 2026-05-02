@@ -25,7 +25,12 @@ export function useWeather(
   const forecastQuery = useQuery({
     queryKey: ["forecast", lat, lon],
     queryFn: ({ signal }) =>
-      fetchForecast({ latitude: lat!, longitude: lon!, signal }),
+      fetchForecast({
+        latitude: lat!,
+        longitude: lon!,
+        pastDays: 7,
+        signal,
+      }),
     enabled,
     staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
