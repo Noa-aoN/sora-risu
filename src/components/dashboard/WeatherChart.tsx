@@ -16,7 +16,10 @@ import {
   YAxis,
 } from "recharts";
 
+import { ChartSeriesPicker } from "@/components/dashboard/ChartSeriesPicker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAppStore } from "@/stores/useAppStore";
+import type { ChartSeriesVisibility } from "@/types/settings";
 import type { TimelineRange } from "@/types/timeline";
 import type {
   NormalizedPollen,
@@ -324,6 +327,8 @@ type Props = {
 };
 
 export function WeatherChart({ weather, pollen, range }: Props) {
+  const chartSeries = useAppStore((s) => s.chartSeries);
+
   if (!weather) {
     return (
       <Card>
@@ -341,12 +346,29 @@ export function WeatherChart({ weather, pollen, range }: Props) {
 
   const ctx = buildChartContext(weather, pollen, range);
 
+  const showPressure = ctx.isHourly && chartSeries.pressure;
+  const showTemperature = chartSeries.temperature;
+  const showPrecipitation = chartSeries.precipitation;
+  const showPollenChart = ctx.showPollen && chartSeries.pollen;
+  const visibleCount = [
+    showPressure,
+    showTemperature,
+    showPrecipitation,
+    showPollenChart,
+  ].filter(Boolean).length;
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>
-          {ctx.showPollen ? "気圧 / 気温 / 降水 / 花粉" : "気圧 / 気温 / 降水"}
-        </CardTitle>
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <CardTitle>{buildTitle(chartSeries, ctx)}</CardTitle>
+        </div>
+        <div className="pt-1">
+          <ChartSeriesPicker
+            showPollen={ctx.showPollen}
+            showPressure={ctx.isHourly}
+          />
+        </div>
         {range === "24h" && (
           <div className="flex items-center gap-3 pt-1 text-[10px] text-ink-400">
             <span className="inline-flex items-center gap-1">
@@ -374,25 +396,47 @@ export function WeatherChart({ weather, pollen, range }: Props) {
         )}
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {ctx.isHourly && (
-            <ChartRow icon={<Gauge size={14} />} label="気圧" height="h-40">
-              <PressureChart ctx={ctx} />
-            </ChartRow>
-          )}
-          <ChartRow icon={<Thermometer size={14} />} label="気温" height="h-36">
-            <TemperatureChart ctx={ctx} />
-          </ChartRow>
-          <ChartRow icon={<CloudRain size={14} />} label="降水" height="h-28">
-            <PrecipChart ctx={ctx} />
-          </ChartRow>
-          {ctx.showPollen && (
-            <ChartRow icon={<Flower size={14} />} label="花粉" height="h-24">
-              <PollenChart ctx={ctx} />
-            </ChartRow>
-          )}
-        </div>
-        {ctx.pollenGrayoutFromMs !== null && (
+        {visibleCount === 0 ? (
+          <p className="rounded-2xl border border-dashed border-leaf-100 bg-leaf-25 px-4 py-8 text-center text-xs text-ink-400">
+            上のボタンで表示する系列を選んでください
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {showPressure && (
+              <ChartRow icon={<Gauge size={14} />} label="気圧" height="h-40">
+                <PressureChart ctx={ctx} />
+              </ChartRow>
+            )}
+            {showTemperature && (
+              <ChartRow
+                icon={<Thermometer size={14} />}
+                label="気温"
+                height="h-36"
+              >
+                <TemperatureChart ctx={ctx} />
+              </ChartRow>
+            )}
+            {showPrecipitation && (
+              <ChartRow
+                icon={<CloudRain size={14} />}
+                label="降水"
+                height="h-28"
+              >
+                <PrecipChart ctx={ctx} />
+              </ChartRow>
+            )}
+            {showPollenChart && (
+              <ChartRow
+                icon={<Flower size={14} />}
+                label="花粉"
+                height="h-24"
+              >
+                <PollenChart ctx={ctx} />
+              </ChartRow>
+            )}
+          </div>
+        )}
+        {showPollenChart && ctx.pollenGrayoutFromMs !== null && (
           <p className="mt-2 text-[10px] leading-relaxed text-ink-400">
             花粉データは Open-Meteo Air Quality (CAMS) の都合で 5 日先までしか取得できません。グラフ右側のグレー部分はデータ未提供の範囲です。
           </p>
@@ -400,6 +444,18 @@ export function WeatherChart({ weather, pollen, range }: Props) {
       </CardContent>
     </Card>
   );
+}
+
+function buildTitle(
+  chartSeries: ChartSeriesVisibility,
+  ctx: { isHourly: boolean; showPollen: boolean },
+): string {
+  const parts: string[] = [];
+  if (ctx.isHourly && chartSeries.pressure) parts.push("気圧");
+  if (chartSeries.temperature) parts.push("気温");
+  if (chartSeries.precipitation) parts.push("降水");
+  if (ctx.showPollen && chartSeries.pollen) parts.push("花粉");
+  return parts.length > 0 ? parts.join(" / ") : "表示なし";
 }
 
 function ChartRow({

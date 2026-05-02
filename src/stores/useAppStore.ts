@@ -3,7 +3,12 @@ import { persist } from "zustand/middleware";
 
 import type { GeoLocation } from "@/types/location";
 import type { UserProfile } from "@/types/recommendation";
-import type { AppSettings } from "@/types/settings";
+import type {
+  AppSettings,
+  ChartSeriesKey,
+  ChartSeriesVisibility,
+} from "@/types/settings";
+import { DEFAULT_CHART_SERIES } from "@/types/settings";
 import type { DisplayTarget, TimelineRange } from "@/types/timeline";
 
 export const DAY_WINDOW_MAX_START = 6;
@@ -16,6 +21,8 @@ type Actions = {
   toggleCarryCheck: (id: string) => void;
   resetCarryChecks: () => void;
   setDayWindowStart: (n: number) => void;
+  toggleChartSeries: (key: ChartSeriesKey) => void;
+  resetChartSeries: () => void;
 };
 
 type AppStore = AppSettings & {
@@ -28,6 +35,7 @@ const initial: AppSettings = {
   timelineRange: "24h",
   displayTarget: "summary",
   carryChecks: {},
+  chartSeries: DEFAULT_CHART_SERIES,
 };
 
 function clampDayWindow(n: number): number {
@@ -55,16 +63,35 @@ export const useAppStore = create<AppStore>()(
         })),
       resetCarryChecks: () => set({ carryChecks: {} }),
       setDayWindowStart: (n) => set({ dayWindowStart: clampDayWindow(n) }),
+      toggleChartSeries: (key) =>
+        set((state) => ({
+          chartSeries: {
+            ...state.chartSeries,
+            [key]: !state.chartSeries[key],
+          },
+        })),
+      resetChartSeries: () => set({ chartSeries: DEFAULT_CHART_SERIES }),
     }),
     {
       name: "weather-dash:settings",
+      version: 2,
+      migrate: (persisted: unknown, version: number) => {
+        const state = (persisted as Partial<AppSettings>) ?? {};
+        if (version < 2 || !state.chartSeries) {
+          return { ...state, chartSeries: DEFAULT_CHART_SERIES };
+        }
+        return state;
+      },
       partialize: (state) => ({
         location: state.location,
         profile: state.profile,
         timelineRange: state.timelineRange,
         displayTarget: state.displayTarget,
         carryChecks: state.carryChecks,
+        chartSeries: state.chartSeries,
       }),
     },
   ),
 );
+
+export type { ChartSeriesKey, ChartSeriesVisibility };
