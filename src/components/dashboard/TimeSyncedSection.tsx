@@ -17,10 +17,27 @@ import {
   precipLevelLabel,
   pressureTrendLabel,
 } from "@/lib/labels";
+import { cn } from "@/lib/cn";
 import type { Recommendations } from "@/features/recommendations/buildRecommendations";
 import { relativeDayLabel } from "@/features/weather/services/buildTimeSlots";
-import type { TimeSlot } from "@/types/timeline";
+import type { SlotPeriod, TimeSlot } from "@/types/timeline";
 import type { WeatherCondition } from "@/types/weather";
+
+const SLOT_DOT_COLOR: Record<SlotPeriod, string> = {
+  morning: "bg-pollen-500",
+  daytime: "bg-leaf-500",
+  evening: "bg-alert-500",
+  night: "bg-ink-700",
+  daily: "bg-ink-300",
+};
+
+const SLOT_BG_TINT: Record<SlotPeriod, string> = {
+  morning: "bg-pollen-50/60",
+  daytime: "bg-leaf-50/60",
+  evening: "bg-alert-50/60",
+  night: "bg-ink-50",
+  daily: "",
+};
 
 type Props = {
   slots: TimeSlot[];
@@ -114,8 +131,8 @@ function DayBlock({
           </CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {group.slots.map((slot, idx) => (
+      <CardContent className="space-y-3">
+        {group.slots.map((slot) => (
           <SlotRow
             key={slot.id}
             slot={slot}
@@ -123,7 +140,6 @@ function DayBlock({
             outfit={recommendations.outfit.filter((o) => o.slotId === slot.id)}
             carry={recommendations.carry.filter((c) => c.slotId === slot.id)}
             action={recommendations.action.filter((a) => a.slotId === slot.id)}
-            isFirst={idx === 0}
           />
         ))}
       </CardContent>
@@ -137,28 +153,32 @@ function SlotRow({
   outfit,
   carry,
   action,
-  isFirst,
 }: {
   slot: TimeSlot;
   condition: WeatherCondition | undefined;
   outfit: Recommendations["outfit"];
   carry: Recommendations["carry"];
   action: Recommendations["action"];
-  isFirst: boolean;
 }) {
   return (
     <div
-      className={
-        isFirst
-          ? "space-y-3"
-          : "space-y-3 border-t border-leaf-100/60 pt-4"
-      }
+      className={cn(
+        "space-y-3 rounded-2xl px-3 py-3",
+        SLOT_BG_TINT[slot.period],
+      )}
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <p className="text-sm font-medium text-ink-700">
+        <p className="flex items-center gap-2 text-sm font-medium text-ink-700">
+          <span
+            aria-hidden
+            className={cn(
+              "inline-block h-2 w-2 rounded-full",
+              SLOT_DOT_COLOR[slot.period],
+            )}
+          />
           {slot.label}
           {slot.period !== "daily" && (
-            <span className="ml-2 text-[10px] font-normal text-ink-400">
+            <span className="ml-1 text-[10px] font-normal text-ink-400">
               {slot.start.slice(11, 16)}–{slot.end.slice(11, 16)}
             </span>
           )}

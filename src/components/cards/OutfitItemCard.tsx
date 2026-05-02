@@ -17,6 +17,7 @@ const PRIORITY_LABEL: Record<OutfitItem["priority"], string> = {
 export function OutfitItemCard({ item }: { item: OutfitItem }) {
   const checked = useAppStore((s) => Boolean(s.outfitChecks[item.id]));
   const toggle = useAppStore((s) => s.toggleOutfitCheck);
+  const isRequired = item.priority === "required";
 
   return (
     <button
@@ -27,17 +28,20 @@ export function OutfitItemCard({ item }: { item: OutfitItem }) {
         "relative w-full overflow-hidden rounded-2xl border px-4 pb-3 pt-4 text-left transition-colors",
         checked
           ? "border-leaf-300 bg-leaf-50/70"
-          : "border-leaf-100/80 bg-white hover:bg-leaf-25",
+          : isRequired
+            ? "border-leaf-200 bg-leaf-50/60 hover:bg-leaf-50"
+            : "border-leaf-100/80 bg-white hover:bg-leaf-25",
       )}
     >
       <span
         aria-hidden
         className={cn(
           "absolute inset-x-0 top-0 h-1",
-          checked ? "bg-leaf-500" : "bg-leaf-400",
+          checked ? "bg-leaf-500" : isRequired ? "bg-leaf-500" : "bg-leaf-400",
         )}
       />
       <div className="flex items-start gap-3">
+        <CheckIndicator checked={checked} className="mt-0.5" />
         <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-leaf-50 text-leaf-700">
           <Shirt size={14} />
         </span>
@@ -54,12 +58,9 @@ export function OutfitItemCard({ item }: { item: OutfitItem }) {
             {item.reason}
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-1.5">
-          <Badge tone={item.priority === "required" ? "leaf" : "muted"}>
-            {PRIORITY_LABEL[item.priority]}
-          </Badge>
-          <CheckIndicator checked={checked} />
-        </div>
+        <Badge tone={isRequired ? "leaf" : "muted"}>
+          {PRIORITY_LABEL[item.priority]}
+        </Badge>
       </div>
     </button>
   );
