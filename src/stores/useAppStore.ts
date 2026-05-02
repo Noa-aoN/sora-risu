@@ -6,6 +6,8 @@ import type { UserProfile } from "@/types/recommendation";
 import type { AppSettings } from "@/types/settings";
 import type { DisplayTarget, TimelineRange } from "@/types/timeline";
 
+export const DAY_WINDOW_MAX_START = 5;
+
 type Actions = {
   setLocation: (location: GeoLocation | null) => void;
   setTimelineRange: (range: TimelineRange) => void;
@@ -13,9 +15,12 @@ type Actions = {
   setProfile: (profile: Partial<UserProfile>) => void;
   toggleCarryCheck: (id: string) => void;
   resetCarryChecks: () => void;
+  setDayWindowStart: (n: number) => void;
 };
 
-type AppStore = AppSettings & Actions;
+type AppStore = AppSettings & {
+  dayWindowStart: number;
+} & Actions;
 
 const initial: AppSettings = {
   location: null,
@@ -25,10 +30,17 @@ const initial: AppSettings = {
   carryChecks: {},
 };
 
+function clampDayWindow(n: number): number {
+  if (n < 0) return 0;
+  if (n > DAY_WINDOW_MAX_START) return DAY_WINDOW_MAX_START;
+  return n;
+}
+
 export const useAppStore = create<AppStore>()(
   persist(
     (set) => ({
       ...initial,
+      dayWindowStart: 0,
       setLocation: (location) => set({ location }),
       setTimelineRange: (timelineRange) => set({ timelineRange }),
       setDisplayTarget: (displayTarget) => set({ displayTarget }),
@@ -42,6 +54,7 @@ export const useAppStore = create<AppStore>()(
           },
         })),
       resetCarryChecks: () => set({ carryChecks: {} }),
+      setDayWindowStart: (n) => set({ dayWindowStart: clampDayWindow(n) }),
     }),
     {
       name: "weather-dash:settings",

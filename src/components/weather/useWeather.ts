@@ -9,15 +9,9 @@ import {
   normalizeForecast,
   normalizePollen,
 } from "@/features/weather/mappers/normalizeWeatherData";
-import { buildTimeSlots } from "@/features/weather/services/buildTimeSlots";
-import { buildWeatherConditions } from "@/features/weather/services/buildWeatherConditions";
 import type { GeoLocation } from "@/types/location";
-import type { TimelineRange } from "@/types/timeline";
 
-export function useWeather(
-  location: GeoLocation | null,
-  range: TimelineRange,
-) {
+export function useWeather(location: GeoLocation | null) {
   const lat = location?.latitude;
   const lon = location?.longitude;
   const enabled = lat !== undefined && lon !== undefined;
@@ -57,17 +51,9 @@ export function useWeather(
     [pollenQuery.data],
   );
 
-  const slots = useMemo(() => buildTimeSlots(range), [range]);
-  const conditions = useMemo(
-    () => (weather ? buildWeatherConditions(slots, weather, pollen) : []),
-    [weather, pollen, slots],
-  );
-
   return {
     weather,
     pollen,
-    slots,
-    conditions,
     isLoading: forecastQuery.isLoading,
     isFetching: forecastQuery.isFetching || pollenQuery.isFetching,
     isError: forecastQuery.isError,

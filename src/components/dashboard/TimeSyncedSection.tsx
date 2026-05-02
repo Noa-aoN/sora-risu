@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import { ActionCard } from "@/components/cards/ActionCard";
 import { CarryItemCard } from "@/components/cards/CarryItemCard";
 import { OutfitItemCard } from "@/components/cards/OutfitItemCard";
@@ -16,6 +18,7 @@ import {
   pressureTrendLabel,
 } from "@/lib/labels";
 import type { Recommendations } from "@/features/recommendations/buildRecommendations";
+import { relativeDayLabel } from "@/features/weather/services/buildTimeSlots";
 import type { TimeSlot } from "@/types/timeline";
 import type { WeatherCondition } from "@/types/weather";
 
@@ -24,6 +27,34 @@ type Props = {
   conditions: WeatherCondition[];
   recommendations: Recommendations;
 };
+
+type DayGroup = {
+  date: string;
+  dateLabel: string;
+  relativeLabel: string;
+  slots: TimeSlot[];
+};
+
+function groupSlotsByDay(slots: TimeSlot[]): DayGroup[] {
+  const groups = new Map<string, DayGroup>();
+  for (const slot of slots) {
+    const date = slot.start.slice(0, 10);
+    let group = groups.get(date);
+    if (!group) {
+      group = {
+        date,
+        dateLabel: slot.dateLabel,
+        relativeLabel: relativeDayLabel(date),
+        slots: [],
+      };
+      groups.set(date, group);
+    }
+    group.slots.push(slot);
+  }
+  return Array.from(groups.values()).sort((a, b) =>
+    a.date.localeCompare(b.date),
+  );
+}
 
 export function TimeSyncedSection({
   slots,
@@ -46,65 +77,120 @@ export function TimeSyncedSection({
     );
   }
 
+  const days = groupSlotsByDay(slots);
+
   return (
     <div className="space-y-4">
-      {slots.map((slot) => {
-        const condition = conditions.find((c) => c.slotId === slot.id);
-        const outfit = recommendations.outfit.filter(
-          (o) => o.slotId === slot.id,
-        );
-        const carry = recommendations.carry.filter((c) => c.slotId === slot.id);
-        const action = recommendations.action.filter(
-          (a) => a.slotId === slot.id,
-        );
+      {days.map((day) => (
+        <DayBlock
+          key={day.date}
+          group={day}
+          conditions={conditions}
+          recommendations={recommendations}
+        />
+      ))}
+    </div>
+  );
+}
 
-        return (
-          <Card key={slot.id}>
-            <CardHeader>
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <CardTitle className="text-base text-ink-800">
-                  {slot.label}
-                  <span className="ml-2 text-[11px] font-normal text-ink-400">
-                    {slot.dateLabel}
-                    {slot.period !== "daily"
-                      ? ` ・ ${slot.start.slice(11, 16)}–${slot.end.slice(11, 16)}`
-                      : ""}
-                  </span>
-                </CardTitle>
-                {condition && (
-                  <p className="text-[11px] text-ink-500">
-                    {pressureTrendLabel(condition.pressure.trend)} ・
-                    {" "}
-                    {condition.temperature.value}℃
-                    {" ・ "}
-                    {precipLevelLabel(condition.precipitation.level)}
-                    {" ・ "}花粉 {pollenLevelLabel(condition.pollen.level)}
-                  </p>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-3 lg:grid-cols-3">
-                <Column tone="leaf" title="服装" empty="提案なし">
-                  {outfit.map((item) => (
-                    <OutfitItemCard key={item.id} item={item} />
-                  ))}
-                </Column>
-                <Column tone="pollen" title="持ち物" empty="この時間帯はとくに必要なし">
-                  {carry.map((item) => (
-                    <CarryItemCard key={item.id} item={item} />
-                  ))}
-                </Column>
-                <Column tone="rain" title="アクション" empty="無理のない範囲で過ごせる目安">
-                  {action.map((item) => (
-                    <ActionCard key={item.id} item={item} />
-                  ))}
-                </Column>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
+function DayBlock({
+  group,
+  conditions,
+  recommendations,
+}: {
+  group: DayGroup;
+  conditions: WeatherCondition[];
+  recommendations: Recommendations;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-baseline justify-between gap-2">
+          <CardTitle className="text-base text-ink-800">
+            {group.relativeLabel}
+            <span className="ml-2 text-[11px] font-normal text-ink-400">
+              {group.dateLabel}
+            </span>
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {group.slots.map((slot, idx) => (
+          <SlotRow
+            key={slot.id}
+            slot={slot}
+            condition={conditions.find((c) => c.slotId === slot.id)}
+            outfit={recommendations.outfit.filter((o) => o.slotId === slot.id)}
+            carry={recommendations.carry.filter((c) => c.slotId === slot.id)}
+            action={recommendations.action.filter((a) => a.slotId === slot.id)}
+            isFirst={idx === 0}
+          />
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
+function SlotRow({
+  slot,
+  condition,
+  outfit,
+  carry,
+  action,
+  isFirst,
+}: {
+  slot: TimeSlot;
+  condition: WeatherCondition | undefined;
+  outfit: Recommendations["outfit"];
+  carry: Recommendations["carry"];
+  action: Recommendations["action"];
+  isFirst: boolean;
+}) {
+  return (
+    <div
+      className={
+        isFirst
+          ? "space-y-3"
+          : "space-y-3 border-t border-leaf-100/60 pt-4"
+      }
+    >
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-sm font-medium text-ink-700">
+          {slot.label}
+          {slot.period !== "daily" && (
+            <span className="ml-2 text-[10px] font-normal text-ink-400">
+              {slot.start.slice(11, 16)}–{slot.end.slice(11, 16)}
+            </span>
+          )}
+        </p>
+        {condition && (
+          <p className="text-[11px] text-ink-500">
+            {pressureTrendLabel(condition.pressure.trend)} ・
+            {" "}
+            {condition.temperature.value}℃
+            {" ・ "}
+            {precipLevelLabel(condition.precipitation.level)}
+            {" ・ "}花粉 {pollenLevelLabel(condition.pollen.level)}
+          </p>
+        )}
+      </div>
+      <div className="grid gap-3 lg:grid-cols-3">
+        <Column tone="leaf" title="服装" empty="提案なし">
+          {outfit.map((item) => (
+            <OutfitItemCard key={item.id} item={item} />
+          ))}
+        </Column>
+        <Column tone="pollen" title="持ち物" empty="この時間帯はとくに必要なし">
+          {carry.map((item) => (
+            <CarryItemCard key={item.id} item={item} />
+          ))}
+        </Column>
+        <Column tone="rain" title="アクション" empty="無理のない範囲で過ごせる目安">
+          {action.map((item) => (
+            <ActionCard key={item.id} item={item} />
+          ))}
+        </Column>
+      </div>
     </div>
   );
 }
@@ -132,7 +218,7 @@ function Column({
   tone: ColumnTone;
   title: string;
   empty: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const items = Array.isArray(children) ? children : [children];
   const hasContent = items.some(Boolean) && items.length > 0;
