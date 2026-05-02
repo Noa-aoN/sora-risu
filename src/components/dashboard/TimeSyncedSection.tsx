@@ -255,7 +255,7 @@ function SlotRow({
           </p>
         )}
       </div>
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <Column tone="leaf" title="服装" empty="提案なし">
           {outfit.map((item) => (
             <OutfitItemCard key={item.id} item={item} />
@@ -304,7 +304,7 @@ function Column({
   const items = Array.isArray(children) ? children : [children];
   const hasContent = items.some(Boolean) && items.length > 0;
   return (
-    <div className="space-y-2">
+    <div className="min-w-0 space-y-2">
       <p
         className={`flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.2em] ${TONE_HEADER_CLASS[tone]}`}
       >
