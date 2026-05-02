@@ -14,7 +14,7 @@ import {
   Sun,
   Thermometer,
 } from "lucide-react";
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import type { ReactElement, ReactNode } from "react";
 import {
   Area,
@@ -611,7 +611,7 @@ function WeatherIconRow({ ctx }: { ctx: ChartContext }) {
   );
 
   return (
-    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+    <ChartFrame>
       <LineChart
         data={data}
         margin={{ top: 24, right: 8, left: 0, bottom: 0 }}
@@ -676,7 +676,7 @@ function WeatherIconRow({ ctx }: { ctx: ChartContext }) {
           isAnimationActive={false}
         />
       </LineChart>
-    </ResponsiveContainer>
+    </ChartFrame>
   );
 }
 
@@ -706,6 +706,24 @@ function ChartRow({
       </div>
       <div className={`min-w-0 flex-1 ${height}`}>{children}</div>
     </div>
+  );
+}
+
+function ChartFrame({ children }: { children: ReactElement }) {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    setReady(true);
+  }, []);
+  if (!ready) return null;
+  return (
+    <ResponsiveContainer
+      width="100%"
+      height="100%"
+      minWidth={1}
+      minHeight={1}
+    >
+      {children}
+    </ResponsiveContainer>
   );
 }
 
@@ -764,7 +782,7 @@ function commonOverlays(ctx: ChartContext, yAxisId?: string, withLabel = false) 
 
 function PressureChart({ ctx }: { ctx: ChartContext }) {
   return (
-    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+    <ChartFrame>
       <LineChart
         data={ctx.data}
         margin={{ top: 16, right: 8, left: 0, bottom: 0 }}
@@ -799,13 +817,13 @@ function PressureChart({ ctx }: { ctx: ChartContext }) {
           name="気圧 (hPa)"
         />
       </LineChart>
-    </ResponsiveContainer>
+    </ChartFrame>
   );
 }
 
 function TemperatureChart({ ctx }: { ctx: ChartContext }) {
   return (
-    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+    <ChartFrame>
       <AreaChart
         data={ctx.data}
         margin={{ top: 14, right: 8, left: 0, bottom: 0 }}
@@ -843,13 +861,13 @@ function TemperatureChart({ ctx }: { ctx: ChartContext }) {
           name="気温 (℃)"
         />
       </AreaChart>
-    </ResponsiveContainer>
+    </ChartFrame>
   );
 }
 
 function PrecipChart({ ctx }: { ctx: ChartContext }) {
   return (
-    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+    <ChartFrame>
       <AreaChart
         data={ctx.data}
         margin={{ top: 6, right: 8, left: 0, bottom: 0 }}
@@ -888,13 +906,13 @@ function PrecipChart({ ctx }: { ctx: ChartContext }) {
           name="降水確率 (%)"
         />
       </AreaChart>
-    </ResponsiveContainer>
+    </ChartFrame>
   );
 }
 
 function PollenChart({ ctx }: { ctx: ChartContext }) {
   return (
-    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+    <ChartFrame>
       <AreaChart
         data={ctx.data}
         margin={{ top: 6, right: 8, left: 0, bottom: 0 }}
@@ -951,6 +969,6 @@ function PollenChart({ ctx }: { ctx: ChartContext }) {
           connectNulls={false}
         />
       </AreaChart>
-    </ResponsiveContainer>
+    </ChartFrame>
   );
 }

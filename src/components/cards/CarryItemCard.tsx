@@ -63,8 +63,8 @@ export function CarryItemCard({ item }: { item: CarryItem }) {
         checked
           ? "border-leaf-200 border-t-leaf-500 bg-leaf-50/70"
           : isRequired
-            ? "border-pollen-200 border-t-pollen-500 bg-pollen-50/60 hover:bg-pollen-50"
-            : "border-pollen-100 border-t-pollen-400 bg-white hover:bg-pollen-50/40",
+            ? "border-pollen-100 border-t-pollen-500 bg-pollen-50/60 hover:bg-pollen-50"
+            : "border-pollen-100 border-t-pollen-500/55 bg-white hover:bg-pollen-50/40",
       )}
     >
       <div className="flex items-center gap-2.5">
