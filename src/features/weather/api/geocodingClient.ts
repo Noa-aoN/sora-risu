@@ -36,9 +36,15 @@ export async function searchLocations({
     format: "json",
   });
 
-  const response = await fetch(`${GEOCODING_ENDPOINT}?${params.toString()}`, {
-    signal,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${GEOCODING_ENDPOINT}?${params.toString()}`, {
+      signal,
+    });
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") return [];
+    throw err;
+  }
 
   if (!response.ok) {
     throw new Error(`Geocoding failed: ${response.status}`);

@@ -49,6 +49,7 @@ export function LocationHeader() {
       setLocation(DEFAULT_LOCATION);
       return;
     }
+    const controller = new AbortController();
     let cancelled = false;
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -63,6 +64,7 @@ export function LocationHeader() {
         const name = await reverseGeocode({
           latitude: pos.coords.latitude,
           longitude: pos.coords.longitude,
+          signal: controller.signal,
         });
         if (cancelled || !name) return;
         setLocation({ ...base, admin: name });
@@ -75,6 +77,7 @@ export function LocationHeader() {
     );
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, [location, setLocation]);
 

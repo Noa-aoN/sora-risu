@@ -19,7 +19,7 @@ export function SkyLetterCard({ letter }: { letter: SkyLetter }) {
   return (
     <Card
       className={cn(
-        "bg-gradient-to-br",
+        "flex h-full flex-col bg-gradient-to-br",
         TONE_CLASS[letter.tone],
       )}
     >
