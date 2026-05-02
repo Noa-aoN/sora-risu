@@ -1,0 +1,72 @@
+export type Priority = "required" | "recommended" | "optional";
+
+export type StyleTag = "simple" | "casual" | "office" | "outdoor";
+
+export type OutfitCategory =
+  | "outer"
+  | "top"
+  | "bottom"
+  | "shoes"
+  | "accessory"
+  | "indoor";
+
+export type OutfitItem = {
+  id: string;
+  slotId: string;
+  name: string;
+  category: OutfitCategory;
+  reason: string;
+  priority: Priority;
+  styleTags: StyleTag[];
+};
+
+export type CarryCategory =
+  | "umbrella"
+  | "mask"
+  | "medicine"
+  | "sunshade"
+  | "water"
+  | "warmth"
+  | "pollen"
+  | "other";
+
+export type CarryItem = {
+  id: string;
+  slotId: string;
+  name: string;
+  category: CarryCategory;
+  reason: string;
+  priority: Priority;
+};
+
+export type ActionCategory =
+  | "stretch"
+  | "training"
+  | "rest"
+  | "work"
+  | "outing"
+  | "pollen_care"
+  | "weather_care";
+
+export type ActionItem = {
+  id: string;
+  slotId: string;
+  title: string;
+  category: ActionCategory;
+  description: string;
+  reason: string;
+  intensity: "low" | "medium" | "high";
+};
+
+export type SkyLetter = {
+  title: string;
+  body: string;
+  tone: "calm" | "gentle" | "alert";
+};
+
+export type BodyType = "neutral" | "cold_sensitive" | "heat_sensitive";
+
+export type UserProfile = {
+  styleGenre: StyleTag;
+  bodyType: BodyType;
+};
