@@ -34,7 +34,12 @@ export function useWeather(location: GeoLocation | null) {
   const pollenQuery = useQuery({
     queryKey: ["pollen", lat, lon],
     queryFn: ({ signal }) =>
-      fetchAirQuality({ latitude: lat!, longitude: lon!, signal }),
+      fetchAirQuality({
+        latitude: lat!,
+        longitude: lon!,
+        pastDays: 1,
+        signal,
+      }),
     enabled,
     staleTime: 30 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
