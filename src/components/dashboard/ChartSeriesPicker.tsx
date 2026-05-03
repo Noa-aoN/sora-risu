@@ -19,13 +19,13 @@ const ITEMS: Item[] = [
     key: "weather",
     label: "天気",
     icon: <CloudSun size={12} />,
-    activeClass: "border-leaf-300 bg-leaf-50 text-leaf-800",
+    activeClass: "border-leaf-100 bg-leaf-50 text-leaf-700",
   },
   {
     key: "temperature",
     label: "気温",
     icon: <Thermometer size={12} />,
-    activeClass: "border-leaf-300 bg-leaf-50 text-leaf-800",
+    activeClass: "border-alert-100 bg-alert-50 text-alert-700",
   },
   {
     key: "precipitation",
@@ -37,7 +37,7 @@ const ITEMS: Item[] = [
     key: "pressure",
     label: "気圧",
     icon: <Gauge size={12} />,
-    activeClass: "border-leaf-300 bg-leaf-50 text-leaf-800",
+    activeClass: "border-dusk-100 bg-dusk-50 text-dusk-700",
   },
   {
     key: "pollen",
