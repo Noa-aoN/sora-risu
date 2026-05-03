@@ -64,21 +64,31 @@ export function LocationHeader() {
     reverseAbortRef.current = controller;
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        if (controller.signal.aborted) return;
-        const base: GeoLocation = {
-          id: "current",
-          name: "現在地",
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-        };
-        setLocation(base);
-        const name = await reverseGeocode({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-          signal: controller.signal,
-        });
-        if (controller.signal.aborted || !name) return;
-        setLocation({ ...base, admin: name });
+        try {
+          if (controller.signal.aborted) return;
+          const base: GeoLocation = {
+            id: "current",
+            name: "現在地",
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          };
+          setLocation(base);
+          const name = await reverseGeocode({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            signal: controller.signal,
+          });
+          if (controller.signal.aborted || !name) return;
+          setLocation({ ...base, admin: name });
+        } catch (err) {
+          if (
+            err instanceof DOMException && err.name === "AbortError"
+          ) {
+            return;
+          }
+          if (controller.signal.aborted) return;
+          throw err;
+        }
       },
       () => {
         if (controller.signal.aborted) return;
@@ -169,22 +179,32 @@ export function LocationHeader() {
     reverseAbortRef.current = controller;
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        if (controller.signal.aborted) return;
-        const base: GeoLocation = {
-          id: "current",
-          name: "現在地",
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-        };
-        setLocation(base);
-        setOpen(false);
-        const name = await reverseGeocode({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-          signal: controller.signal,
-        });
-        if (controller.signal.aborted || !name) return;
-        setLocation({ ...base, admin: name });
+        try {
+          if (controller.signal.aborted) return;
+          const base: GeoLocation = {
+            id: "current",
+            name: "現在地",
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          };
+          setLocation(base);
+          setOpen(false);
+          const name = await reverseGeocode({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            signal: controller.signal,
+          });
+          if (controller.signal.aborted || !name) return;
+          setLocation({ ...base, admin: name });
+        } catch (err) {
+          if (
+            err instanceof DOMException && err.name === "AbortError"
+          ) {
+            return;
+          }
+          if (controller.signal.aborted) return;
+          throw err;
+        }
       },
       (err) => {
         if (controller.signal.aborted) return;
