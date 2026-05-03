@@ -510,6 +510,7 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
                 label="天気"
                 height="h-16"
                 iconPaddingTop={24}
+                iconClass="bg-leaf-50 text-leaf-700"
               >
                 <WeatherIconRow ctx={ctx} weather={weather} range={range} />
               </ChartRow>
@@ -519,6 +520,7 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
                 icon={<Thermometer size={14} />}
                 label="気温"
                 height="h-36"
+                iconClass="bg-alert-50 text-alert-700"
               >
                 <TemperatureChart ctx={ctx} />
               </ChartRow>
@@ -528,12 +530,18 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
                 icon={<CloudRain size={14} />}
                 label="降水"
                 height="h-28"
+                iconClass="bg-rain-50 text-rain-700"
               >
                 <PrecipChart ctx={ctx} />
               </ChartRow>
             )}
             {showPressure && (
-              <ChartRow icon={<Gauge size={14} />} label="気圧" height="h-36">
+              <ChartRow
+                icon={<Gauge size={14} />}
+                label="気圧"
+                height="h-36"
+                iconClass="bg-dusk-50 text-dusk-700"
+              >
                 <PressureChart ctx={ctx} />
               </ChartRow>
             )}
@@ -542,6 +550,7 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
                 icon={<Flower size={14} />}
                 label="花粉"
                 height="h-24"
+                iconClass="bg-pollen-50 text-pollen-700"
               >
                 <PollenChart ctx={ctx} />
               </ChartRow>
@@ -745,12 +754,14 @@ function ChartRow({
   label,
   height,
   iconPaddingTop = 0,
+  iconClass = "bg-leaf-50 text-leaf-700",
   children,
 }: {
   icon: ReactNode;
   label: string;
   height: string;
   iconPaddingTop?: number;
+  iconClass?: string;
   children: ReactNode;
 }) {
   return (
@@ -759,7 +770,9 @@ function ChartRow({
         className="flex w-10 flex-col items-center justify-center gap-0.5 text-ink-500"
         style={iconPaddingTop ? { paddingTop: iconPaddingTop } : undefined}
       >
-        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-leaf-50 text-leaf-700">
+        <span
+          className={`inline-flex h-7 w-7 items-center justify-center rounded-full ${iconClass}`}
+        >
           {icon}
         </span>
         <span className="text-[9px] leading-none tracking-wider">{label}</span>
@@ -884,7 +897,7 @@ function PressureChart({ ctx }: { ctx: ChartContext }) {
           yAxisId="p"
           type="monotone"
           dataKey="pressure"
-          stroke="#5b7a62"
+          stroke="#4a5278"
           strokeWidth={2}
           dot={false}
           name="気圧 (hPa)"
@@ -903,8 +916,8 @@ function TemperatureChart({ ctx }: { ctx: ChartContext }) {
       >
         <defs>
           <linearGradient id="tempFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#86a48b" stopOpacity={0.45} />
-            <stop offset="100%" stopColor="#86a48b" stopOpacity={0} />
+            <stop offset="0%" stopColor="#e08a8a" stopOpacity={0.4} />
+            <stop offset="100%" stopColor="#e08a8a" stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid stroke="#e8efe6" vertical={false} />
@@ -928,7 +941,7 @@ function TemperatureChart({ ctx }: { ctx: ChartContext }) {
         <Area
           type="monotone"
           dataKey="temperature"
-          stroke="#6f8f75"
+          stroke="#e08a8a"
           fill="url(#tempFill)"
           strokeWidth={2}
           name="気温 (℃)"
