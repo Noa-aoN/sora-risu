@@ -1,6 +1,8 @@
-# そらリス
+<p align="center">
+  <img src="public/brand/header-lockup.png" alt="そらリス｜気圧と体調のそばに、やさしい空を。" width="720" />
+</p>
 
-気圧と体調のそばに、やさしい空を。
+# そらリス
 
 ライブ: <https://sora-risu.vercel.app>
 
