@@ -153,6 +153,7 @@ export default function HomePage() {
               <p>
                 提案は生活判断のための目安で、医療助言ではありません。体調や予定に合わせて無理のない範囲で参考にしてください。
               </p>
+              <p className="pt-1 text-ink-300">© 2026 NOA</p>
             </>
           )}
         </footer>
