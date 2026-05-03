@@ -30,6 +30,7 @@ import {
   YAxis,
 } from "recharts";
 
+import { AcornIcon } from "@/components/brand/AcornIcon";
 import { ChartAnchorToggle } from "@/components/dashboard/ChartAnchorToggle";
 import { ChartSeriesPicker } from "@/components/dashboard/ChartSeriesPicker";
 import { TimelinePanel } from "@/components/dashboard/TimelinePanel";
@@ -57,7 +58,7 @@ type ChartPoint = {
 const HOURLY_BAND_BASE = [
   { startHour: 6, endHour: 11, fill: "#f3e6b9", opacity: 0.3, label: "朝" },
   { startHour: 11, endHour: 15, fill: "#dde6d8", opacity: 0.38, label: "昼" },
-  { startHour: 15, endHour: 19, fill: "#c5cce0", opacity: 0.24, label: "晩" },
+  { startHour: 15, endHour: 19, fill: "#c5cce0", opacity: 0.24, label: "夕方" },
   { startHour: 19, endHour: 24, fill: "#e3e5e1", opacity: 0.3, label: "夜" },
 ];
 
@@ -418,7 +419,10 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>気圧 / 気温 / 降水 / 天気 / 花粉</CardTitle>
+          <div className="flex items-center gap-2">
+            <AcornIcon />
+            <CardTitle>気圧 / 気温 / 降水 / 天気 / 花粉</CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex h-48 items-center justify-center text-xs text-ink-400">
@@ -449,7 +453,10 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
       <CardHeader>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-1">
-            <CardTitle>{buildTitle(chartSeries)}</CardTitle>
+            <div className="flex items-center gap-2">
+              <AcornIcon />
+              <CardTitle>{buildTitle(chartSeries)}</CardTitle>
+            </div>
             <p className="text-[11px] leading-relaxed text-ink-400">
               24H は時刻ごと、3D / 7D / 14D は日次で傾向を見られます
             </p>
@@ -472,7 +479,7 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
             </span>
             <span className="inline-flex items-center gap-1">
               <span className="inline-block h-2 w-3 rounded-sm bg-dusk-100" />
-              晩
+              夕方
             </span>
             <span className="inline-flex items-center gap-1">
               <span className="inline-block h-2 w-3 rounded-sm bg-ink-200" />
@@ -504,7 +511,7 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
                 height="h-16"
                 iconPaddingTop={24}
               >
-                <WeatherIconRow ctx={ctx} />
+                <WeatherIconRow ctx={ctx} weather={weather} range={range} />
               </ChartRow>
             )}
             {showTemperature && (
@@ -616,19 +623,52 @@ function sampleWeatherRowPoints(
   return sampled;
 }
 
-function WeatherIconRow({ ctx }: { ctx: ChartContext }) {
+function buildHourlyIconPoints(
+  weather: NormalizedWeather,
+  domain: [number, number],
+  stepHours: number,
+): WeatherRowPoint[] {
+  const stepMs = stepHours * 60 * 60 * 1000;
+  const out: WeatherRowPoint[] = [];
+  for (const p of weather.hourly) {
+    const t = parseLocalISOToMs(p.time);
+    if (t < domain[0] || t > domain[1]) continue;
+    if (typeof p.weatherCode !== "number") continue;
+    const last = out[out.length - 1];
+    if (last && t - last.t < stepMs) continue;
+    out.push({ t, weatherY: 0.5, code: p.weatherCode });
+  }
+  return out;
+}
+
+function WeatherIconRow({
+  ctx,
+  weather,
+  range,
+}: {
+  ctx: ChartContext;
+  weather: NormalizedWeather;
+  range: TimelineRange;
+}) {
   const isMobile = useSyncExternalStore(
     subscribeViewport,
     getIsMobileSnapshot,
     () => false,
   );
-  const data = sampleWeatherRowPoints(
-    ctx.data
-      .filter((p) => typeof p.weatherCode === "number")
-      .map((p) => ({ t: p.t, weatherY: 0.5, code: p.weatherCode as number })),
-    ctx.isHourly,
-    isMobile,
-  );
+  const data =
+    range === "3d"
+      ? buildHourlyIconPoints(weather, ctx.domain, isMobile ? 6 : 4)
+      : sampleWeatherRowPoints(
+          ctx.data
+            .filter((p) => typeof p.weatherCode === "number")
+            .map((p) => ({
+              t: p.t,
+              weatherY: 0.5,
+              code: p.weatherCode as number,
+            })),
+          ctx.isHourly,
+          isMobile,
+        );
 
   return (
     <ChartFrame>

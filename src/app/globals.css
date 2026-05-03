@@ -1,9 +1,10 @@
+@import url("https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap");
 @import "tailwindcss";
 
 @theme {
-  --color-leaf-25: #f8faf6;
-  --color-leaf-50: #eef3ec;
-  --color-leaf-100: #dde6d8;
+  --color-leaf-25: #f7faf4;
+  --color-leaf-50: #ecf2e8;
+  --color-leaf-100: #dde9d7;
   --color-leaf-200: #c1d3bc;
   --color-leaf-300: #a3bd9d;
   --color-leaf-400: #86a48b;
@@ -13,14 +14,14 @@
   --color-leaf-800: #3a4f3f;
   --color-leaf-900: #2c3c30;
 
-  --color-ink-50: #f4f5f3;
-  --color-ink-100: #e3e5e1;
+  --color-ink-50: #f3f4f1;
+  --color-ink-100: #e2e4df;
   --color-ink-200: #cdd1c9;
   --color-ink-300: #b3b8af;
   --color-ink-400: #8d938a;
   --color-ink-500: #6f766d;
-  --color-ink-600: #545a52;
-  --color-ink-700: #3d423b;
+  --color-ink-600: #5a6360;
+  --color-ink-700: #424845;
   --color-ink-800: #2f352e;
 
   --color-alert-50: #fdf2f1;
@@ -33,8 +34,8 @@
   --color-pollen-500: #e6b85c;
   --color-pollen-700: #b08e3f;
 
-  --color-rain-50: #eff4fb;
-  --color-rain-100: #d2e0f1;
+  --color-rain-50: #eaf3fb;
+  --color-rain-100: #cfe4f3;
   --color-rain-500: #6c9bd2;
   --color-rain-700: #4f7ba9;
 
@@ -43,9 +44,26 @@
   --color-dusk-500: #4a5278;
   --color-dusk-700: #2a3258;
 
+  --color-sora-50: #eaf3fb;
+  --color-sora-100: #cfe4f3;
+  --color-sora-200: #b3d2e8;
+  --color-sora-500: #7cadd0;
+  --color-sora-700: #4f84a6;
+
+  --color-cream-50: #fbf6ee;
+  --color-cream-100: #f2e7d6;
+  --color-cream-200: #e5d4b8;
+  --color-cream-500: #c8a87a;
+
+  --color-brand: #6f8f75;
+  --color-brand-ink: #5a6360;
+
   --font-sans:
     "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui,
     -apple-system, "Segoe UI", sans-serif;
+  --font-brand:
+    "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Hiragino Sans",
+    "Noto Sans JP", system-ui, sans-serif;
 }
 
 html,

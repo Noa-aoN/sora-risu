@@ -73,19 +73,20 @@ export async function fetchAirQuality({
     past_days: pastDays.toString(),
   });
 
-  let response: Response;
+  let json: unknown;
   try {
-    response = await fetch(`${AIR_QUALITY_ENDPOINT}?${params.toString()}`, {
+    const response = await fetch(`${AIR_QUALITY_ENDPOINT}?${params.toString()}`, {
       signal,
     });
+    if (!response.ok) {
+      throw new Error(`Air quality failed: ${response.status}`);
+    }
+    json = await response.json();
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") return null;
+    if (signal?.aborted) return null;
     throw err;
   }
 
-  if (!response.ok) {
-    throw new Error(`Air quality failed: ${response.status}`);
-  }
-
-  return ensureAirQualityResponse(await response.json());
+  return ensureAirQualityResponse(json);
 }

@@ -10,7 +10,7 @@ type DayPart = {
 const DAY_PARTS: DayPart[] = [
   { period: "morning", label: "朝", startHour: 6, endHour: 11 },
   { period: "daytime", label: "昼", startHour: 11, endHour: 15 },
-  { period: "evening", label: "晩", startHour: 15, endHour: 19 },
+  { period: "evening", label: "夕方", startHour: 15, endHour: 19 },
   { period: "night", label: "夜", startHour: 19, endHour: 24 },
 ];
 

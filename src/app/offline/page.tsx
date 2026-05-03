@@ -1,15 +1,27 @@
+import { BrandMark } from "@/components/brand/BrandMark";
+
 export const dynamic = "force-static";
 
 export default function OfflinePage() {
   return (
-    <main className="min-h-screen bg-leaf-25 px-4 py-16 text-ink-800">
-      <div className="mx-auto max-w-md space-y-4 text-center">
-        <p className="text-[11px] uppercase tracking-[0.3em] text-leaf-700">
-          Weather Dash
-        </p>
-        <h1 className="text-xl font-medium">オフラインのようです</h1>
-        <p className="text-sm leading-relaxed text-ink-500">
-          ネットワークに接続できないため、最新の天気データを取得できませんでした。接続が戻ったら、画面を更新してもう一度お試しください。
+    <main className="flex min-h-screen items-center justify-center bg-cream-50 px-4 py-16 text-ink-800">
+      <div className="mx-auto max-w-md space-y-6 text-center">
+        <div className="flex items-center justify-center gap-3">
+          <BrandMark className="h-10 w-10" />
+          <span className="font-brand text-2xl text-leaf-700">そらリス</span>
+        </div>
+        <div className="space-y-3 rounded-3xl border border-cream-200 bg-white/70 px-6 py-8 shadow-sm">
+          <h1 className="font-brand text-xl text-ink-700">
+            空とつながれていません
+          </h1>
+          <p className="text-sm leading-relaxed text-ink-500">
+            ネットワークに接続できないため、最新のお天気を取りに行けませんでした。
+            <br />
+            電波が戻ったら、画面を更新してもう一度のぞいてみてください。
+          </p>
+        </div>
+        <p className="font-brand text-xs text-leaf-700">
+          気圧と体調のそばに、やさしい空を。
         </p>
       </div>
     </main>

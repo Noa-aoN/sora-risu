@@ -117,19 +117,20 @@ export async function fetchForecast({
     past_days: pastDays.toString(),
   });
 
-  let response: Response;
+  let json: unknown;
   try {
-    response = await fetch(`${FORECAST_ENDPOINT}?${params.toString()}`, {
+    const response = await fetch(`${FORECAST_ENDPOINT}?${params.toString()}`, {
       signal,
     });
+    if (!response.ok) {
+      throw new Error(`Open-Meteo forecast failed: ${response.status}`);
+    }
+    json = await response.json();
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") return null;
+    if (signal?.aborted) return null;
     throw err;
   }
 
-  if (!response.ok) {
-    throw new Error(`Open-Meteo forecast failed: ${response.status}`);
-  }
-
-  return ensureForecastResponse(await response.json());
+  return ensureForecastResponse(json);
 }

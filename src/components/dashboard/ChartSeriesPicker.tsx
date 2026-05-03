@@ -67,9 +67,7 @@ export function ChartSeriesPicker({
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <span className="text-[10px] uppercase tracking-[0.2em] text-ink-400">
-        表示
-      </span>
+      <span className="font-brand text-xs text-ink-500">表示</span>
       {items.map((item) => {
         const active = chartSeries[item.key];
         return (

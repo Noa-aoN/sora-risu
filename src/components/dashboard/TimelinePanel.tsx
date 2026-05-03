@@ -21,9 +21,7 @@ export function TimelinePanel() {
 
   return (
     <div className="inline-flex items-center gap-2">
-      <span className="text-[10px] uppercase tracking-[0.22em] text-ink-400">
-        時間軸
-      </span>
+      <span className="font-brand text-xs text-ink-500">時間軸</span>
       <Segmented<TimelineRange>
         value={range}
         onChange={setRange}
