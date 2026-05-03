@@ -40,11 +40,11 @@ next-env.d.ts
 # Coverage
 coverage/
 
-# Claude Code (個人ローカル設定・履歴)
+# Local tool settings and session files
 .claude/settings.local.json
 .claude/.session/
 
-# 個人ログ・作業メモ (CLAUDE.md 規約)
+# Local notes and working logs
 docs/notes/
 
 # Serwist が生成する成果物

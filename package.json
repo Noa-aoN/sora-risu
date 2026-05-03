@@ -3,9 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "dev": "SERWIST_SUPPRESS_TURBOPACK_WARNING=1 next dev --webpack",
+    "dev": "SERWIST_SUPPRESS_TURBOPACK_WARNING=1 next dev --webpack -p 3020",
     "build": "next build --webpack",
-    "start": "next start",
+    "start": "next start -p 3020",
     "lint": "eslint .",
     "test": "node --test --experimental-strip-types --experimental-specifier-resolution=node src/features/weather/api/geocodingSearch.test.ts src/features/weather/api/geocodingClient.test.ts",
     "typecheck": "tsc --noEmit",
