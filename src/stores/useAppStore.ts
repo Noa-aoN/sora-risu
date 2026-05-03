@@ -103,7 +103,7 @@ export const useAppStore = create<AppStore>()(
       setChartAnchor: (chartAnchor) => set({ chartAnchor }),
     }),
     {
-      name: "weather-dash:settings",
+      name: "sorarisu:settings",
       version: 6,
       migrate: (persisted: unknown, version: number) => {
         const state = (persisted as Partial<AppSettings> & {

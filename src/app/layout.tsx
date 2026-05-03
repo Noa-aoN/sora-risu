@@ -5,23 +5,27 @@ import { Providers } from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Weather Dash｜今日の空と、うまく付き合う",
+  title: "そらリス｜気圧と体調のそばに、やさしい空を",
   description:
-    "気圧・天気・気温・降水・花粉から、服装・持ち物・行動を一画面で提案する PWA。",
-  applicationName: "Weather Dash",
+    "気圧・お天気・花粉・気温の変化を、服装・持ち物・行動の判断に変換するパートナー。",
+  applicationName: "そらリス",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Weather Dash",
+    title: "そらリス",
   },
   icons: {
-    icon: [{ url: "/icons/icon.svg", type: "image/svg+xml" }],
+    icon: [
+      { url: "/brand/app-icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/brand/app-icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/brand/app-icon-512.png", sizes: "512x512" }],
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#5b7a62",
+  themeColor: "#cfe4f3",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,

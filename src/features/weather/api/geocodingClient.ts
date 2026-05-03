@@ -105,19 +105,20 @@ async function fetchOne(
     language,
     format: "json",
   });
-  let response: Response;
+  let json: RawSearchResponse;
   try {
-    response = await fetch(`${GEOCODING_ENDPOINT}?${params.toString()}`, {
+    const response = await fetch(`${GEOCODING_ENDPOINT}?${params.toString()}`, {
       signal,
     });
+    if (!response.ok) {
+      throw new Error(`Geocoding failed: ${response.status}`);
+    }
+    json = (await response.json()) as RawSearchResponse;
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") return [];
+    if (signal?.aborted) return [];
     throw err;
   }
-  if (!response.ok) {
-    throw new Error(`Geocoding failed: ${response.status}`);
-  }
-  const json = (await response.json()) as RawSearchResponse;
   return json.results ?? [];
 }
 

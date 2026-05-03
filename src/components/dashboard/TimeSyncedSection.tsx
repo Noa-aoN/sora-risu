@@ -3,6 +3,7 @@
 import { ArrowDown, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { AcornIcon } from "@/components/brand/AcornIcon";
 import { ActionCard } from "@/components/cards/ActionCard";
 import { CarryItemCard } from "@/components/cards/CarryItemCard";
 import { OutfitItemCard } from "@/components/cards/OutfitItemCard";
@@ -69,7 +70,10 @@ export function TimeSyncedSection({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>カード表示なし</CardTitle>
+          <div className="flex items-center gap-2">
+            <AcornIcon />
+            <CardTitle>カード表示なし</CardTitle>
+          </div>
           <CardDescription>この表示範囲では詳細カードを出していません</CardDescription>
         </CardHeader>
         <CardContent>
@@ -116,10 +120,9 @@ function DayBlock({
     <Card>
       <CardHeader>
         <div className="grid gap-3 md:grid-cols-[1fr_auto_1fr] md:items-center">
-          <div className="flex items-center justify-start">
-            <CardTitle className="text-base text-ink-800">
-              アドバイスカード
-            </CardTitle>
+          <div className="flex items-center justify-start gap-2">
+            <AcornIcon />
+            <CardTitle>アドバイスカード</CardTitle>
           </div>
           <div className="flex items-center justify-center gap-2">
             <button
@@ -209,22 +212,20 @@ function SlotRow({
   return (
     <div
       className={cn(
-        "space-y-3 rounded-2xl px-3 py-3",
+        "space-y-4 rounded-2xl px-4 py-4",
         PERIOD_TONE[slot.period].rowBg,
       )}
     >
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <p className="flex min-w-0 shrink-0 items-center gap-2 text-sm font-medium text-ink-700">
-          <span
-            aria-hidden
-            className={cn(
-              "inline-block h-2 w-2 shrink-0 rounded-full",
-              PERIOD_TONE[slot.period].dotBg,
-            )}
-          />
+        <p
+          className={cn(
+            "flex min-w-0 shrink-0 items-baseline gap-1.5 font-brand text-base",
+            PERIOD_TONE[slot.period].labelText,
+          )}
+        >
           {slot.label}
           {slot.period !== "daily" && (
-            <span className="ml-1 text-[10px] font-normal text-ink-400">
+            <span className="text-[10px] font-normal text-ink-400">
               {slot.start.slice(11, 16)}–{slot.end.slice(11, 16)}
             </span>
           )}
@@ -241,17 +242,17 @@ function SlotRow({
         )}
       </div>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        <Column tone="leaf" title="服装" empty="提案なし">
+        <Column title="服装" empty="提案なし">
           {outfit.map((item) => (
             <OutfitItemCard key={item.id} item={item} period={slot.period} />
           ))}
         </Column>
-        <Column tone="pollen" title="持ち物" empty="この時間帯はとくに必要なし">
+        <Column title="持ち物" empty="この時間帯はとくに必要なし">
           {carry.map((item) => (
             <CarryItemCard key={item.id} item={item} period={slot.period} />
           ))}
         </Column>
-        <Column tone="rain" title="アクション" empty="無理のない範囲で過ごせる目安">
+        <Column title="アクション" empty="無理のない範囲で過ごせる目安">
           {action.map((item) => (
             <ActionCard key={item.id} item={item} period={slot.period} />
           ))}
@@ -261,27 +262,11 @@ function SlotRow({
   );
 }
 
-type ColumnTone = "leaf" | "pollen" | "rain";
-
-const TONE_HEADER_CLASS: Record<ColumnTone, string> = {
-  leaf: "text-leaf-700",
-  pollen: "text-pollen-700",
-  rain: "text-rain-700",
-};
-
-const TONE_DOT_CLASS: Record<ColumnTone, string> = {
-  leaf: "bg-leaf-400",
-  pollen: "bg-pollen-500",
-  rain: "bg-rain-500",
-};
-
 function Column({
-  tone,
   title,
   empty,
   children,
 }: {
-  tone: ColumnTone;
   title: string;
   empty: string;
   children: ReactNode;
@@ -290,19 +275,11 @@ function Column({
   const hasContent = items.some(Boolean) && items.length > 0;
   return (
     <div className="min-w-0 space-y-2">
-      <p
-        className={`flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.2em] ${TONE_HEADER_CLASS[tone]}`}
-      >
-        <span
-          className={`inline-block h-1.5 w-1.5 rounded-full ${TONE_DOT_CLASS[tone]}`}
-          aria-hidden
-        />
-        {title}
-      </p>
+      <p className="font-brand text-xs text-ink-500">{title}</p>
       {hasContent ? (
         <div className="space-y-2">{children}</div>
       ) : (
-        <p className="rounded-2xl border border-dashed border-leaf-100 bg-leaf-25 px-4 py-3 text-[11px] text-ink-400">
+        <p className="rounded-2xl border border-dashed border-cream-200 bg-cream-50 px-4 py-3 text-[11px] text-ink-400">
           {empty}
         </p>
       )}

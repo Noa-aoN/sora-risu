@@ -2,7 +2,7 @@ import type { SlotPeriod } from "@/types/timeline";
 
 type PeriodTone = {
   rowBg: string;
-  dotBg: string;
+  labelText: string;
   cardRequired: string;
   cardUnchecked: string;
   cardChecked: string;
@@ -14,7 +14,7 @@ type PeriodTone = {
 export const PERIOD_TONE: Record<SlotPeriod, PeriodTone> = {
   morning: {
     rowBg: "bg-pollen-50/30",
-    dotBg: "bg-pollen-500",
+    labelText: "text-pollen-700",
     cardRequired:
       "border-pollen-100 border-t-pollen-500 bg-pollen-50/80 hover:bg-pollen-50",
     cardUnchecked:
@@ -26,7 +26,7 @@ export const PERIOD_TONE: Record<SlotPeriod, PeriodTone> = {
   },
   daytime: {
     rowBg: "bg-leaf-50/30",
-    dotBg: "bg-leaf-500",
+    labelText: "text-leaf-700",
     cardRequired:
       "border-leaf-200 border-t-leaf-500 bg-leaf-50/70 hover:bg-leaf-50",
     cardUnchecked:
@@ -38,7 +38,7 @@ export const PERIOD_TONE: Record<SlotPeriod, PeriodTone> = {
   },
   evening: {
     rowBg: "bg-dusk-50/25",
-    dotBg: "bg-dusk-700",
+    labelText: "text-dusk-700",
     cardRequired:
       "border-dusk-100 border-t-dusk-500 bg-dusk-50/75 hover:bg-dusk-50",
     cardUnchecked:
@@ -50,7 +50,7 @@ export const PERIOD_TONE: Record<SlotPeriod, PeriodTone> = {
   },
   night: {
     rowBg: "bg-ink-50/55",
-    dotBg: "bg-ink-700",
+    labelText: "text-ink-700",
     cardRequired:
       "border-ink-100 border-t-ink-500 bg-ink-50 hover:bg-ink-50",
     cardUnchecked:
@@ -62,7 +62,7 @@ export const PERIOD_TONE: Record<SlotPeriod, PeriodTone> = {
   },
   daily: {
     rowBg: "",
-    dotBg: "bg-ink-300",
+    labelText: "text-ink-500",
     cardRequired:
       "border-ink-100 border-t-ink-400 bg-ink-50/80 hover:bg-ink-50",
     cardUnchecked:

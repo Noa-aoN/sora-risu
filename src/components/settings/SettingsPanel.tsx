@@ -1,7 +1,6 @@
 "use client";
 
-import { Settings } from "lucide-react";
-
+import { AcornIcon } from "@/components/brand/AcornIcon";
 import { CheckIndicator } from "@/components/ui/check-indicator";
 import {
   Card,
@@ -45,9 +44,9 @@ export function SettingsPanel() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2 text-leaf-700">
-          <Settings size={14} />
-          <CardTitle className="text-leaf-800">設定</CardTitle>
+        <div className="flex items-center gap-2">
+          <AcornIcon />
+          <CardTitle>設定</CardTitle>
         </div>
         <CardDescription>
           ジャンル / 体質 / シーンは服装・持ち物・アクションの提案に反映されます
@@ -139,9 +138,7 @@ function Field({
 }) {
   return (
     <label className="space-y-1.5">
-      <span className="text-[11px] uppercase tracking-[0.2em] text-ink-400">
-        {label}
-      </span>
+      <span className="font-brand text-xs text-ink-500">{label}</span>
       <div>{children}</div>
     </label>
   );

@@ -2,8 +2,9 @@
 
 import { CloudRain, Gauge, Thermometer, Wind } from "lucide-react";
 
+import { AcornIcon } from "@/components/brand/AcornIcon";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   pollenLevelLabel,
   pressureTrendLabel,
@@ -45,20 +46,11 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
 
   return (
     <Card>
-      <CardContent className="space-y-5 pt-5">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div className="space-y-1">
-            <p className="text-[11px] tracking-[0.05em] text-ink-400">
-              今日のサマリー
-            </p>
-            <p className="text-2xl font-medium text-ink-800">
-              {weatherCodeLabel(weatherCode)}
-            </p>
-            <p className="text-xs text-ink-500">
-              {tempMax !== null && tempMin !== null
-                ? `最高 ${tempMax}℃ / 最低 ${tempMin}℃`
-                : "—"}
-            </p>
+      <CardHeader>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <AcornIcon />
+            <CardTitle>今日のサマリー</CardTitle>
           </div>
           {highlight && (
             <div className="flex flex-wrap items-center gap-2">
@@ -83,6 +75,18 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               ) : null}
             </div>
           )}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        <div className="space-y-1.5">
+          <p className="font-brand text-2xl leading-snug text-ink-800">
+            {weatherCodeLabel(weatherCode)}
+          </p>
+          <p className="text-xs text-ink-500">
+            {tempMax !== null && tempMin !== null
+              ? `最高 ${tempMax}℃ / 最低 ${tempMin}℃`
+              : "—"}
+          </p>
         </div>
 
         {highlight && slot && (
@@ -148,12 +152,12 @@ function SummaryStat({
   hint?: string;
 }) {
   return (
-    <div className="rounded-2xl bg-leaf-25 px-4 py-3">
-      <div className="flex items-center gap-1 text-[11px] uppercase tracking-[0.15em] text-ink-400">
+    <div className="rounded-2xl bg-cream-50 px-4 py-3">
+      <div className="flex items-center gap-1 text-xs text-ink-500">
         {icon}
-        {label}
+        <span className="font-brand">{label}</span>
       </div>
-      <p className="mt-1 text-base font-medium text-ink-800">{value}</p>
+      <p className="mt-1 font-brand text-base text-ink-800">{value}</p>
       {hint && <p className="mt-0.5 text-[11px] text-ink-500">{hint}</p>}
     </div>
   );

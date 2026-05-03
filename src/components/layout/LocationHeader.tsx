@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Compass, MapPin, Search } from "lucide-react";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 
+import { BrandMark } from "@/components/brand/BrandMark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { searchLocations } from "@/features/weather/api/geocodingClient";
@@ -211,17 +212,31 @@ export function LocationHeader() {
     <header className="space-y-3">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="space-y-1">
-          <p className="text-[11px] uppercase tracking-[0.3em] text-leaf-700">
-            Weather Dash
-          </p>
-          <div className="flex items-center gap-2 text-ink-800">
+          <div className="flex items-center gap-2">
+            <BrandMark className="h-9 w-9" />
+            <span className="font-brand text-2xl leading-none text-leaf-700">
+              そらリス
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-ink-800">
             <MapPin size={16} className="text-leaf-700" />
             <span className="text-lg font-medium">
-              {location?.name ?? "地点を選んでください"}
+              {(location?.id === "current"
+                ? location.admin ?? location.name
+                : location?.name) ?? "地点を選んでください"}
             </span>
-            {location?.admin && (
-              <span className="text-xs text-ink-500">{location.admin}</span>
+            {location?.id === "current" && (
+              <span className="rounded-full bg-leaf-50 px-2 py-0.5 text-[11px] font-medium text-leaf-700">
+                現在地
+              </span>
             )}
+            {location?.id !== "current" &&
+              location?.admin &&
+              location.admin !== location.name && (
+                <span className="text-xs text-ink-500">
+                  {location.admin}
+                </span>
+              )}
           </div>
           <p className="text-xs text-ink-500">{todayLabel()}</p>
         </div>

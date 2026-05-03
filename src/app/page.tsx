@@ -116,10 +116,45 @@ export default function HomePage() {
 
         <SettingsPanel />
 
-        <footer className="pt-2 text-center text-[11px] text-ink-400">
-          {isLoading
-            ? "天気データを取得しています…"
-            : "データ提供: Open-Meteo (Forecast / Geocoding / Air Quality)"}
+        <footer className="space-y-1 pt-6 text-center text-[11px] leading-relaxed text-ink-400">
+          {isLoading ? (
+            <p>天気データを取得しています…</p>
+          ) : (
+            <>
+              <p>
+                天気・地点検索・花粉データ:{" "}
+                <a
+                  href="https://open-meteo.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline-offset-2 hover:underline"
+                >
+                  Open-Meteo
+                </a>{" "}
+                (
+                <a
+                  href="https://creativecommons.org/licenses/by/4.0/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline-offset-2 hover:underline"
+                >
+                  CC BY 4.0
+                </a>
+                ) ／ 現在地の地名:{" "}
+                <a
+                  href="https://www.bigdatacloud.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline-offset-2 hover:underline"
+                >
+                  BigDataCloud
+                </a>
+              </p>
+              <p>
+                提案は生活判断のための目安で、医療助言ではありません。体調や予定に合わせて無理のない範囲で参考にしてください。
+              </p>
+            </>
+          )}
         </footer>
       </div>
     </AppShell>
