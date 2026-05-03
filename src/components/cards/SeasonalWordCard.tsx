@@ -34,13 +34,13 @@ export function SeasonalWordCard() {
       </CardHeader>
       <CardContent className="pt-3">
         {word ? (
-          <div className="rounded-[1.25rem] border border-sora-100/80 bg-[linear-gradient(160deg,rgba(207,228,243,0.45),rgba(251,246,238,0.95))] px-4 py-4">
+          <div className="rounded-2xl bg-cream-50 px-4 py-4">
             <div className="space-y-3">
               <div className="space-y-1">
                 <p className="font-brand text-lg text-ink-800">{word.term}</p>
                 <p className="text-[11px] text-ink-400">{word.reading}</p>
               </div>
-              <div className="h-px bg-gradient-to-r from-leaf-100 via-leaf-200/70 to-transparent" />
+              <div className="h-px bg-gradient-to-r from-cream-200 via-cream-100 to-transparent" />
               <p className="text-[13px] leading-7 text-ink-600">
                 {word.description}
               </p>
