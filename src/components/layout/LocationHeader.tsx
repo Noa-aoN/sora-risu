@@ -231,14 +231,14 @@ export function LocationHeader() {
   return (
     <header className="space-y-3">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="space-y-1">
+        <div>
           <div className="flex items-center gap-2">
             <BrandMark className="h-9 w-9" />
             <span className="font-brand text-2xl leading-none text-leaf-700">
               そらリス
             </span>
           </div>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-ink-800">
+          <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-ink-800">
             <MapPin size={16} className="text-leaf-700" />
             <span className="text-lg font-medium">
               {(location?.id === "current"
@@ -258,7 +258,7 @@ export function LocationHeader() {
                 </span>
               )}
           </div>
-          <p className="text-xs text-ink-500">{todayLabel()}</p>
+          <p className="mt-1 text-xs text-ink-500">{todayLabel()}</p>
         </div>
 
         <div ref={containerRef} className="relative w-full max-w-sm">
