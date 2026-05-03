@@ -13,8 +13,10 @@ import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { CheckIndicator } from "@/components/ui/check-indicator";
 import { cn } from "@/lib/cn";
+import { PERIOD_TONE } from "@/lib/periodTone";
 import { useAppStore } from "@/stores/useAppStore";
 import type { OutfitItem } from "@/types/recommendation";
+import type { SlotPeriod } from "@/types/timeline";
 
 const PRIORITY_LABEL: Record<OutfitItem["priority"], string> = {
   required: "必須",
@@ -42,10 +44,17 @@ function renderOutfitIcon(
   }
 }
 
-export function OutfitItemCard({ item }: { item: OutfitItem }) {
+export function OutfitItemCard({
+  item,
+  period,
+}: {
+  item: OutfitItem;
+  period: SlotPeriod;
+}) {
   const checked = useAppStore((s) => Boolean(s.outfitChecks[item.id]));
   const toggle = useAppStore((s) => s.toggleOutfitCheck);
   const isRequired = item.priority === "required";
+  const tone = PERIOD_TONE[period];
 
   return (
     <button
@@ -55,14 +64,18 @@ export function OutfitItemCard({ item }: { item: OutfitItem }) {
       className={cn(
         "group relative w-full rounded-2xl border border-t-2 px-4 py-3 text-left transition-colors",
         checked
-          ? "border-leaf-200 border-t-leaf-500 bg-leaf-50/70"
+          ? tone.cardChecked
           : isRequired
-            ? "border-leaf-200 border-t-leaf-500 bg-leaf-50/60 hover:bg-leaf-50"
-            : "border-leaf-100/80 border-t-leaf-400 bg-white hover:bg-leaf-25",
+            ? tone.cardRequired
+            : tone.cardUnchecked,
       )}
     >
       <div className="flex items-center gap-2.5">
-        <CheckIndicator checked={checked} />
+        <CheckIndicator
+          checked={checked}
+          checkedClassName={tone.checkChecked}
+          uncheckedClassName={tone.checkUnchecked}
+        />
         <p
           className={cn(
             "flex min-w-0 flex-1 items-center gap-1.5 text-sm font-medium",
@@ -72,7 +85,7 @@ export function OutfitItemCard({ item }: { item: OutfitItem }) {
           <span
             className={cn(
               "shrink-0",
-              checked ? "text-leaf-600" : "text-leaf-700",
+              checked ? tone.checkedIconText : "text-leaf-700",
             )}
           >
             {renderOutfitIcon(item.category, 14)}
