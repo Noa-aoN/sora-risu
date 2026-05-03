@@ -14,8 +14,10 @@ import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { CheckIndicator } from "@/components/ui/check-indicator";
 import { cn } from "@/lib/cn";
+import { PERIOD_TONE } from "@/lib/periodTone";
 import { useAppStore } from "@/stores/useAppStore";
 import type { ActionItem } from "@/types/recommendation";
+import type { SlotPeriod } from "@/types/timeline";
 
 const INTENSITY_LABEL: Record<ActionItem["intensity"], string> = {
   low: "強度 弱",
@@ -45,9 +47,16 @@ function renderActionIcon(
   }
 }
 
-export function ActionCard({ item }: { item: ActionItem }) {
+export function ActionCard({
+  item,
+  period,
+}: {
+  item: ActionItem;
+  period: SlotPeriod;
+}) {
   const checked = useAppStore((s) => Boolean(s.actionChecks[item.id]));
   const toggle = useAppStore((s) => s.toggleActionCheck);
+  const tone = PERIOD_TONE[period];
 
   return (
     <button
@@ -56,13 +65,16 @@ export function ActionCard({ item }: { item: ActionItem }) {
       aria-pressed={checked}
       className={cn(
         "group relative w-full rounded-2xl border border-t-2 px-4 py-3 text-left transition-colors",
-        checked
-          ? "border-leaf-200 border-t-leaf-500 bg-leaf-50/70"
-          : "border-rain-100 border-t-rain-500 bg-white hover:bg-rain-50/50",
+        checked ? tone.cardChecked : tone.cardUnchecked,
       )}
     >
       <div className="flex items-start gap-2.5">
-        <CheckIndicator checked={checked} className="mt-0.5" />
+        <CheckIndicator
+          checked={checked}
+          checkedClassName={tone.checkChecked}
+          className="mt-0.5"
+          uncheckedClassName={tone.checkUnchecked}
+        />
         <div className="min-w-0 flex-1 space-y-0.5">
           <p
             className={cn(
@@ -73,7 +85,7 @@ export function ActionCard({ item }: { item: ActionItem }) {
             <span
               className={cn(
                 "shrink-0",
-                checked ? "text-leaf-600" : "text-rain-700",
+                checked ? tone.checkedIconText : "text-rain-700",
               )}
             >
               {renderActionIcon(item.category, 14)}

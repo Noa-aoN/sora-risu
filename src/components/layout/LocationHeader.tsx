@@ -41,6 +41,7 @@ export function LocationHeader() {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [geoError, setGeoError] = useState<string | null>(null);
   const debounced = useDebounced(query);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -157,8 +158,12 @@ export function LocationHeader() {
   }
 
   function pickCurrent() {
-    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setGeoError("このブラウザは位置情報に対応していません");
+      return;
+    }
     abortPendingReverse();
+    setGeoError(null);
     const controller = new AbortController();
     reverseAbortRef.current = controller;
     navigator.geolocation.getCurrentPosition(
@@ -180,7 +185,14 @@ export function LocationHeader() {
         if (controller.signal.aborted || !name) return;
         setLocation({ ...base, admin: name });
       },
-      () => {},
+      (err) => {
+        if (controller.signal.aborted) return;
+        setGeoError(
+          err.code === err.PERMISSION_DENIED
+            ? "位置情報がブロックされています。検索から地点を選んでください"
+            : "位置情報を取得できませんでした。検索から地点を選んでください",
+        );
+      },
       { timeout: 6000, maximumAge: 60_000 },
     );
   }
@@ -191,6 +203,7 @@ export function LocationHeader() {
     setOpen(false);
     setQuery("");
     setHighlightedIndex(-1);
+    setGeoError(null);
     inputRef.current?.blur();
   }
 
@@ -253,6 +266,15 @@ export function LocationHeader() {
               現在地
             </Button>
           </div>
+
+          {geoError && (
+            <p
+              role="status"
+              className="mt-1 text-[11px] text-pollen-700"
+            >
+              {geoError}
+            </p>
+          )}
 
           {open && (debounced.length > 0 || results.length > 0) && (
             <div

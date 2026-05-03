@@ -55,10 +55,10 @@ type ChartPoint = {
 };
 
 const HOURLY_BAND_BASE = [
-  { startHour: 6, endHour: 11, fill: "#dde6d8", opacity: 0.22, label: "朝" },
-  { startHour: 11, endHour: 15, fill: "#dde6d8", opacity: 0.36, label: "昼" },
-  { startHour: 15, endHour: 19, fill: "#dde6d8", opacity: 0.22, label: "晩" },
-  { startHour: 19, endHour: 24, fill: "#cdd1c9", opacity: 0.18, label: "夜" },
+  { startHour: 6, endHour: 11, fill: "#f3e6b9", opacity: 0.3, label: "朝" },
+  { startHour: 11, endHour: 15, fill: "#dde6d8", opacity: 0.38, label: "昼" },
+  { startHour: 15, endHour: 19, fill: "#c5cce0", opacity: 0.24, label: "晩" },
+  { startHour: 19, endHour: 24, fill: "#e3e5e1", opacity: 0.3, label: "夜" },
 ];
 
 const NOW_LINE_COLOR = "#b86a6a";
@@ -219,10 +219,10 @@ function buildDailyWindow(
   count: number,
   anchor: ChartAnchor,
 ): ChartPoint[] {
-  const fullRangeMs = count * 24 * 60 * 60 * 1000;
-  const nowMs = Date.now();
-  const minMs = anchor === "left" ? nowMs : nowMs - fullRangeMs / 2;
-  const maxMs = anchor === "left" ? nowMs + fullRangeMs : nowMs + fullRangeMs / 2;
+  const todayMs = dayStartMs(Date.now());
+  const startOffset = anchor === "left" ? 0 : -Math.floor((count - 1) / 2);
+  const minMs = dayStartMs(todayMs, startOffset);
+  const maxMs = dayStartMs(minMs, count);
 
   const points: ChartPoint[] = weather.daily
     .map((d) => {
@@ -236,7 +236,7 @@ function buildDailyWindow(
         weatherCode: d.weatherCode,
       } satisfies ChartPoint;
     })
-    .filter((p) => p.t >= minMs && p.t <= maxMs);
+    .filter((p) => p.t >= minMs && p.t < maxMs);
 
   if (!pollen || !pollen.available) return points;
   const pollenDailyMap = buildPollenDailyMap(pollen);
@@ -357,10 +357,16 @@ function buildChartContext(
 
   const nowMs = Date.now();
   const halfMs = rangeHalfMs(range);
+  const first = data[0];
+  const last = data[data.length - 1];
   const domain: [number, number] =
-    anchor === "left"
-      ? [nowMs, nowMs + 2 * halfMs]
-      : [nowMs - halfMs, nowMs + halfMs];
+    !isHourly && first && last
+      ? first.t === last.t
+        ? [first.t - 12 * 60 * 60 * 1000, first.t + 12 * 60 * 60 * 1000]
+        : [first.t, last.t]
+      : anchor === "left"
+        ? [nowMs, nowMs + 2 * halfMs]
+        : [nowMs - halfMs, nowMs + halfMs];
 
   const pollenAvailable = pollen !== null && pollen.available;
   let pollenGrayoutFromMs: number | null = null;
@@ -457,12 +463,16 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
         {range === "24h" && (
           <div className="flex items-center gap-3 pt-1 text-[10px] text-ink-400">
             <span className="inline-flex items-center gap-1">
-              <span className="inline-block h-2 w-3 rounded-sm bg-leaf-100" />
-              朝・晩
+              <span className="inline-block h-2 w-3 rounded-sm bg-pollen-100" />
+              朝
             </span>
             <span className="inline-flex items-center gap-1">
               <span className="inline-block h-2 w-3 rounded-sm bg-leaf-100 opacity-100" />
               昼
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block h-2 w-3 rounded-sm bg-dusk-100" />
+              晩
             </span>
             <span className="inline-flex items-center gap-1">
               <span className="inline-block h-2 w-3 rounded-sm bg-ink-200" />
@@ -720,10 +730,11 @@ function ChartRow({
 }
 
 function ChartFrame({ children }: { children: ReactElement }) {
-  const [ready, setReady] = useState(false);
-  useEffect(() => {
-    setReady(true);
-  }, []);
+  const ready = useSyncExternalStore(
+    subscribeMounted,
+    getMountedSnapshot,
+    getServerMountedSnapshot,
+  );
   if (!ready) return null;
   return (
     <ResponsiveContainer
@@ -737,6 +748,18 @@ function ChartFrame({ children }: { children: ReactElement }) {
   );
 }
 
+function subscribeMounted() {
+  return () => undefined;
+}
+
+function getMountedSnapshot() {
+  return true;
+}
+
+function getServerMountedSnapshot() {
+  return false;
+}
+
 function commonAxisProps(ctx: ChartContext) {
   return {
     type: "number" as const,
@@ -748,7 +771,7 @@ function commonAxisProps(ctx: ChartContext) {
     tick: { fill: "#8d938a", fontSize: 11 },
     axisLine: { stroke: "#dce6d8" },
     tickLine: false,
-    padding: { left: 12, right: 12 },
+    padding: ctx.isHourly ? { left: 12, right: 12 } : { left: 0, right: 0 },
   };
 }
 

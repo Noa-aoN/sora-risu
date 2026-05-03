@@ -19,27 +19,12 @@ import {
   pressureTrendLabel,
 } from "@/lib/labels";
 import { cn } from "@/lib/cn";
+import { PERIOD_TONE } from "@/lib/periodTone";
 import type { Recommendations } from "@/features/recommendations/buildRecommendations";
 import { relativeDayLabel } from "@/features/weather/services/buildTimeSlots";
 import { DAY_WINDOW_MAX_START, useAppStore } from "@/stores/useAppStore";
-import type { SlotPeriod, TimeSlot } from "@/types/timeline";
+import type { TimeSlot } from "@/types/timeline";
 import type { WeatherCondition } from "@/types/weather";
-
-const SLOT_DOT_COLOR: Record<SlotPeriod, string> = {
-  morning: "bg-pollen-500",
-  daytime: "bg-leaf-500",
-  evening: "bg-dusk-700",
-  night: "bg-ink-700",
-  daily: "bg-ink-300",
-};
-
-const SLOT_BG_TINT: Record<SlotPeriod, string> = {
-  morning: "bg-pollen-50/30",
-  daytime: "bg-leaf-50/30",
-  evening: "bg-dusk-50/25",
-  night: "bg-ink-50/55",
-  daily: "",
-};
 
 type Props = {
   slots: TimeSlot[];
@@ -225,7 +210,7 @@ function SlotRow({
     <div
       className={cn(
         "space-y-3 rounded-2xl px-3 py-3",
-        SLOT_BG_TINT[slot.period],
+        PERIOD_TONE[slot.period].rowBg,
       )}
     >
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
@@ -234,7 +219,7 @@ function SlotRow({
             aria-hidden
             className={cn(
               "inline-block h-2 w-2 shrink-0 rounded-full",
-              SLOT_DOT_COLOR[slot.period],
+              PERIOD_TONE[slot.period].dotBg,
             )}
           />
           {slot.label}
@@ -258,17 +243,17 @@ function SlotRow({
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <Column tone="leaf" title="服装" empty="提案なし">
           {outfit.map((item) => (
-            <OutfitItemCard key={item.id} item={item} />
+            <OutfitItemCard key={item.id} item={item} period={slot.period} />
           ))}
         </Column>
         <Column tone="pollen" title="持ち物" empty="この時間帯はとくに必要なし">
           {carry.map((item) => (
-            <CarryItemCard key={item.id} item={item} />
+            <CarryItemCard key={item.id} item={item} period={slot.period} />
           ))}
         </Column>
         <Column tone="rain" title="アクション" empty="無理のない範囲で過ごせる目安">
           {action.map((item) => (
-            <ActionCard key={item.id} item={item} />
+            <ActionCard key={item.id} item={item} period={slot.period} />
           ))}
         </Column>
       </div>

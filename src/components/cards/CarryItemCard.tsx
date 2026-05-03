@@ -15,8 +15,10 @@ import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { CheckIndicator } from "@/components/ui/check-indicator";
 import { cn } from "@/lib/cn";
+import { PERIOD_TONE } from "@/lib/periodTone";
 import { useAppStore } from "@/stores/useAppStore";
 import type { CarryItem } from "@/types/recommendation";
+import type { SlotPeriod } from "@/types/timeline";
 
 const PRIORITY_LABEL: Record<CarryItem["priority"], string> = {
   required: "必須",
@@ -48,10 +50,17 @@ function renderCarryIcon(
   }
 }
 
-export function CarryItemCard({ item }: { item: CarryItem }) {
+export function CarryItemCard({
+  item,
+  period,
+}: {
+  item: CarryItem;
+  period: SlotPeriod;
+}) {
   const checked = useAppStore((s) => Boolean(s.carryChecks[item.id]));
   const toggle = useAppStore((s) => s.toggleCarryCheck);
   const isRequired = item.priority === "required";
+  const tone = PERIOD_TONE[period];
 
   return (
     <button
@@ -61,14 +70,18 @@ export function CarryItemCard({ item }: { item: CarryItem }) {
       className={cn(
         "group relative w-full rounded-2xl border border-t-2 px-4 py-3 text-left transition-colors",
         checked
-          ? "border-leaf-200 border-t-leaf-500 bg-leaf-50/70"
+          ? tone.cardChecked
           : isRequired
-            ? "border-pollen-100 border-t-pollen-500 bg-pollen-50/60 hover:bg-pollen-50"
-            : "border-pollen-100 border-t-pollen-500/55 bg-white hover:bg-pollen-50/40",
+            ? tone.cardRequired
+            : tone.cardUnchecked,
       )}
     >
       <div className="flex items-center gap-2.5">
-        <CheckIndicator checked={checked} />
+        <CheckIndicator
+          checked={checked}
+          checkedClassName={tone.checkChecked}
+          uncheckedClassName={tone.checkUnchecked}
+        />
         <p
           className={cn(
             "flex min-w-0 flex-1 items-center gap-1.5 text-sm font-medium",
@@ -78,7 +91,7 @@ export function CarryItemCard({ item }: { item: CarryItem }) {
           <span
             className={cn(
               "shrink-0",
-              checked ? "text-leaf-600" : "text-pollen-700",
+              checked ? tone.checkedIconText : "text-pollen-700",
             )}
           >
             {renderCarryIcon(item.category, 14)}
