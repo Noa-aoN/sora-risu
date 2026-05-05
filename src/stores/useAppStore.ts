@@ -56,6 +56,26 @@ function clampDayWindow(n: number): number {
   return n;
 }
 
+function localTodayISO(): string {
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
+function pruneStaleChecks(
+  checks: Record<string, boolean> | undefined,
+  today: string,
+): Record<string, boolean> {
+  if (!checks) return {};
+  const result: Record<string, boolean> = {};
+  for (const [id, value] of Object.entries(checks)) {
+    const match = id.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (!match || match[1]! >= today) result[id] = value;
+  }
+  return result;
+}
+
 export const useAppStore = create<AppStore>()(
   persist(
     (set) => ({
@@ -149,6 +169,13 @@ export const useAppStore = create<AppStore>()(
         chartSeries: state.chartSeries,
         chartAnchor: state.chartAnchor,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+        const today = localTodayISO();
+        state.carryChecks = pruneStaleChecks(state.carryChecks, today);
+        state.outfitChecks = pruneStaleChecks(state.outfitChecks, today);
+        state.actionChecks = pruneStaleChecks(state.actionChecks, today);
+      },
     },
   ),
 );
