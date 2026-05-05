@@ -721,16 +721,32 @@ function WeatherIconRow({
         />
         <Tooltip
           cursor={false}
-          labelFormatter={(value) => ctx.tooltipFormatter(value as number)}
-          formatter={(_value, _name, item) => {
-            const code = (item as unknown as { payload?: { code?: number } })
-              ?.payload?.code;
-            return [weatherCodeLabel(code), "天気"];
-          }}
-          contentStyle={{
-            borderRadius: 12,
-            border: "1px solid #dce6d8",
-            fontSize: 12,
+          content={({ active, payload, label }) => {
+            if (!active || !payload?.length) return null;
+            const point = payload[0]?.payload as
+              | { t?: number; code?: number }
+              | undefined;
+            const ts =
+              typeof label === "number"
+                ? label
+                : typeof point?.t === "number"
+                  ? point.t
+                  : null;
+            const code = point?.code;
+            return (
+              <div
+                className="rounded-xl border border-[#dce6d8] bg-white px-2.5 py-2 text-xs leading-snug shadow-sm"
+                style={{ minWidth: 120 }}
+              >
+                {ts !== null && (
+                  <p className="text-ink-700">{ctx.tooltipFormatter(ts)}</p>
+                )}
+                <p className="mt-0.5 text-ink-500">
+                  天気：
+                  <span className="text-ink-700">{weatherCodeLabel(code)}</span>
+                </p>
+              </div>
+            );
           }}
         />
         {ctx.bands.map((b) => (
