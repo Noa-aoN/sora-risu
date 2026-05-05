@@ -73,17 +73,12 @@ export default function HomePage() {
     [weather, pollen, todaySlots],
   );
 
-  if (!mounted) {
-    return (
-      <AppShell>
-        <DashboardSkeleton />
-      </AppShell>
-    );
-  }
-
   return (
     <AppShell>
-      <div className="space-y-6">
+      {!mounted ? (
+        <DashboardSkeleton />
+      ) : (
+        <div className="space-y-6">
         <LocationHeader />
 
         {isError && (
@@ -166,7 +161,8 @@ export default function HomePage() {
             </>
           )}
         </footer>
-      </div>
+        </div>
+      )}
     </AppShell>
   );
 }

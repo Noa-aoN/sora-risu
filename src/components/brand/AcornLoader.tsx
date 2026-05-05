@@ -24,15 +24,21 @@ export function AcornLoader({
         className,
       )}
     >
-      <Image
-        src="/brand/sora/acorn-basic.png"
-        alt=""
-        width={size}
-        height={size}
-        className="motion-acorn-spin select-none [animation:acorn-spin_2.4s_linear_infinite]"
-        draggable={false}
-        unoptimized
-      />
+      <span
+        aria-hidden
+        className="motion-acorn-spin relative inline-block [animation:acorn-spin_2.4s_linear_infinite]"
+        style={{ width: size, height: size }}
+      >
+        <Image
+          src="/brand/sora/acorn-basic.png"
+          alt=""
+          fill
+          sizes={`${size * 2}px`}
+          className="select-none object-contain"
+          draggable={false}
+          unoptimized
+        />
+      </span>
       <p className="text-xs text-ink-500">{text}</p>
     </div>
   );
