@@ -76,7 +76,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
             size={88}
             ariaLabel="そらリスのひとこと"
             placement="left"
-            popoverClassName="w-[min(24rem,calc(100vw-8rem))]"
+            popoverClassName="w-[min(24rem,calc(100vw-8.75rem))]"
           >
             <p className="font-brand text-sm text-ink-800">
               そらリスのひとこと

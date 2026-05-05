@@ -89,7 +89,7 @@ export function SkyMascotChirp() {
       {open && chirp && (
         <div
           role="dialog"
-          className="absolute left-1/2 top-full z-30 mt-2 -translate-x-1/2 rounded-2xl border border-cream-200 bg-white px-3 py-3 shadow-md shadow-leaf-900/[0.08]"
+          className="absolute left-1/2 top-full z-30 mt-2 flex -translate-x-1/2 justify-center rounded-2xl border border-cream-200 bg-white px-3 py-3 shadow-md shadow-leaf-900/[0.08]"
         >
           <span
             aria-hidden
