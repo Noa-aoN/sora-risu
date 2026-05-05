@@ -100,6 +100,9 @@ body {
 .motion-mascot-bounce {
   animation: mascot-bounce 2.4s ease-in-out infinite;
 }
+.motion-mascot-bounce:hover {
+  animation: none;
+}
 
 .mascot-hover-glow {
   transition: filter 240ms ease-out;
