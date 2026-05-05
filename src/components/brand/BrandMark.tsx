@@ -9,7 +9,7 @@ export function BrandMark({ className }: { className?: string }) {
       className={cn("relative inline-block h-9 w-9", className)}
     >
       <Image
-        src="/brand/logo-mark.png"
+        src="/brand/logo-mark2.png"
         alt=""
         fill
         sizes="80px"
