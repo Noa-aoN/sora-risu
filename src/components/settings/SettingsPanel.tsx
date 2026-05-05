@@ -101,13 +101,13 @@ export function SettingsPanel() {
           </div>
         </div>
       </CardContent>
-      <div className="absolute -bottom-5 right-1 z-10 sm:-bottom-6 sm:right-2">
+      <div className="absolute bottom-2 right-1 z-10 sm:bottom-3 sm:right-2">
         <SoraRisuPopover
           pose="on-cloud"
-          size={112}
+          size={96}
           ariaLabel="そらリスのこと"
           placement="left"
-          popoverClassName="w-[27rem] max-w-[calc(100vw-2rem)]"
+          popoverClassName="w-[min(27rem,calc(100vw-9rem))]"
         >
           <p className="font-brand text-sm text-ink-800">そらリスのこと</p>
           <p className="mt-1.5 text-[13px] leading-5 text-ink-600">
