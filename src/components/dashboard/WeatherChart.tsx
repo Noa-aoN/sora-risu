@@ -14,7 +14,7 @@ import {
   Sun,
   Thermometer,
 } from "lucide-react";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ReactElement, ReactNode } from "react";
 import {
   Area,
@@ -820,21 +820,62 @@ function ChartRow({
 }
 
 function ChartFrame({ children }: { children: ReactElement }) {
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const [hasSize, setHasSize] = useState(false);
   const ready = useSyncExternalStore(
     subscribeMounted,
     getMountedSnapshot,
     getServerMountedSnapshot,
   );
-  if (!ready) return null;
+
+  useEffect(() => {
+    if (!ready) return;
+    const frame = frameRef.current;
+    if (!frame) return;
+
+    let animationFrame = 0;
+    const updateSize = () => {
+      animationFrame = 0;
+      const { width, height } = frame.getBoundingClientRect();
+      setHasSize((current) => {
+        const next = width > 0 && height > 0;
+        return current === next ? current : next;
+      });
+    };
+    const scheduleUpdate = () => {
+      if (animationFrame) return;
+      animationFrame = window.requestAnimationFrame(updateSize);
+    };
+
+    scheduleUpdate();
+    const observer =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(scheduleUpdate)
+        : null;
+    observer?.observe(frame);
+
+    return () => {
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      observer?.disconnect();
+    };
+  }, [ready]);
+
   return (
-    <ResponsiveContainer
-      width="100%"
-      height="100%"
-      minWidth={1}
-      minHeight={1}
+    <div
+      ref={frameRef}
+      className="h-full min-h-px w-full min-w-px"
     >
-      {children}
-    </ResponsiveContainer>
+      {ready && hasSize && (
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+          minWidth={1}
+          minHeight={1}
+        >
+          {children}
+        </ResponsiveContainer>
+      )}
+    </div>
   );
 }
 
