@@ -3,13 +3,10 @@
 import { CloudRain, Gauge, Thermometer, Wind } from "lucide-react";
 
 import { AcornIcon } from "@/components/brand/AcornIcon";
-import { Badge } from "@/components/ui/badge";
+import { SoraRisuPopover } from "@/components/brand/SoraRisuPopover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  pollenLevelLabel,
-  pressureTrendLabel,
-  weatherCodeLabel,
-} from "@/lib/labels";
+import { pickRisuMood } from "@/features/recommendations/risuMood";
+import { pressureTrendLabel, weatherCodeLabel } from "@/lib/labels";
 import type { TimeSlot } from "@/types/timeline";
 import type { NormalizedWeather, WeatherCondition } from "@/types/weather";
 
@@ -19,8 +16,20 @@ type Props = {
   weather: NormalizedWeather | null;
 };
 
+function findCurrentSlot(slots: TimeSlot[]): TimeSlot | null {
+  const nowMs = Date.now();
+  return (
+    slots.find((s) => {
+      const start = new Date(s.start).getTime();
+      const end = new Date(s.end).getTime();
+      return nowMs >= start && nowMs < end;
+    }) ?? null
+  );
+}
+
 function pickHighlightCondition(
   conditions: WeatherCondition[],
+  slots: TimeSlot[],
 ): WeatherCondition | null {
   if (conditions.length === 0) return null;
   const alert = conditions.find(
@@ -29,11 +38,17 @@ function pickHighlightCondition(
       c.precipitation.level === "high" ||
       c.pollen.level === "very_high",
   );
-  return alert ?? conditions[0] ?? null;
+  if (alert) return alert;
+  const currentSlot = findCurrentSlot(slots);
+  if (currentSlot) {
+    const current = conditions.find((c) => c.slotId === currentSlot.id);
+    if (current) return current;
+  }
+  return conditions[0] ?? null;
 }
 
 export function SummaryCard({ conditions, slots, weather }: Props) {
-  const highlight = pickHighlightCondition(conditions);
+  const highlight = pickHighlightCondition(conditions, slots);
   const slot = highlight
     ? slots.find((s) => s.id === highlight.slotId)
     : undefined;
@@ -43,40 +58,29 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
   const tempMin =
     weather && weather.daily[0] ? Math.round(weather.daily[0].tempMin) : null;
   const weatherCode = weather?.daily[0]?.weatherCode;
+  const mood = pickRisuMood(highlight);
 
   return (
-    <Card>
+    <Card className="relative">
       <CardHeader>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <AcornIcon />
-            <CardTitle>今日のサマリー</CardTitle>
-          </div>
-          {highlight && (
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge tone="leaf">
-                <Gauge size={12} />
-                {pressureTrendLabel(highlight.pressure.trend)}
-              </Badge>
-              {highlight.pressure.changeLevel === "high" && (
-                <Badge tone="alert">変化が大きい目安</Badge>
-              )}
-              {highlight.precipitation.level === "high" && (
-                <Badge tone="rain">
-                  <CloudRain size={12} />
-                  雨が強め
-                </Badge>
-              )}
-              {highlight.pollen.level === "high" ||
-              highlight.pollen.level === "very_high" ? (
-                <Badge tone="pollen">
-                  花粉 {pollenLevelLabel(highlight.pollen.level)}
-                </Badge>
-              ) : null}
-            </div>
-          )}
+        <div className="flex items-center gap-2">
+          <AcornIcon />
+          <CardTitle>今日のサマリー</CardTitle>
         </div>
       </CardHeader>
+      <div className="absolute right-3 top-10 z-10 sm:right-5 sm:top-12">
+        <SoraRisuPopover
+          pose={mood.pose}
+          size={72}
+          ariaLabel="そらリスのひとこと"
+          align="right"
+        >
+          <p className="font-brand text-sm text-ink-800">そらリスのひとこと</p>
+          <p className="mt-1 text-[13px] leading-6 text-ink-600">
+            {mood.message}
+          </p>
+        </SoraRisuPopover>
+      </div>
       <CardContent className="space-y-5">
         <div className="space-y-1.5">
           <p className="font-brand text-2xl leading-snug text-ink-800">

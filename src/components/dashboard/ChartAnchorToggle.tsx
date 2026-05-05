@@ -15,7 +15,7 @@ export function ChartAnchorToggle() {
 
   return (
     <div className="inline-flex items-center gap-2">
-      <span className="font-brand text-xs text-ink-500">現在の位置</span>
+      <span className="font-brand text-xs text-ink-500">現在の表示位置</span>
       <div className="inline-flex rounded-full border border-leaf-100 bg-white p-0.5">
         {OPTIONS.map((opt) => {
           const active = anchor === opt.value;

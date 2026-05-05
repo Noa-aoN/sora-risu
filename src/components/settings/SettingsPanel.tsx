@@ -1,6 +1,7 @@
 "use client";
 
 import { AcornIcon } from "@/components/brand/AcornIcon";
+import { SoraRisuPopover } from "@/components/brand/SoraRisuPopover";
 import { CheckIndicator } from "@/components/ui/check-indicator";
 import {
   Card,
@@ -42,7 +43,7 @@ export function SettingsPanel() {
   };
 
   return (
-    <Card>
+    <Card className="relative">
       <CardHeader>
         <div className="flex items-center gap-2">
           <AcornIcon />
@@ -52,8 +53,9 @@ export function SettingsPanel() {
           ジャンル / 体質 / シーンは服装・持ち物・アクションの提案に反映されます
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="grid gap-3 sm:grid-cols-3">
+      <CardContent className="pr-28 sm:pr-32">
+        <div className="flex flex-col gap-3">
+          <div className="grid gap-3 sm:max-w-xl sm:grid-cols-3">
             <Field label="服装ジャンル">
               <Select
                 value={profile.styleGenre}
@@ -96,8 +98,22 @@ export function SettingsPanel() {
                 />
               </div>
             </Field>
+          </div>
         </div>
       </CardContent>
+      <div className="absolute bottom-3 right-3 z-10 sm:bottom-4 sm:right-4">
+        <SoraRisuPopover
+          pose="on-cloud"
+          size={104}
+          ariaLabel="そらリスのこと"
+          align="right"
+        >
+          <p className="font-brand text-sm text-ink-800">そらリスのこと</p>
+          <p className="mt-1 text-[13px] leading-6 text-ink-600">
+            空のすみっこに住んでいる小さなリス。雲のしっぽで風を読み、どんぐりに今日の空模様をしまっています。気圧がゆれる日や、雨が近い日は、そっと知らせに来てくれます。
+          </p>
+        </SoraRisuPopover>
+      </div>
     </Card>
   );
 }

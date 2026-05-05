@@ -9,19 +9,36 @@ import {
   PRESSURE_SWING,
   TEMP_SWING,
   type LetterPattern,
+  type Season,
 } from "./letterMessages";
 
 function dayIndex(date: Date = new Date()): number {
   return Math.floor(date.getTime() / 86_400_000);
 }
 
+function seasonOf(date: Date): Season {
+  const m = date.getMonth() + 1;
+  if (m >= 3 && m <= 5) return "spring";
+  if (m >= 6 && m <= 8) return "summer";
+  if (m >= 9 && m <= 11) return "autumn";
+  return "winter";
+}
+
 function pickFromPattern(
   pattern: LetterPattern,
   date: Date = new Date(),
 ): SkyLetter {
-  const idx = dayIndex(date) % pattern.bodies.length;
-  const body = pattern.bodies[idx] ?? pattern.bodies[0]!;
-  return { title: pattern.title, tone: pattern.tone, body };
+  const season = seasonOf(date);
+  const seasonal = pattern.seasonalBodies?.[season] ?? [];
+  const pool = [...pattern.bodies, ...seasonal];
+  const idx = dayIndex(date) % pool.length;
+  const body = pool[idx] ?? pool[0]!;
+  return {
+    title: pattern.title,
+    tone: pattern.tone,
+    category: pattern.category,
+    body,
+  };
 }
 
 function pickPattern(conditions: WeatherCondition[]): LetterPattern {
