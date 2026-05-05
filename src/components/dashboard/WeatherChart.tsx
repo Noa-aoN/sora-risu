@@ -95,6 +95,11 @@ function formatHourTick(ms: number): string {
   return pad2(new Date(ms).getHours()) + "時";
 }
 
+function formatNowLabel(ms: number): string {
+  const d = new Date(ms);
+  return `現在 (${pad2(d.getHours())}:${pad2(d.getMinutes())})`;
+}
+
 function formatDayTick(ms: number): string {
   const d = new Date(ms);
   return `${d.getMonth() + 1}/${d.getDate()}`;
@@ -189,7 +194,7 @@ function build24hWindow(
     anchor === "left" ? nowIdx : Math.max(0, nowIdx - 12);
   const endIdx =
     anchor === "left"
-      ? Math.min(points.length, nowIdx + 24)
+      ? Math.min(points.length, nowIdx + 25)
       : Math.min(points.length, nowIdx + 13);
   const sliced = points.slice(startIdx, endIdx);
 
@@ -413,7 +418,8 @@ function useNowTick(intervalMs = 60_000): number {
 export function WeatherChart({ weather, pollen, range, isError }: Props) {
   const chartSeries = useAppStore((s) => s.chartSeries);
   const chartAnchor = useAppStore((s) => s.chartAnchor);
-  useNowTick();
+  const nowMs = useNowTick();
+  const nowLabel = formatNowLabel(nowMs);
 
   if (!weather) {
     return (
@@ -487,7 +493,7 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
             </span>
             <span className="inline-flex items-center gap-1">
               <span className="inline-block h-0.5 w-3 bg-[#b86a6a]" />
-              現在
+              {nowLabel}
             </span>
           </div>
         )}
@@ -730,7 +736,7 @@ function WeatherIconRow({
           strokeWidth={1.5}
           ifOverflow="extendDomain"
           label={{
-            value: "現在",
+            value: formatNowLabel(ctx.nowX),
             position: "top",
             offset: 11,
             fill: NOW_LINE_COLOR,
@@ -854,7 +860,7 @@ function commonOverlays(ctx: ChartContext, yAxisId?: string, withLabel = false) 
       {...(withLabel
         ? {
             label: {
-              value: "現在",
+              value: formatNowLabel(ctx.nowX),
               position: "top",
               fill: NOW_LINE_COLOR,
               fontSize: 10,

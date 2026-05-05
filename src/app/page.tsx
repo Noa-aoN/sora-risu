@@ -3,6 +3,8 @@
 import dynamic from "next/dynamic";
 import { useMemo, useSyncExternalStore } from "react";
 
+import { AcornLoader } from "@/components/brand/AcornLoader";
+import { SecretAcornButton } from "@/components/brand/SecretAcornButton";
 import { SeasonalWordCard } from "@/components/cards/SeasonalWordCard";
 import { SkyLetterCard } from "@/components/cards/SkyLetterCard";
 import { SummaryCard } from "@/components/dashboard/SummaryCard";
@@ -24,7 +26,9 @@ const WeatherChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-72 animate-pulse rounded-2xl border border-leaf-100/80 bg-white" />
+      <div className="flex h-72 items-center justify-center rounded-2xl border border-leaf-100/80 bg-white">
+        <AcornLoader />
+      </div>
     ),
   },
 );
@@ -107,10 +111,8 @@ export default function HomePage() {
           recommendations={recommendations}
         />
 
-        <div className="grid gap-4 lg:grid-cols-3 lg:items-stretch">
-          <div className="lg:col-span-2">
-            <SkyLetterCard letter={recommendations.letter} />
-          </div>
+        <div className="grid gap-4 lg:grid-cols-2 lg:items-stretch">
+          <SkyLetterCard letter={recommendations.letter} />
           <SeasonalWordCard />
         </div>
 
@@ -118,7 +120,11 @@ export default function HomePage() {
 
         <footer className="space-y-1 pt-6 text-center text-[11px] leading-relaxed text-ink-400">
           {isLoading ? (
-            <p>天気データを取得しています…</p>
+            <AcornLoader
+              size={40}
+              message="そらリスが天気を読んでいます…"
+              className="py-2"
+            />
           ) : (
             <>
               <p>
@@ -153,7 +159,10 @@ export default function HomePage() {
               <p>
                 提案は生活判断のための目安で、医療助言ではありません。体調や予定に合わせて無理のない範囲で参考にしてください。
               </p>
-              <p className="pt-1 text-ink-300">© 2026 NOA</p>
+              <p className="pt-1 text-ink-300">
+                © 2026 NOA
+                <SecretAcornButton />
+              </p>
             </>
           )}
         </footer>

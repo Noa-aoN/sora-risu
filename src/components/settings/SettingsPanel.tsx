@@ -1,6 +1,7 @@
 "use client";
 
 import { AcornIcon } from "@/components/brand/AcornIcon";
+import { SoraRisuPopover } from "@/components/brand/SoraRisuPopover";
 import { CheckIndicator } from "@/components/ui/check-indicator";
 import {
   Card,
@@ -42,18 +43,19 @@ export function SettingsPanel() {
   };
 
   return (
-    <Card>
+    <Card className="relative">
       <CardHeader>
         <div className="flex items-center gap-2">
-          <AcornIcon />
+          <AcornIcon bounce />
           <CardTitle>設定</CardTitle>
         </div>
         <CardDescription>
           ジャンル / 体質 / シーンは服装・持ち物・アクションの提案に反映されます
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="grid gap-3 sm:grid-cols-3">
+      <CardContent className="pr-32 sm:pr-40">
+        <div className="flex flex-col gap-3">
+          <div className="grid gap-3 sm:max-w-xl sm:grid-cols-3">
             <Field label="服装ジャンル">
               <Select
                 value={profile.styleGenre}
@@ -96,8 +98,29 @@ export function SettingsPanel() {
                 />
               </div>
             </Field>
+          </div>
         </div>
       </CardContent>
+      <div className="absolute -bottom-5 right-1 z-10 sm:-bottom-6 sm:right-2">
+        <SoraRisuPopover
+          pose="on-cloud"
+          size={112}
+          ariaLabel="そらリスのこと"
+          align="right"
+          popoverClassName="w-[min(28rem,calc(100vw-2.75rem))]"
+        >
+          <p className="font-brand text-sm text-ink-800">そらリスのこと</p>
+          <p className="mt-1.5 text-[13px] leading-5 text-ink-600">
+            空のすみっこにすむ、ちいさな物知りリス。
+          </p>
+          <p className="mt-1.5 text-[13px] leading-5 text-ink-600">
+            雲のしっぽで風を読み、どんぐりに今日の空模様をしまっているよ。
+          </p>
+          <p className="mt-1.5 text-[13px] leading-5 text-ink-600">
+            人が好きなので、空の変化をそっと知らせてくれるんだ。
+          </p>
+        </SoraRisuPopover>
+      </div>
     </Card>
   );
 }

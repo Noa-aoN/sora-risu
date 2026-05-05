@@ -8,8 +8,10 @@ import {
   Shirt,
   Wind,
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
+import { AcornRoll } from "@/components/brand/AcornRoll";
 import { Badge } from "@/components/ui/badge";
 import { CheckIndicator } from "@/components/ui/check-indicator";
 import { cn } from "@/lib/cn";
@@ -56,6 +58,13 @@ export function OutfitItemCard({
   const isRequired = item.priority === "required";
   const tone = PERIOD_TONE[period];
 
+  const prevChecked = useRef(checked);
+  const [rollTrigger, setRollTrigger] = useState(0);
+  useEffect(() => {
+    if (!prevChecked.current && checked) setRollTrigger((n) => n + 1);
+    prevChecked.current = checked;
+  }, [checked]);
+
   return (
     <button
       type="button"
@@ -70,6 +79,7 @@ export function OutfitItemCard({
             : tone.cardUnchecked,
       )}
     >
+      <AcornRoll trigger={rollTrigger} />
       <div className="flex items-center gap-2.5">
         <CheckIndicator
           checked={checked}

@@ -1,16 +1,18 @@
 "use client";
 
 import {
-  Activity,
   BedDouble,
   Briefcase,
   Cloud,
   Dumbbell,
   Footprints,
+  PersonStanding,
   Wind,
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
+import { AcornRoll } from "@/components/brand/AcornRoll";
 import { Badge } from "@/components/ui/badge";
 import { CheckIndicator } from "@/components/ui/check-indicator";
 import { cn } from "@/lib/cn";
@@ -31,7 +33,7 @@ function renderActionIcon(
 ): ReactNode {
   switch (category) {
     case "stretch":
-      return <Activity size={size} />;
+      return <PersonStanding size={size} />;
     case "training":
       return <Dumbbell size={size} />;
     case "rest":
@@ -58,6 +60,13 @@ export function ActionCard({
   const toggle = useAppStore((s) => s.toggleActionCheck);
   const tone = PERIOD_TONE[period];
 
+  const prevChecked = useRef(checked);
+  const [rollTrigger, setRollTrigger] = useState(0);
+  useEffect(() => {
+    if (!prevChecked.current && checked) setRollTrigger((n) => n + 1);
+    prevChecked.current = checked;
+  }, [checked]);
+
   return (
     <button
       type="button"
@@ -68,6 +77,7 @@ export function ActionCard({
         checked ? tone.cardChecked : tone.cardUnchecked,
       )}
     >
+      <AcornRoll trigger={rollTrigger} />
       <div className="flex items-start gap-2.5">
         <CheckIndicator
           checked={checked}

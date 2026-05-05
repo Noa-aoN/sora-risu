@@ -58,10 +58,19 @@ export type ActionItem = {
   intensity: "low" | "medium" | "high";
 };
 
+export type LetterCategory =
+  | "pressure"
+  | "rain"
+  | "pollen"
+  | "temp"
+  | "calm"
+  | "no_data";
+
 export type SkyLetter = {
   title: string;
   body: string;
   tone: "calm" | "gentle" | "alert";
+  category: LetterCategory;
 };
 
 export type BodyType = "neutral" | "cold_sensitive" | "heat_sensitive";

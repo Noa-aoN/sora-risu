@@ -36,12 +36,19 @@ export function buildActionItems(condition: WeatherCondition): ActionItem[] {
       reason: "気圧が上昇傾向で外に出やすい時間帯のため",
       intensity: "low",
     });
+    items.push({
+      title: "肩・腕の軽いストレッチ",
+      category: "stretch",
+      description: "両肩を上げてストン、腕を頭上に伸ばす。各 10 秒ずつ",
+      reason: "外出前後の体ほぐしに",
+      intensity: "low",
+    });
   } else {
     items.push({
-      title: "通常通り過ごせる時間帯",
-      category: "work",
-      description: "無理のない範囲で予定を進める",
-      reason: "気圧が安定した時間帯のため",
+      title: "ストレッチでひと息",
+      category: "stretch",
+      description: "首をゆっくり左右に倒す・肩甲骨を寄せる動きを 30 秒",
+      reason: "デスクワークや家事の合間のリフレッシュに",
       intensity: "low",
     });
   }
