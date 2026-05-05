@@ -54,8 +54,8 @@ export function SettingsPanel() {
         </CardDescription>
       </CardHeader>
       <CardContent className="pr-32 sm:pr-40">
-        <div className="flex flex-col gap-3">
-          <div className="grid gap-3 sm:max-w-xl sm:grid-cols-3">
+        <div className="flex flex-col gap-2">
+          <div className="grid gap-2 sm:max-w-md sm:grid-cols-3">
             <Field label="服装ジャンル">
               <Select
                 value={profile.styleGenre}
@@ -106,18 +106,18 @@ export function SettingsPanel() {
           pose="on-cloud"
           size={112}
           ariaLabel="そらリスのこと"
-          align="right"
-          popoverClassName="w-[min(28rem,calc(100vw-2.75rem))]"
+          placement="left"
+          popoverClassName="w-[27rem] max-w-[calc(100vw-2rem)]"
         >
           <p className="font-brand text-sm text-ink-800">そらリスのこと</p>
           <p className="mt-1.5 text-[13px] leading-5 text-ink-600">
             空のすみっこにすむ、ちいさな物知りリス。
           </p>
           <p className="mt-1.5 text-[13px] leading-5 text-ink-600">
-            雲のしっぽで風を読み、どんぐりに今日の空模様をしまっているよ。
+            雲のしっぽで風を読み、どんぐりに今日の空模様をしまっている。
           </p>
           <p className="mt-1.5 text-[13px] leading-5 text-ink-600">
-            人が好きなので、空の変化をそっと知らせてくれるんだ。
+            人が好きなので、空の変化をこつこつ知らせてくれるよ。
           </p>
         </SoraRisuPopover>
       </div>

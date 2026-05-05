@@ -88,7 +88,7 @@ export function SoraRisuPopover({
         onClick={() => setOpen((v) => !v)}
         aria-label={ariaLabel}
         aria-expanded={open}
-        className="inline-flex shrink-0 items-end justify-center rounded-full transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-leaf-300"
+        className="motion-mascot-bounce mascot-hover-glow inline-flex shrink-0 items-end justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-leaf-300"
         style={{ width: size, height: size }}
       >
         <span

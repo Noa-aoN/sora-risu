@@ -112,7 +112,26 @@ function formatHourTooltip(ms: number): string {
 
 function formatDayTooltip(ms: number): string {
   const d = new Date(ms);
-  return `${d.getMonth() + 1}/${d.getDate()} (${WEEKDAYS[d.getDay()]})`;
+  return `${d.getMonth() + 1}/${d.getDate()} (${WEEKDAYS[d.getDay()]}) ${pad2(d.getHours())}:00`;
+}
+
+function buildDayCenterTicks(data: ChartPoint[]): number[] {
+  const seen = new Set<string>();
+  const ticks: number[] = [];
+  for (const p of data) {
+    const d = new Date(p.t);
+    const key = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const noon = new Date(
+      d.getFullYear(),
+      d.getMonth(),
+      d.getDate(),
+      12,
+    ).getTime();
+    ticks.push(noon);
+  }
+  return ticks;
 }
 
 function pollenPointMax(p: PollenHourlyPoint): number | undefined {
@@ -203,22 +222,6 @@ function build24hWindow(
   return sliced.map((p) => ({ ...p, pollen: pollenMap.get(p.t) }));
 }
 
-function dailyAveragePressure(
-  hourly: NormalizedWeather["hourly"],
-  dayMidnightMs: number,
-): number {
-  const dayEnd = dayStartMs(dayMidnightMs, 1);
-  let sum = 0;
-  let count = 0;
-  for (const p of hourly) {
-    const t = parseLocalISOToMs(p.time);
-    if (t < dayMidnightMs || t >= dayEnd) continue;
-    sum += p.pressure;
-    count += 1;
-  }
-  return count > 0 ? sum / count : 1013;
-}
-
 function buildDailyWindow(
   weather: NormalizedWeather,
   pollen: NormalizedPollen | null,
@@ -230,26 +233,36 @@ function buildDailyWindow(
   const minMs = dayStartMs(todayMs, startOffset);
   const maxMs = dayStartMs(minMs, count);
 
-  const points: ChartPoint[] = weather.daily
-    .map((d) => {
-      const t = parseLocalISOToMs(d.date);
+  const dailyByDate = new Map(
+    weather.daily.map((d) => [d.date.slice(0, 10), d] as const),
+  );
+
+  const points: ChartPoint[] = weather.hourly
+    .map((p) => {
+      const t = parseLocalISOToMs(p.time);
+      const date = new Date(t);
+      const dateKey = `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+      const isWeatherIconHour = date.getHours() === 12;
+      const daily = dailyByDate.get(dateKey);
       return {
         t,
-        pressure: Math.round(dailyAveragePressure(weather.hourly, t)),
-        temperature: Math.round((d.tempMax + d.tempMin) / 2),
-        precip: d.precipitationSum,
-        precipProb: d.precipitationProbabilityMax,
-        weatherCode: d.weatherCode,
+        pressure: Math.round(p.pressure),
+        temperature: Math.round(p.temperature * 10) / 10,
+        precip: p.precipitation,
+        precipProb: p.precipitationProbability,
+        weatherCode: isWeatherIconHour ? daily?.weatherCode : undefined,
       } satisfies ChartPoint;
     })
     .filter((p) => p.t >= minMs && p.t < maxMs);
 
   if (!pollen || !pollen.available) return points;
-  const pollenDailyMap = buildPollenDailyMap(pollen);
-  return points.map((p) => ({
-    ...p,
-    pollen: pollenDailyMap.get(localDateStringFromMs(p.t)),
-  }));
+  const pollenHourly = buildPollenHourlyMap(pollen);
+  const pollenDaily = buildPollenDailyMap(pollen);
+  return points.map((p) => {
+    const hourly = pollenHourly.get(p.t);
+    const fallback = pollenDaily.get(localDateStringFromMs(p.t));
+    return { ...p, pollen: hourly ?? fallback };
+  });
 }
 
 function dailyCountForRange(range: TimelineRange): number {
@@ -333,6 +346,7 @@ type ChartContext = {
   tickFormatter: (ms: number) => string;
   tooltipFormatter: (ms: number) => string;
   minTickGap: number;
+  ticks?: number[];
   pollenAvailable: boolean;
   pollenGrayoutFromMs: number | null;
 };
@@ -393,7 +407,8 @@ function buildChartContext(
     domain,
     tickFormatter: isHourly ? formatHourTick : formatDayTick,
     tooltipFormatter: isHourly ? formatHourTooltip : formatDayTooltip,
-    minTickGap: isHourly ? 30 : range === "14d" ? 60 : 0,
+    minTickGap: isHourly ? 30 : 0,
+    ticks: isHourly ? undefined : buildDayCenterTicks(data),
     pollenAvailable,
     pollenGrayoutFromMs,
   };
@@ -706,16 +721,32 @@ function WeatherIconRow({
         />
         <Tooltip
           cursor={false}
-          labelFormatter={(value) => ctx.tooltipFormatter(value as number)}
-          formatter={(_value, _name, item) => {
-            const code = (item as unknown as { payload?: { code?: number } })
-              ?.payload?.code;
-            return [weatherCodeLabel(code), "天気"];
-          }}
-          contentStyle={{
-            borderRadius: 12,
-            border: "1px solid #dce6d8",
-            fontSize: 12,
+          content={({ active, payload, label }) => {
+            if (!active || !payload?.length) return null;
+            const point = payload[0]?.payload as
+              | { t?: number; code?: number }
+              | undefined;
+            const ts =
+              typeof label === "number"
+                ? label
+                : typeof point?.t === "number"
+                  ? point.t
+                  : null;
+            const code = point?.code;
+            return (
+              <div
+                className="rounded-xl border border-[#dce6d8] bg-white px-2.5 py-2 text-xs leading-snug shadow-sm"
+                style={{ minWidth: 120 }}
+              >
+                {ts !== null && (
+                  <p className="text-ink-700">{ctx.tooltipFormatter(ts)}</p>
+                )}
+                <p className="mt-0.5 text-ink-500">
+                  天気：
+                  <span className="text-ink-700">{weatherCodeLabel(code)}</span>
+                </p>
+              </div>
+            );
           }}
         />
         {ctx.bands.map((b) => (
@@ -831,6 +862,9 @@ function commonAxisProps(ctx: ChartContext) {
     axisLine: { stroke: "#dce6d8" },
     tickLine: false,
     padding: ctx.isHourly ? { left: 12, right: 12 } : { left: 0, right: 0 },
+    ...(ctx.ticks
+      ? { ticks: ctx.ticks, interval: 0 as const }
+      : {}),
   };
 }
 

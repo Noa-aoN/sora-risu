@@ -82,7 +82,7 @@ export function SkyMascotChirp() {
         }}
         aria-label="そらリスから一言"
         aria-expanded={open}
-        className="inline-flex rounded-full transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-leaf-300"
+        className="motion-mascot-bounce mascot-hover-glow inline-flex rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-leaf-300"
       >
         <MiniMascot />
       </button>

@@ -4,16 +4,51 @@ import { Providers } from "./providers";
 
 import "./globals.css";
 
+const SITE_URL = "https://sora-risu.vercel.app";
+const SITE_NAME = "そらリス";
+const SITE_TITLE = "そらリス｜空の変化に、やさしく合わせるために。";
+const SITE_DESCRIPTION =
+  "そらリスが、天候・気圧・花粉をもとに、今日の服装・持ち物・過ごし方を提案します。";
+const OG_IMAGE = "/brand/og-image.png";
+
 export const metadata: Metadata = {
-  title: "そらリス｜気圧と体調のそばに、やさしい空を",
-  description:
-    "気圧・お天気・花粉・気温の変化を、服装・持ち物・行動の判断に変換するパートナー。",
-  applicationName: "そらリス",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
   manifest: "/manifest.webmanifest",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "ja_JP",
+    url: "/",
+    siteName: SITE_NAME,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [
+      {
+        url: OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: "そらリス｜空の変化に、やさしく合わせるために。",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [OG_IMAGE],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "そらリス",
+    title: SITE_NAME,
+  },
+  formatDetection: {
+    telephone: false,
+    email: false,
+    address: false,
   },
   icons: {
     icon: [

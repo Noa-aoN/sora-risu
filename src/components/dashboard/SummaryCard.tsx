@@ -28,6 +28,18 @@ function findCurrentSlot(slots: TimeSlot[]): TimeSlot | null {
   );
 }
 
+function pickCurrentHourlyCode(
+  weather: NormalizedWeather | null,
+): number | undefined {
+  if (!weather) return undefined;
+  const nowMs = Date.now();
+  const point = weather.hourly.find((p) => {
+    const t = new Date(p.time).getTime();
+    return t <= nowMs && nowMs < t + 60 * 60 * 1000;
+  });
+  return point?.weatherCode;
+}
+
 function pickHighlightCondition(
   conditions: WeatherCondition[],
   slots: TimeSlot[],
@@ -58,7 +70,8 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
     weather && weather.daily[0] ? Math.round(weather.daily[0].tempMax) : null;
   const tempMin =
     weather && weather.daily[0] ? Math.round(weather.daily[0].tempMin) : null;
-  const weatherCode = weather?.daily[0]?.weatherCode;
+  const weatherCode =
+    pickCurrentHourlyCode(weather) ?? weather?.daily[0]?.weatherCode;
   const mood = pickRisuMood(highlight);
 
   return (
@@ -81,7 +94,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
             <p className="font-brand text-sm text-ink-800">
               そらリスのひとこと
             </p>
-            <p className="mt-1 text-[13px] leading-6 text-ink-600">
+            <p className="mt-1 whitespace-pre-line text-[13px] leading-6 text-ink-600">
               {mood.message}
             </p>
           </SoraRisuPopover>
@@ -90,15 +103,19 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
             aria-hidden
             className="inline-flex h-[88px] w-[88px] items-center justify-center"
           >
-            <Image
-              src="/brand/sora/acorn-basic.png"
-              alt=""
-              width={36}
-              height={36}
-              className="motion-acorn-spin select-none [animation:acorn-spin_2.4s_linear_infinite]"
-              draggable={false}
-              unoptimized
-            />
+            <span
+              className="motion-acorn-spin relative inline-block h-9 w-9 [animation:acorn-spin_2.4s_linear_infinite]"
+            >
+              <Image
+                src="/brand/sora/acorn-basic.png"
+                alt=""
+                fill
+                sizes="72px"
+                className="select-none object-contain"
+                draggable={false}
+                unoptimized
+              />
+            </span>
           </span>
         )}
       </div>

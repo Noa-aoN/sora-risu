@@ -92,6 +92,27 @@ body {
   animation: acorn-bounce 1.8s ease-in-out infinite;
 }
 
+@keyframes mascot-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2.5%); }
+}
+
+.motion-mascot-bounce {
+  animation: mascot-bounce 2.4s ease-in-out infinite;
+}
+.motion-mascot-bounce:hover {
+  animation: none;
+}
+
+.mascot-hover-glow {
+  transition: filter 240ms ease-out;
+}
+.mascot-hover-glow:hover {
+  filter:
+    drop-shadow(0 0 16px rgba(255, 222, 142, 0.95))
+    drop-shadow(0 0 6px rgba(255, 244, 200, 0.75));
+}
+
 @keyframes acorn-roll {
   0% { left: -10%; transform: rotate(0deg); opacity: 0; }
   15% { opacity: 1; }
@@ -136,6 +157,7 @@ body {
   .motion-acorn-roll,
   .motion-acorn-arc,
   .motion-acorn-bounce,
+  .motion-mascot-bounce,
   .motion-cloud-drift {
     animation: none !important;
   }
