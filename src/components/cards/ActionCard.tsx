@@ -1,12 +1,12 @@
 "use client";
 
 import {
-  Accessibility,
   BedDouble,
   Briefcase,
   Cloud,
   Dumbbell,
   Footprints,
+  PersonStanding,
   Wind,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -33,7 +33,7 @@ function renderActionIcon(
 ): ReactNode {
   switch (category) {
     case "stretch":
-      return <Accessibility size={size} />;
+      return <PersonStanding size={size} />;
     case "training":
       return <Dumbbell size={size} />;
     case "rest":

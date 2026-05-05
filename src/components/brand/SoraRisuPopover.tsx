@@ -39,13 +39,17 @@ const POSE_SRC: Record<Pose, string> = {
 
 export type SoraRisuPose = Pose;
 
+type Placement = "bottom" | "left";
+
 type Props = {
   pose: Pose;
   size?: number;
   ariaLabel?: string;
   align?: "left" | "right";
+  placement?: Placement;
   children: ReactNode;
   className?: string;
+  popoverClassName?: string;
 };
 
 export function SoraRisuPopover({
@@ -53,8 +57,10 @@ export function SoraRisuPopover({
   size = 64,
   ariaLabel = "そらリスのコメントを見る",
   align = "right",
+  placement = "bottom",
   children,
   className,
+  popoverClassName,
 }: Props) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -83,30 +89,44 @@ export function SoraRisuPopover({
         aria-label={ariaLabel}
         aria-expanded={open}
         className="inline-flex shrink-0 items-end justify-center rounded-full transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-leaf-300"
+        style={{ width: size, height: size }}
       >
-        <Image
-          src={POSE_SRC[pose]}
-          alt=""
-          width={size}
-          height={size}
-          className="select-none"
-          draggable={false}
-          unoptimized
-        />
+        <span
+          className="relative block h-full w-full"
+          aria-hidden
+        >
+          <Image
+            src={POSE_SRC[pose]}
+            alt=""
+            fill
+            sizes={`${size * 2}px`}
+            className="select-none object-contain"
+            draggable={false}
+            unoptimized
+          />
+        </span>
       </button>
       {open && (
         <div
           role="dialog"
           className={cn(
-            "absolute top-full z-30 mt-2 w-64 rounded-2xl border border-cream-200 bg-white px-4 py-3 text-sm leading-relaxed text-ink-700 shadow-lg shadow-leaf-900/[0.08]",
-            align === "right" ? "right-0" : "left-0",
+            "absolute z-30 w-64 rounded-2xl border border-cream-200 bg-white px-4 py-3 text-sm leading-relaxed text-ink-700 shadow-lg shadow-leaf-900/[0.08]",
+            placement === "bottom"
+              ? cn("top-full mt-2", align === "right" ? "right-0" : "left-0")
+              : "right-full top-1/2 mr-3 -translate-y-1/2",
+            popoverClassName,
           )}
         >
           <span
             aria-hidden
             className={cn(
-              "absolute -top-1.5 h-3 w-3 rotate-45 border-l border-t border-cream-200 bg-white",
-              align === "right" ? "right-6" : "left-6",
+              "absolute h-3 w-3 rotate-45 border-cream-200 bg-white",
+              placement === "bottom"
+                ? cn(
+                    "-top-1.5 border-l border-t",
+                    align === "right" ? "right-6" : "left-6",
+                  )
+                : "right-[-6px] top-1/2 -translate-y-1/2 border-r border-t",
             )}
           />
           {children}

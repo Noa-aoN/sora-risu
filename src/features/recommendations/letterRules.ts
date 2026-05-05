@@ -10,7 +10,7 @@ import {
   TEMP_SWING,
   type LetterPattern,
   type Season,
-} from "./letterMessages";
+} from "./letterMessages.ts";
 
 function dayIndex(date: Date = new Date()): number {
   return Math.floor(date.getTime() / 86_400_000);

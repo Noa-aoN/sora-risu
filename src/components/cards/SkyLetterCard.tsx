@@ -15,7 +15,7 @@ export function SkyLetterCard({ letter }: { letter: SkyLetter }) {
     <Card className="flex h-full flex-col">
       <CardHeader>
         <div className="flex items-center gap-2">
-          <AcornIcon />
+          <AcornIcon bounce />
           <CardTitle>{letter.title}</CardTitle>
         </div>
       </CardHeader>
@@ -28,7 +28,7 @@ export function SkyLetterCard({ letter }: { letter: SkyLetter }) {
                 aria-hidden
                 className="absolute left-[-7px] top-4 h-3 w-3 rotate-45 border-b border-l border-cream-200 bg-white/85"
               />
-              <p className="text-[15px] leading-7 text-ink-700">
+              <p className="whitespace-pre-line text-[15px] leading-7 text-ink-700">
                 {letter.body}
               </p>
               <div className="mt-2 flex justify-end">

@@ -7,7 +7,7 @@
     "build": "next build --webpack",
     "start": "next start -p 3020",
     "lint": "eslint .",
-    "test": "node --test --experimental-strip-types --experimental-specifier-resolution=node src/features/weather/api/geocodingSearch.test.ts src/features/weather/api/geocodingClient.test.ts",
+    "test": "node --test --experimental-strip-types --experimental-specifier-resolution=node src/features/weather/api/geocodingSearch.test.ts src/features/weather/api/geocodingClient.test.ts src/features/weather/api/reverseGeocodingClient.test.ts src/features/weather/services/buildTimeSlots.test.ts src/features/seasonal/solarTerms.test.ts src/features/recommendations/risuMood.test.ts src/features/recommendations/letterRules.test.ts",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf .next .turbo"
   },

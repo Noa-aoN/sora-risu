@@ -5,7 +5,10 @@ import { TimeBasedBackground } from "@/components/layout/TimeBasedBackground";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-cream-50 text-ink-800">
+    <div
+      suppressHydrationWarning
+      className="relative min-h-screen overflow-hidden bg-cream-50 text-ink-800"
+    >
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 -z-0 h-72 overflow-hidden"

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { CloudRain, Gauge, Thermometer, Wind } from "lucide-react";
 
 import { AcornIcon } from "@/components/brand/AcornIcon";
@@ -64,22 +65,42 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
     <Card className="relative">
       <CardHeader>
         <div className="flex items-center gap-2">
-          <AcornIcon />
+          <AcornIcon bounce />
           <CardTitle>今日のサマリー</CardTitle>
         </div>
       </CardHeader>
-      <div className="absolute right-3 top-10 z-10 sm:right-5 sm:top-12">
-        <SoraRisuPopover
-          pose={mood.pose}
-          size={72}
-          ariaLabel="そらリスのひとこと"
-          align="right"
-        >
-          <p className="font-brand text-sm text-ink-800">そらリスのひとこと</p>
-          <p className="mt-1 text-[13px] leading-6 text-ink-600">
-            {mood.message}
-          </p>
-        </SoraRisuPopover>
+      <div className="absolute right-2 top-5 z-10 sm:right-4 sm:top-5">
+        {highlight ? (
+          <SoraRisuPopover
+            pose={mood.pose}
+            size={88}
+            ariaLabel="そらリスのひとこと"
+            placement="left"
+            popoverClassName="w-[min(24rem,calc(100vw-8rem))]"
+          >
+            <p className="font-brand text-sm text-ink-800">
+              そらリスのひとこと
+            </p>
+            <p className="mt-1 text-[13px] leading-6 text-ink-600">
+              {mood.message}
+            </p>
+          </SoraRisuPopover>
+        ) : (
+          <span
+            aria-hidden
+            className="inline-flex h-[88px] w-[88px] items-center justify-center"
+          >
+            <Image
+              src="/brand/sora/acorn-basic.png"
+              alt=""
+              width={36}
+              height={36}
+              className="motion-acorn-spin select-none [animation:acorn-spin_2.4s_linear_infinite]"
+              draggable={false}
+              unoptimized
+            />
+          </span>
+        )}
       </div>
       <CardContent className="space-y-5">
         <div className="space-y-1.5">

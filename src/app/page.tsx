@@ -111,10 +111,8 @@ export default function HomePage() {
           recommendations={recommendations}
         />
 
-        <div className="grid gap-4 lg:grid-cols-3 lg:items-stretch">
-          <div className="lg:col-span-2">
-            <SkyLetterCard letter={recommendations.letter} />
-          </div>
+        <div className="grid gap-4 lg:grid-cols-2 lg:items-stretch">
+          <SkyLetterCard letter={recommendations.letter} />
           <SeasonalWordCard />
         </div>
 

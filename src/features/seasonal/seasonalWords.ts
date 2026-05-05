@@ -536,3 +536,33 @@ export function pickSeasonalWord(now: Date = new Date()): SeasonalWord {
   }
   return best;
 }
+
+export type SeasonalWordRange = SeasonalWord & {
+  startLabel: string;
+  endLabel: string;
+};
+
+export function describeSeasonalWord(now: Date = new Date()): SeasonalWordRange {
+  const year = now.getFullYear();
+  const t = now.getTime();
+  const sorted = TERMS.flatMap((term) => [
+    { ms: startOfYearMs(year - 1, term.startMonth, term.startDay), term },
+    { ms: startOfYearMs(year, term.startMonth, term.startDay), term },
+    { ms: startOfYearMs(year + 1, term.startMonth, term.startDay), term },
+  ]).sort((a, b) => a.ms - b.ms);
+
+  let curIdx = 0;
+  for (let k = 0; k < sorted.length; k++) {
+    if ((sorted[k]?.ms ?? Number.NEGATIVE_INFINITY) <= t) curIdx = k;
+    else break;
+  }
+  const current = sorted[curIdx]!;
+  const next = sorted[(curIdx + 1) % sorted.length]!;
+  const endDate = new Date(next.ms - 24 * 60 * 60 * 1000);
+
+  return {
+    ...current.term,
+    startLabel: `${current.term.startMonth}/${current.term.startDay}`,
+    endLabel: `${endDate.getMonth() + 1}/${endDate.getDate()}`,
+  };
+}
