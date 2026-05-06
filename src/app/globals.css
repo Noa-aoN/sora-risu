@@ -109,8 +109,8 @@ body {
 }
 .mascot-hover-glow:hover {
   filter:
-    drop-shadow(0 0 16px rgba(255, 222, 142, 0.95))
-    drop-shadow(0 0 6px rgba(255, 244, 200, 0.75));
+    drop-shadow(0 0 12px rgba(246, 222, 164, 0.72))
+    drop-shadow(0 0 4px rgba(255, 248, 223, 0.62));
 }
 
 @keyframes acorn-roll {

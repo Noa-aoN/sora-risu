@@ -32,7 +32,7 @@ export const PERIOD_TONE: Record<SlotPeriod, PeriodTone> = {
     cardUnchecked:
       "border-cream-200 border-t-cream-300 bg-white hover:bg-white",
     cardChecked: "border-cream-200 border-t-cream-500 bg-cream-50",
-    checkUnchecked: "border-cream-200 bg-white text-leaf-300",
+    checkUnchecked: "border-cream-200 bg-white text-cream-300",
     checkChecked: "border-cream-500 bg-cream-500 text-white",
     checkedIconText: "text-ink-600",
   },
@@ -56,7 +56,7 @@ export const PERIOD_TONE: Record<SlotPeriod, PeriodTone> = {
     cardUnchecked:
       "border-cream-200 border-t-cream-300 bg-white hover:bg-white",
     cardChecked: "border-cream-200 border-t-cream-500 bg-cream-50",
-    checkUnchecked: "border-cream-200 bg-white text-leaf-300",
+    checkUnchecked: "border-cream-200 bg-white text-cream-300",
     checkChecked: "border-cream-500 bg-cream-500 text-white",
     checkedIconText: "text-ink-600",
   },

@@ -57,9 +57,9 @@ type ChartPoint = {
 
 const HOURLY_BAND_BASE = [
   { startHour: 6, endHour: 11, fill: "#f3e6b9", opacity: 0.3, label: "朝" },
-  { startHour: 11, endHour: 15, fill: "#dde6d8", opacity: 0.38, label: "昼" },
+  { startHour: 11, endHour: 15, fill: "#dde9d7", opacity: 0.3, label: "昼" },
   { startHour: 15, endHour: 19, fill: "#c5cce0", opacity: 0.24, label: "夕方" },
-  { startHour: 19, endHour: 24, fill: "#e3e5e1", opacity: 0.3, label: "夜" },
+  { startHour: 19, endHour: 24, fill: "#cdd1c9", opacity: 0.24, label: "夜" },
 ];
 
 const NOW_LINE_COLOR = "#b86a6a";
@@ -495,7 +495,7 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
               朝
             </span>
             <span className="inline-flex items-center gap-1">
-              <span className="inline-block h-2 w-3 rounded-sm bg-leaf-100 opacity-100" />
+              <span className="inline-block h-2 w-3 rounded-sm bg-leaf-100" />
               昼
             </span>
             <span className="inline-flex items-center gap-1">
