@@ -18,7 +18,6 @@ export function AcornRoll({ trigger }: { trigger: number }) {
           height={28}
           className="select-none"
           draggable={false}
-          unoptimized
         />
       </span>
     </span>

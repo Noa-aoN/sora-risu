@@ -65,7 +65,6 @@ export function SecretAcornButton() {
           height={14}
           className="select-none"
           draggable={false}
-          unoptimized
         />
       </button>
       {flying && (
@@ -85,7 +84,6 @@ export function SecretAcornButton() {
               height={36}
               className="select-none [transform:scaleX(-1)]"
               draggable={false}
-              unoptimized
             />
           </span>
         </span>
