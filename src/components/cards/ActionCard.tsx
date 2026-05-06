@@ -74,7 +74,7 @@ export function ActionCard({
       aria-pressed={checked}
       className={cn(
         "group relative w-full rounded-2xl border border-t-2 px-4 py-3 text-left transition-colors",
-        checked ? tone.cardChecked : tone.cardUnchecked,
+        tone.cardUnchecked,
       )}
     >
       <AcornRoll trigger={rollTrigger} />
@@ -95,7 +95,7 @@ export function ActionCard({
             <span
               className={cn(
                 "shrink-0",
-                checked ? tone.checkedIconText : "text-rain-700",
+                checked ? tone.checkedIconText : "text-leaf-700",
               )}
             >
               {renderActionIcon(item.category, 14)}
@@ -108,7 +108,7 @@ export function ActionCard({
             {item.description}
           </p>
         </div>
-        <Badge tone="rain" className="shrink-0">
+        <Badge tone="muted" className="shrink-0">
           {INTENSITY_LABEL[item.intensity]}
         </Badge>
       </div>

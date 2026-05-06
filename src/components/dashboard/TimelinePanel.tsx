@@ -20,7 +20,7 @@ export function TimelinePanel() {
   const setRange = useAppStore((s) => s.setTimelineRange);
 
   return (
-    <div className="inline-flex items-center gap-2">
+    <div className="inline-flex w-full flex-col gap-1.5 sm:w-auto sm:flex-row sm:items-center sm:gap-2">
       <span className="font-brand text-xs text-ink-500">時間軸</span>
       <Segmented<TimelineRange>
         value={range}
