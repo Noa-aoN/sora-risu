@@ -472,7 +472,7 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <AcornIcon />
@@ -484,26 +484,26 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
           </div>
           <TimelinePanel />
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-3">
+        <div className="flex flex-col gap-2 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <ChartSeriesPicker showPollen showPressure />
           <ChartAnchorToggle />
         </div>
         {range === "24h" && (
-          <div className="flex items-center gap-3 pt-1 text-[10px] text-ink-400">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-[10px] text-ink-400">
             <span className="inline-flex items-center gap-1">
-              <span className="inline-block h-2 w-3 rounded-sm bg-pollen-100" />
+              <span className="inline-block h-2.5 w-4 rounded-sm bg-pollen-100" />
               朝
             </span>
             <span className="inline-flex items-center gap-1">
-              <span className="inline-block h-2 w-3 rounded-sm bg-leaf-100" />
+              <span className="inline-block h-2.5 w-4 rounded-sm bg-leaf-100" />
               昼
             </span>
             <span className="inline-flex items-center gap-1">
-              <span className="inline-block h-2 w-3 rounded-sm bg-dusk-100" />
+              <span className="inline-block h-2.5 w-4 rounded-sm bg-dusk-100" />
               夕方
             </span>
             <span className="inline-flex items-center gap-1">
-              <span className="inline-block h-2 w-3 rounded-sm bg-ink-200" />
+              <span className="inline-block h-2.5 w-4 rounded-sm bg-ink-200" />
               夜
             </span>
             <span className="inline-flex items-center gap-1">

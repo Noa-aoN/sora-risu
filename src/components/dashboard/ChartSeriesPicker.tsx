@@ -66,28 +66,30 @@ export function ChartSeriesPicker({
   });
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      <span className="font-brand text-xs text-ink-500">表示項目</span>
-      {items.map((item) => {
-        const active = chartSeries[item.key];
-        return (
-          <button
-            key={item.key}
-            type="button"
-            onClick={() => toggleChartSeries(item.key)}
-            aria-pressed={active}
-            className={cn(
-              "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] transition-colors",
-              active
-                ? item.activeClass
-                : "border-leaf-100 bg-white text-ink-400 hover:bg-leaf-25",
-            )}
-          >
-            {item.icon}
-            {item.label}
-          </button>
-        );
-      })}
+    <div className="flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-center">
+      <span className="shrink-0 font-brand text-xs text-ink-500">表示項目</span>
+      <div className="-mx-1 flex min-w-0 gap-1.5 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:p-0">
+        {items.map((item) => {
+          const active = chartSeries[item.key];
+          return (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => toggleChartSeries(item.key)}
+              aria-pressed={active}
+              className={cn(
+                "inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] transition-colors",
+                active
+                  ? item.activeClass
+                  : "border-leaf-100 bg-white text-ink-400 hover:bg-leaf-25",
+              )}
+            >
+              {item.icon}
+              {item.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
