@@ -7,6 +7,19 @@ const withSerwist = withSerwistInit({
   cacheOnNavigation: true,
   reloadOnOnline: true,
   disable: process.env.NODE_ENV === "development",
+  // 大きい・利用頻度の低いアセットは precache から除外し、
+  // 必要時に runtimeCaching (StaleWhileRevalidate) で取得する。
+  // node-glob の負パターンは patterns 配列内では効かないので、
+  // include したい public/ アセットを正リストで列挙する。
+  globPublicPatterns: [
+    "manifest.webmanifest",
+    "brand/acorn-face.png",
+    "brand/app-icon-*.png",
+    "brand/apple-touch-icon.png",
+    "brand/favicon-*.png",
+    "brand/logo-mark*.png",
+    "brand/mini-mascot-v2.png",
+  ],
 });
 
 const config: NextConfig = {

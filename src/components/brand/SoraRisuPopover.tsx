@@ -102,7 +102,6 @@ export function SoraRisuPopover({
             sizes={`${size * 2}px`}
             className="select-none object-contain"
             draggable={false}
-            unoptimized
           />
         </span>
       </button>

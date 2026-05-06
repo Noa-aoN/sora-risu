@@ -9,7 +9,7 @@ const SITE_NAME = "そらリス";
 const SITE_TITLE = "そらリス｜空の変化に、やさしく合わせるために。";
 const SITE_DESCRIPTION =
   "そらリスが、天候・気圧・花粉をもとに、今日の服装・持ち物・過ごし方を提案します。";
-const OG_IMAGE = "/brand/og-image.png";
+const OG_IMAGE = "/brand/og-image.jpg";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

@@ -89,7 +89,6 @@ export function SeasonalStamp({
       height={size}
       className={cn("inline-block select-none", className)}
       draggable={false}
-      unoptimized
     />
   );
 }

@@ -113,7 +113,6 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                 sizes="72px"
                 className="select-none object-contain"
                 draggable={false}
-                unoptimized
               />
             </span>
           </span>

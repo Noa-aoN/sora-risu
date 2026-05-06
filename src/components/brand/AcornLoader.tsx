@@ -36,7 +36,6 @@ export function AcornLoader({
           sizes={`${size * 2}px`}
           className="select-none object-contain"
           draggable={false}
-          unoptimized
         />
       </span>
       <p className="text-xs text-ink-500">{text}</p>
