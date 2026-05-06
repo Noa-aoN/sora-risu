@@ -40,9 +40,9 @@ export function SeasonalWordCard() {
           <CardTitle>今日の季節の言葉</CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="pt-3">
+      <CardContent className="flex flex-1 pt-3">
         {word && solar ? (
-          <div className="rounded-2xl bg-cream-50 px-4 py-4 space-y-3">
+          <div className="flex flex-1 flex-col rounded-2xl bg-cream-50 px-4 py-4 space-y-3">
             <section className="space-y-1.5">
               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                 <p className="font-brand text-base text-ink-800">

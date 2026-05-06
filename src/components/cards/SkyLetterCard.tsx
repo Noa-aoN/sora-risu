@@ -19,8 +19,8 @@ export function SkyLetterCard({ letter }: { letter: SkyLetter }) {
           <CardTitle>{letter.title}</CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="pt-3">
-        <div className="rounded-2xl bg-cream-50 px-4 py-4">
+      <CardContent className="flex flex-1 pt-3">
+        <div className="flex flex-1 rounded-2xl bg-cream-50 px-4 py-4">
           <div className="flex items-start gap-3">
             <SkyMascotChirp />
             <div className="relative min-w-0 flex-1 rounded-2xl border border-cream-200 bg-white/85 px-4 py-4 shadow-sm">

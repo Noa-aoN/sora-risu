@@ -11,13 +11,46 @@ type StampKind =
   | "rain"
   | "pollen";
 
-const STAMP_META: Record<StampKind, { src: string; label: string }> = {
-  spring: { src: "/brand/sora/stamp-spring.png", label: "春のしるし" },
-  summer: { src: "/brand/sora/stamp-summer.png", label: "夏のしるし" },
-  autumn: { src: "/brand/sora/stamp-autumn.png", label: "秋のしるし" },
-  winter: { src: "/brand/sora/stamp-winter.png", label: "冬のしるし" },
-  rain: { src: "/brand/sora/stamp-rain.png", label: "雨のしるし" },
-  pollen: { src: "/brand/sora/stamp-pollen.png", label: "花粉のしるし" },
+const STAMP_META: Record<
+  StampKind,
+  { src: string; label: string; width: number; height: number }
+> = {
+  spring: {
+    src: "/brand/sora/stamp-spring.png",
+    label: "春のしるし",
+    width: 145,
+    height: 125,
+  },
+  summer: {
+    src: "/brand/sora/stamp-summer.png",
+    label: "夏のしるし",
+    width: 135,
+    height: 125,
+  },
+  autumn: {
+    src: "/brand/sora/stamp-autumn.png",
+    label: "秋のしるし",
+    width: 135,
+    height: 125,
+  },
+  winter: {
+    src: "/brand/sora/stamp-winter.png",
+    label: "冬のしるし",
+    width: 135,
+    height: 125,
+  },
+  rain: {
+    src: "/brand/sora/stamp-rain.png",
+    label: "雨のしるし",
+    width: 135,
+    height: 125,
+  },
+  pollen: {
+    src: "/brand/sora/stamp-pollen.png",
+    label: "花粉のしるし",
+    width: 155,
+    height: 125,
+  },
 };
 
 function monthToSeason(month: number): StampKind {
@@ -46,11 +79,13 @@ export function SeasonalStamp({
   className?: string;
 }) {
   const meta = STAMP_META[kind];
+  const width = Math.round((size * meta.width) / meta.height);
+
   return (
     <Image
       src={meta.src}
       alt={meta.label}
-      width={size}
+      width={width}
       height={size}
       className={cn("inline-block select-none", className)}
       draggable={false}

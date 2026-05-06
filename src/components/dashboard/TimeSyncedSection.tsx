@@ -279,7 +279,7 @@ function Column({
       {hasContent ? (
         <div className="space-y-2">{children}</div>
       ) : (
-        <p className="rounded-2xl border border-dashed border-cream-200 bg-cream-50 px-4 py-3 text-[11px] text-ink-400">
+        <p className="rounded-2xl border border-dashed border-cream-200 bg-white px-4 py-3 text-[11px] text-ink-400">
           {empty}
         </p>
       )}

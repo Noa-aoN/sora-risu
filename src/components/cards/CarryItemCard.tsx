@@ -79,7 +79,9 @@ export function CarryItemCard({
       className={cn(
         "group relative w-full rounded-2xl border border-t-2 px-4 py-3 text-left transition-colors",
         checked
-          ? tone.cardChecked
+          ? isRequired
+            ? tone.cardChecked
+            : tone.cardUnchecked
           : isRequired
             ? tone.cardRequired
             : tone.cardUnchecked,
@@ -95,13 +97,17 @@ export function CarryItemCard({
         <p
           className={cn(
             "flex min-w-0 flex-1 items-center gap-1.5 text-sm font-medium",
-            checked ? "text-leaf-800 line-through" : "text-ink-800",
+            checked
+              ? "text-leaf-800 line-through"
+              : "text-ink-800",
           )}
         >
           <span
             className={cn(
               "shrink-0",
-              checked ? tone.checkedIconText : "text-pollen-700",
+              checked
+                ? tone.checkedIconText
+                : "text-leaf-700",
             )}
           >
             {renderCarryIcon(item.category, 14)}
@@ -110,7 +116,10 @@ export function CarryItemCard({
             {item.name}
           </span>
         </p>
-        <Badge tone={isRequired ? "pollen" : "muted"} className="shrink-0">
+        <Badge
+          tone="muted"
+          className="shrink-0"
+        >
           {PRIORITY_LABEL[item.priority]}
         </Badge>
       </div>

@@ -107,7 +107,7 @@ export function SettingsPanel() {
           size={96}
           ariaLabel="そらリスのこと"
           placement="left"
-          popoverClassName="w-[min(27rem,calc(100vw-9rem))]"
+          popoverClassName="w-[min(27rem,calc(100vw-9rem))] -translate-y-[calc(50%+6px)]"
         >
           <p className="font-brand text-sm text-ink-800">そらリスのこと</p>
           <p className="mt-1.5 text-[13px] leading-5 text-ink-600">

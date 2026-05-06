@@ -130,10 +130,6 @@ export function LocationHeader() {
   const results = search.data ?? [];
 
   useEffect(() => {
-    setHighlightedIndex(-1);
-  }, [debounced]);
-
-  useEffect(() => {
     if (highlightedIndex < 0) return;
     itemRefs.current[highlightedIndex]?.scrollIntoView({ block: "nearest" });
   }, [highlightedIndex]);
@@ -274,6 +270,7 @@ export function LocationHeader() {
                 onChange={(e) => {
                   setQuery(e.target.value);
                   setOpen(true);
+                  setHighlightedIndex(-1);
                 }}
                 onFocus={() => setOpen(true)}
                 onKeyDown={onInputKeyDown}
