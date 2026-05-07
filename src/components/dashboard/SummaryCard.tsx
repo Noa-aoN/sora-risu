@@ -135,19 +135,10 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
   const todayPeakHourlyPrecip = todayHourly.length
     ? Math.max(...todayHourly.map((p) => p.precipitation))
     : null;
-  const currentRainStatus = (() => {
-    if (!currentHourly) return null;
-    const c = currentHourly.code;
-    if ((c >= 51 && c <= 67) || (c >= 80 && c <= 82) || c >= 95) return "雨";
-    if ((c >= 71 && c <= 77) || (c >= 85 && c <= 86)) return "雪";
-    return "非雨";
-  })();
 
   const todayWinds = todayHourly.map((p) => p.windSpeed);
   const todayMaxWind = todayWinds.length ? Math.max(...todayWinds) : null;
-  const todayAvgWind = todayWinds.length
-    ? todayWinds.reduce((a, b) => a + b, 0) / todayWinds.length
-    : null;
+  const todayMinWind = todayWinds.length ? Math.min(...todayWinds) : null;
 
   const todayMaxUv = weather?.daily[0]?.uvIndexMax;
   const todayHumidities = todayHourly.map((p) => p.humidity);
@@ -157,7 +148,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
 
   const precipHint =
     todayPeakHourlyPrecip !== null
-      ? `降水量 最大 ${todayPeakHourlyPrecip.toFixed(1)} mm（${rainIntensityLabel(todayPeakHourlyPrecip)}）`
+      ? `${todayPeakHourlyPrecip.toFixed(1)} mm（${rainIntensityLabel(todayPeakHourlyPrecip)}）`
       : undefined;
 
   return (
@@ -223,7 +214,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               label="気温"
               value={
                 tempMax !== null && tempMin !== null
-                  ? `最高 ${tempMax} ・ 最低 ${tempMin}℃`
+                  ? `${tempMin} ~ ${tempMax} ℃`
                   : "—"
               }
               hint={
@@ -247,7 +238,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               label="気圧"
               value={
                 todayMaxPressure !== null && todayMinPressure !== null
-                  ? `最大 ${todayMaxPressure} ・ 最小 ${todayMinPressure} hPa`
+                  ? `${todayMinPressure} ~ ${todayMaxPressure} hPa`
                   : "—"
               }
               hint={
@@ -267,20 +258,16 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               label="降水確率"
               value={
                 todayPrecipProbMax !== undefined
-                  ? todayPeakProbHour !== null
-                    ? `最大 ${todayPrecipProbMax}% ・ ピーク ${todayPeakProbHour}時`
-                    : `最大 ${todayPrecipProbMax}%`
+                  ? `${todayPrecipProbMax}%`
                   : `${highlight.precipitation.probability ?? 0}%`
               }
               hint={
                 <>
-                  {currentRainStatus && (
-                    <span className="text-[#b86a6a]">
-                      （現在 {currentRainStatus}）
-                    </span>
-                  )}
-                  {currentRainStatus && precipHint && " "}
                   {precipHint}
+                  {precipHint && todayPeakProbHour !== null && " "}
+                  {todayPeakProbHour !== null && (
+                    <>ピーク {todayPeakProbHour}時</>
+                  )}
                 </>
               }
             />
@@ -288,19 +275,17 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               icon={<Wind size={14} />}
               label="風・湿度・紫外線"
               value={
-                todayMaxWind !== null && todayAvgWind !== null
-                  ? `最大 ${todayMaxWind.toFixed(1)} ・ 平均 ${todayAvgWind.toFixed(1)} m/s`
+                todayMaxWind !== null && todayMinWind !== null
+                  ? `${todayMinWind.toFixed(1)} ~ ${todayMaxWind.toFixed(1)} m/s`
                   : "—"
               }
               hint={
                 <>
-                  {todayMaxHumidity !== null && (
-                    <>湿度 最大 {todayMaxHumidity}%</>
-                  )}
+                  {todayMaxHumidity !== null && <>湿度 {todayMaxHumidity}%</>}
                   {todayMaxUv !== undefined && (
                     <>
                       {todayMaxHumidity !== null && " ・ "}
-                      UV 最大 {todayMaxUv.toFixed(0)}
+                      UV {todayMaxUv.toFixed(0)}
                     </>
                   )}
                 </>
