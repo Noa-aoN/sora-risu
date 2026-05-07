@@ -5,7 +5,13 @@ import { CloudRain, Gauge, Thermometer, Wind } from "lucide-react";
 
 import { AcornIcon } from "@/components/brand/AcornIcon";
 import { SoraRisuPopover } from "@/components/brand/SoraRisuPopover";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { pickRisuMood } from "@/features/recommendations/risuMood";
 import {
   pressureTrendLabel,
@@ -32,16 +38,21 @@ function findCurrentSlot(slots: TimeSlot[]): TimeSlot | null {
   );
 }
 
-function pickCurrentHourlyCode(
+function pickCurrentHourly(
   weather: NormalizedWeather | null,
-): number | undefined {
-  if (!weather) return undefined;
+): { code: number; temp: number; prob: number } | null {
+  if (!weather) return null;
   const nowMs = Date.now();
   const point = weather.hourly.find((p) => {
     const t = new Date(p.time).getTime();
     return t <= nowMs && nowMs < t + 60 * 60 * 1000;
   });
-  return point?.weatherCode;
+  if (!point) return null;
+  return {
+    code: point.weatherCode,
+    temp: Math.round(point.temperature),
+    prob: point.precipitationProbability,
+  };
 }
 
 function pickHighlightCondition(
@@ -74,25 +85,30 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
     weather && weather.daily[0] ? Math.round(weather.daily[0].tempMax) : null;
   const tempMin =
     weather && weather.daily[0] ? Math.round(weather.daily[0].tempMin) : null;
-  const weatherCode =
-    pickCurrentHourlyCode(weather) ?? weather?.daily[0]?.weatherCode;
+  const currentHourly = pickCurrentHourly(weather);
+  const weatherCode = currentHourly?.code ?? weather?.daily[0]?.weatherCode;
   const mood = pickRisuMood(highlight);
 
-  const precipAmount = highlight?.precipitation.amount;
-  const slotHours =
-    slot &&
-    Number.isFinite(new Date(slot.start).getTime()) &&
-    Number.isFinite(new Date(slot.end).getTime())
-      ? Math.max(
-          1,
-          (new Date(slot.end).getTime() - new Date(slot.start).getTime()) /
-            3_600_000,
-        )
-      : 1;
-  const precipHint =
-    precipAmount !== undefined
-      ? `${precipAmount.toFixed(1)} mm（${rainIntensityLabel(precipAmount / slotHours)}）`
-      : undefined;
+  const todayDateStr = weather?.daily[0]?.date;
+  const todayHourly =
+    todayDateStr && weather
+      ? weather.hourly.filter((p) => p.time.startsWith(todayDateStr))
+      : [];
+  const todayPrecipProbMax = weather?.daily[0]?.precipitationProbabilityMax;
+  const todayPrecipSum = weather?.daily[0]?.precipitationSum;
+  const todayPeakHourlyPrecip = todayHourly.length
+    ? Math.max(...todayHourly.map((p) => p.precipitation))
+    : 0;
+  const precipHint = (() => {
+    const parts: string[] = [];
+    if (currentHourly) parts.push(`今 ${currentHourly.prob}%`);
+    if (todayPrecipSum !== undefined) {
+      parts.push(
+        `累積 ${todayPrecipSum.toFixed(1)} mm（${rainIntensityLabel(todayPeakHourlyPrecip)}）`,
+      );
+    }
+    return parts.length > 0 ? parts.join(" / ") : undefined;
+  })();
 
   return (
     <Card className="relative">
@@ -101,6 +117,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
           <AcornIcon bounce />
           <CardTitle>今日のサマリー</CardTitle>
         </div>
+        <CardDescription>今日 0-24h のざっくり予報</CardDescription>
       </CardHeader>
       <div className="absolute right-2 top-5 z-10 sm:right-4 sm:top-5">
         {highlight ? (
@@ -144,9 +161,12 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
             <p className="font-brand text-2xl leading-snug text-ink-800">
               {weatherCodeLabel(weatherCode)}
             </p>
-            <span className="text-[11px] text-ink-400">
-              今日 0-24h のざっくり予報（今この瞬間の天気）
-            </span>
+            {currentHourly && (
+              <span className="text-[11px] text-ink-400">
+                （今 {weatherCodeLabel(currentHourly.code)} {currentHourly.temp}
+                ℃）
+              </span>
+            )}
           </div>
           <p className="text-xs text-ink-500">
             {tempMax !== null && tempMin !== null
@@ -176,7 +196,11 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
             <SummaryStat
               icon={<CloudRain size={14} />}
               label="降水確率"
-              value={`${highlight.precipitation.probability ?? 0}%`}
+              value={
+                todayPrecipProbMax !== undefined
+                  ? `最大 ${todayPrecipProbMax}%`
+                  : `${highlight.precipitation.probability ?? 0}%`
+              }
               hint={precipHint}
             />
             <SummaryStat
