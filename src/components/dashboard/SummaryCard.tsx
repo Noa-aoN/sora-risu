@@ -40,7 +40,12 @@ function findCurrentSlot(slots: TimeSlot[]): TimeSlot | null {
 
 function pickCurrentHourly(
   weather: NormalizedWeather | null,
-): { code: number; temp: number; prob: number } | null {
+): {
+  code: number;
+  temp: number;
+  prob: number;
+  pressure: number;
+} | null {
   if (!weather) return null;
   const nowMs = Date.now();
   const point = weather.hourly.find((p) => {
@@ -52,6 +57,7 @@ function pickCurrentHourly(
     code: point.weatherCode,
     temp: Math.round(point.temperature),
     prob: point.precipitationProbability,
+    pressure: Math.round(point.pressure),
   };
 }
 
@@ -99,6 +105,9 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
   const todayPrecipProbMax = weather?.daily[0]?.precipitationProbabilityMax;
   const todayPeakHourlyPrecip = todayHourly.length
     ? Math.max(...todayHourly.map((p) => p.precipitation))
+    : null;
+  const todayMaxWind = todayHourly.length
+    ? Math.max(...todayHourly.map((p) => p.windSpeed))
     : null;
   const precipHint =
     todayPeakHourlyPrecip !== null
@@ -178,7 +187,11 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
             <SummaryStat
               icon={<Thermometer size={14} />}
               label="気温"
-              value={`${highlight.temperature.value}℃`}
+              value={
+                currentHourly
+                  ? `現在 ${currentHourly.temp}℃`
+                  : `${highlight.temperature.value}℃`
+              }
               hint={
                 highlight.temperature.feelsLike !== undefined
                   ? `体感 ${highlight.temperature.feelsLike}℃`
@@ -188,7 +201,11 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
             <SummaryStat
               icon={<Gauge size={14} />}
               label="気圧"
-              value={`${Math.round(highlight.pressure.value)} hPa`}
+              value={
+                currentHourly
+                  ? `現在 ${currentHourly.pressure} hPa`
+                  : `${Math.round(highlight.pressure.value)} hPa`
+              }
               hint={pressureTrendLabel(highlight.pressure.trend)}
             />
             <SummaryStat
@@ -205,7 +222,11 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               icon={<Wind size={14} />}
               label="風"
               value={
-                highlight.wind ? `${highlight.wind.speed} m/s` : "—"
+                todayMaxWind !== null
+                  ? `最大 ${todayMaxWind.toFixed(1)} m/s`
+                  : highlight.wind
+                    ? `${highlight.wind.speed} m/s`
+                    : "—"
               }
               hint={
                 highlight.humidity
