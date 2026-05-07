@@ -156,7 +156,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               {dayWeatherSummary}
             </p>
             {currentHourly && (
-              <span className="font-brand text-2xl leading-snug text-[#b86a6a]">
+              <span className="font-brand text-sm text-[#b86a6a]">
                 （現在 {weatherCodeLabel(currentHourly.code)}）
               </span>
             )}
