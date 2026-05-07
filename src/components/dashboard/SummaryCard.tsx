@@ -119,18 +119,17 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
     : null;
   const todayPressureTrend = dayPressureTrendLabel(todayPressures);
 
-  const todayPrecipProbMax = weather?.daily[0]?.precipitationProbabilityMax;
+  const todayPeakProb = todayHourly.length
+    ? Math.max(...todayHourly.map((p) => p.precipitationProbability))
+    : null;
   const todayPeakProbHour = (() => {
-    if (todayHourly.length === 0) return null;
-    let peakProb = -1;
-    let peakHour: number | null = null;
+    if (todayPeakProb === null || todayPeakProb <= 0) return null;
     for (const p of todayHourly) {
-      if (p.precipitationProbability > peakProb) {
-        peakProb = p.precipitationProbability;
-        peakHour = new Date(p.time).getHours();
+      if (p.precipitationProbability === todayPeakProb) {
+        return new Date(p.time).getHours();
       }
     }
-    return peakProb > 0 ? peakHour : null;
+    return null;
   })();
   const todayPeakHourlyPrecip = todayHourly.length
     ? Math.max(...todayHourly.map((p) => p.precipitation))
@@ -147,10 +146,10 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
     ? Math.round(Math.max(...todayHumidities))
     : null;
 
-  const precipHint =
+  const rainStateLabel =
     todayPeakHourlyPrecip !== null
-      ? `${todayPeakHourlyPrecip.toFixed(1)} mm（${rainIntensityLabel(todayPeakHourlyPrecip)}）`
-      : undefined;
+      ? rainIntensityLabel(todayPeakHourlyPrecip)
+      : null;
 
   return (
     <Card className="relative">
@@ -258,14 +257,16 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               icon={<CloudRain size={14} />}
               label="降水確率"
               value={
-                todayPrecipProbMax !== undefined
-                  ? `${todayPrecipProbMax}%`
+                todayPeakProb !== null
+                  ? todayPeakProb > 0 && todayPeakHourlyPrecip !== null
+                    ? `${todayPeakProb}% × ${todayPeakHourlyPrecip.toFixed(1)} mm`
+                    : `${todayPeakProb}%`
                   : `${highlight.precipitation.probability ?? 0}%`
               }
               hint={
                 <>
-                  {precipHint}
-                  {precipHint && todayPeakProbHour !== null && " "}
+                  {rainStateLabel}
+                  {rainStateLabel && todayPeakProbHour !== null && " "}
                   {todayPeakProbHour !== null && (
                     <>ピーク {todayPeakProbHour}時</>
                   )}
