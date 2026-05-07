@@ -24,6 +24,18 @@ export function precipLevelLabel(level: PrecipLevel): string {
   }
 }
 
+export function rainIntensityLabel(mmPerHour: number): string {
+  if (!Number.isFinite(mmPerHour) || mmPerHour <= 0) return "降水なし";
+  if (mmPerHour < 0.5) return "霧雨";
+  if (mmPerHour < 3) return "弱い雨";
+  if (mmPerHour < 10) return "普通の雨";
+  if (mmPerHour < 20) return "やや強い雨";
+  if (mmPerHour < 30) return "強い雨";
+  if (mmPerHour < 50) return "激しい雨";
+  if (mmPerHour < 80) return "非常に激しい雨";
+  return "猛烈な雨";
+}
+
 export function pollenLevelLabel(level: PollenLevel): string {
   switch (level) {
     case "none":

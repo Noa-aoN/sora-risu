@@ -7,7 +7,11 @@ import { AcornIcon } from "@/components/brand/AcornIcon";
 import { SoraRisuPopover } from "@/components/brand/SoraRisuPopover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { pickRisuMood } from "@/features/recommendations/risuMood";
-import { pressureTrendLabel, weatherCodeLabel } from "@/lib/labels";
+import {
+  pressureTrendLabel,
+  rainIntensityLabel,
+  weatherCodeLabel,
+} from "@/lib/labels";
 import type { TimeSlot } from "@/types/timeline";
 import type { NormalizedWeather, WeatherCondition } from "@/types/weather";
 
@@ -74,6 +78,22 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
     pickCurrentHourlyCode(weather) ?? weather?.daily[0]?.weatherCode;
   const mood = pickRisuMood(highlight);
 
+  const precipAmount = highlight?.precipitation.amount;
+  const slotHours =
+    slot &&
+    Number.isFinite(new Date(slot.start).getTime()) &&
+    Number.isFinite(new Date(slot.end).getTime())
+      ? Math.max(
+          1,
+          (new Date(slot.end).getTime() - new Date(slot.start).getTime()) /
+            3_600_000,
+        )
+      : 1;
+  const precipHint =
+    precipAmount !== undefined
+      ? `${precipAmount.toFixed(1)} mm（${rainIntensityLabel(precipAmount / slotHours)}）`
+      : undefined;
+
   return (
     <Card className="relative">
       <CardHeader>
@@ -120,9 +140,14 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
       </div>
       <CardContent className="space-y-5">
         <div className="space-y-1.5">
-          <p className="font-brand text-2xl leading-snug text-ink-800">
-            {weatherCodeLabel(weatherCode)}
-          </p>
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+            <p className="font-brand text-2xl leading-snug text-ink-800">
+              {weatherCodeLabel(weatherCode)}
+            </p>
+            <span className="text-[11px] text-ink-400">
+              今日 0-24h のざっくり予報
+            </span>
+          </div>
           <p className="text-xs text-ink-500">
             {tempMax !== null && tempMin !== null
               ? `最高 ${tempMax}℃ / 最低 ${tempMin}℃`
@@ -152,11 +177,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               icon={<CloudRain size={14} />}
               label="降水確率"
               value={`${highlight.precipitation.probability ?? 0}%`}
-              hint={
-                highlight.precipitation.amount !== undefined
-                  ? `${highlight.precipitation.amount} mm`
-                  : undefined
-              }
+              hint={precipHint}
             />
             <SummaryStat
               icon={<Wind size={14} />}
