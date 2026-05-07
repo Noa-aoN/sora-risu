@@ -18,7 +18,11 @@ import {
   weatherCodeLabel,
 } from "@/lib/labels";
 import type { TimeSlot } from "@/types/timeline";
-import type { NormalizedWeather, WeatherCondition } from "@/types/weather";
+import type {
+  HourlyPoint,
+  NormalizedWeather,
+  WeatherCondition,
+} from "@/types/weather";
 
 type Props = {
   conditions: WeatherCondition[];
@@ -78,6 +82,24 @@ function pickHighlightCondition(
   return conditions[0] ?? null;
 }
 
+function pickFuturePeakProbHour(todayHourly: HourlyPoint[]): number | null {
+  const nowMs = Date.now();
+  const futureHourly = todayHourly.filter(
+    (p) => new Date(p.time).getTime() >= nowMs,
+  );
+  if (futureHourly.length === 0) return null;
+  const futurePeakProb = Math.max(
+    ...futureHourly.map((p) => p.precipitationProbability),
+  );
+  if (futurePeakProb <= 0) return null;
+  for (const p of futureHourly) {
+    if (p.precipitationProbability === futurePeakProb) {
+      return new Date(p.time).getHours();
+    }
+  }
+  return null;
+}
+
 function dayPressureTrendLabel(pressures: number[]): string | null {
   if (pressures.length < 2) return null;
   const first = pressures[0];
@@ -122,15 +144,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
   const todayPeakProb = todayHourly.length
     ? Math.max(...todayHourly.map((p) => p.precipitationProbability))
     : null;
-  const todayPeakProbHour = (() => {
-    if (todayPeakProb === null || todayPeakProb <= 0) return null;
-    for (const p of todayHourly) {
-      if (p.precipitationProbability === todayPeakProb) {
-        return new Date(p.time).getHours();
-      }
-    }
-    return null;
-  })();
+  const todayPeakProbHour = pickFuturePeakProbHour(todayHourly);
   const todayPeakHourlyPrecip = todayHourly.length
     ? Math.max(...todayHourly.map((p) => p.precipitation))
     : null;
@@ -255,18 +269,18 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
             />
             <SummaryStat
               icon={<CloudRain size={14} />}
-              label="降水確率"
+              label="降水確率・降水量"
               value={
                 todayPeakProb !== null
                   ? todayPeakProb > 0 && todayPeakHourlyPrecip !== null
-                    ? `${todayPeakProb}% × ${todayPeakHourlyPrecip.toFixed(1)} mm`
+                    ? `${todayPeakProb}% ・ ${todayPeakHourlyPrecip.toFixed(1)} mm`
                     : `${todayPeakProb}%`
                   : `${highlight.precipitation.probability ?? 0}%`
               }
               hint={
                 <>
                   {rainStateLabel}
-                  {rainStateLabel && todayPeakProbHour !== null && " "}
+                  {rainStateLabel && todayPeakProbHour !== null && " ・ "}
                   {todayPeakProbHour !== null && (
                     <>ピーク {todayPeakProbHour}時</>
                   )}
