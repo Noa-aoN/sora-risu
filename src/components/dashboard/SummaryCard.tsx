@@ -8,7 +8,6 @@ import { SoraRisuPopover } from "@/components/brand/SoraRisuPopover";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -16,6 +15,7 @@ import { pickRisuMood } from "@/features/recommendations/risuMood";
 import {
   pressureTrendLabel,
   rainIntensityLabel,
+  summarizeDayWeather,
   weatherCodeLabel,
 } from "@/lib/labels";
 import type { TimeSlot } from "@/types/timeline";
@@ -86,7 +86,6 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
   const tempMin =
     weather && weather.daily[0] ? Math.round(weather.daily[0].tempMin) : null;
   const currentHourly = pickCurrentHourly(weather);
-  const weatherCode = currentHourly?.code ?? weather?.daily[0]?.weatherCode;
   const mood = pickRisuMood(highlight);
 
   const todayDateStr = weather?.daily[0]?.date;
@@ -94,6 +93,9 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
     todayDateStr && weather
       ? weather.hourly.filter((p) => p.time.startsWith(todayDateStr))
       : [];
+  const dayWeatherSummary = todayHourly.length
+    ? summarizeDayWeather(todayHourly)
+    : weatherCodeLabel(weather?.daily[0]?.weatherCode);
   const todayPrecipProbMax = weather?.daily[0]?.precipitationProbabilityMax;
   const todayPeakHourlyPrecip = todayHourly.length
     ? Math.max(...todayHourly.map((p) => p.precipitation))
@@ -110,7 +112,6 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
           <AcornIcon bounce />
           <CardTitle>今日のサマリー</CardTitle>
         </div>
-        <CardDescription>今日 0-24h のざっくり予報</CardDescription>
       </CardHeader>
       <div className="absolute right-2 top-5 z-10 sm:right-4 sm:top-5">
         {highlight ? (
@@ -152,10 +153,10 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
         <div className="space-y-1.5">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
             <p className="font-brand text-2xl leading-snug text-ink-800">
-              {weatherCodeLabel(weatherCode)}
+              {dayWeatherSummary}
             </p>
             {currentHourly && (
-              <span className="text-[11px] text-ink-400">
+              <span className="font-brand text-2xl leading-snug text-[#b86a6a]">
                 （現在 {weatherCodeLabel(currentHourly.code)}）
               </span>
             )}
@@ -165,7 +166,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               ? `最高 ${tempMax}℃ / 最低 ${tempMin}℃`
               : "—"}
             {currentHourly && (
-              <span className="ml-2 text-ink-400">
+              <span className="ml-2 text-[#b86a6a]">
                 （現在 {currentHourly.temp}℃）
               </span>
             )}

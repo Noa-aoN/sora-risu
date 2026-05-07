@@ -1,4 +1,9 @@
-import type { PollenLevel, PrecipLevel, PressureTrend } from "@/types/weather";
+import type {
+  HourlyPoint,
+  PollenLevel,
+  PrecipLevel,
+  PressureTrend,
+} from "@/types/weather";
 
 export function pressureTrendLabel(trend: PressureTrend): string {
   switch (trend) {
@@ -66,4 +71,40 @@ export function weatherCodeLabel(code?: number): string {
   if (code >= 85 && code <= 86) return "雪";
   if (code >= 95) return "雷雨";
   return "—";
+}
+
+export function summarizeDayWeather(hourly: HourlyPoint[]): string {
+  if (hourly.length === 0) return "—";
+  const buckets = [
+    { from: 6, to: 12 },
+    { from: 12, to: 18 },
+    { from: 18, to: 24 },
+  ];
+  const labels: string[] = [];
+  for (const b of buckets) {
+    const points = hourly.filter((p) => {
+      const h = new Date(p.time).getHours();
+      return h >= b.from && h < b.to;
+    });
+    const first = points[0];
+    if (!first) continue;
+    const counts = new Map<number, number>();
+    for (const p of points) {
+      counts.set(p.weatherCode, (counts.get(p.weatherCode) ?? 0) + 1);
+    }
+    let topCode = first.weatherCode;
+    let topCount = 0;
+    for (const [code, count] of counts) {
+      if (count > topCount) {
+        topCount = count;
+        topCode = code;
+      }
+    }
+    const label = weatherCodeLabel(topCode);
+    if (label !== "—" && labels[labels.length - 1] !== label) {
+      labels.push(label);
+    }
+  }
+  if (labels.length === 0) return "—";
+  return labels.join("のち");
 }
