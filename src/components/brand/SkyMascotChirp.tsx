@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { MiniMascot } from "@/components/brand/MiniMascot";
 
@@ -54,27 +55,54 @@ function pickChirp(prev: string | null): string {
 export function SkyMascotChirp() {
   const [open, setOpen] = useState(false);
   const [chirp, setChirp] = useState<string | null>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  // ボタン位置を測って popover を文書座標で固定する
+  // (Card の backdrop-filter で作られる stacking context を回避するため Portal で body 直下に出す)
+  useLayoutEffect(() => {
+    if (!open) return;
+    const update = () => {
+      const rect = buttonRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setPos({
+        top: rect.bottom + window.scrollY + 8,
+        left: rect.left + window.scrollX + rect.width / 2,
+      });
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (wrapRef.current?.contains(target)) return;
+      if (popoverRef.current?.contains(target)) return;
+      setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
+    const onScroll = () => setOpen(false);
     document.addEventListener("mousedown", onDoc);
     document.addEventListener("keydown", onKey);
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       document.removeEventListener("mousedown", onDoc);
       document.removeEventListener("keydown", onKey);
+      window.removeEventListener("scroll", onScroll);
     };
   }, [open]);
 
   return (
     <div ref={wrapRef} className="relative mt-0.5 inline-block">
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => {
           setChirp((prev) => pickChirp(prev));
@@ -86,27 +114,40 @@ export function SkyMascotChirp() {
       >
         <MiniMascot />
       </button>
-      {open && chirp && (
-        <div
-          role="dialog"
-          className="absolute left-1/2 top-full z-30 mt-2 flex -translate-x-[calc(50%+4px)] justify-center rounded-2xl border border-cream-200 bg-white px-3 py-3 shadow-md shadow-leaf-900/[0.08]"
-        >
-          <span
-            aria-hidden
-            className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-cream-200 bg-white"
-          />
-          <p
-            className="font-brand text-[13px] leading-6 text-ink-700"
+      {open &&
+        chirp &&
+        pos &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            ref={popoverRef}
+            role="dialog"
             style={{
-              writingMode: "vertical-rl",
-              textOrientation: "upright",
-              letterSpacing: "0.05em",
+              position: "absolute",
+              top: pos.top,
+              left: pos.left,
+              transform: "translateX(calc(-50% - 4px))",
+              zIndex: 50,
             }}
+            className="flex justify-center rounded-2xl border border-cream-200 bg-white px-3 py-3 shadow-md shadow-leaf-900/[0.08]"
           >
-            {chirp}
-          </p>
-        </div>
-      )}
+            <span
+              aria-hidden
+              className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-cream-200 bg-white"
+            />
+            <p
+              className="font-brand text-[13px] leading-6 text-ink-700"
+              style={{
+                writingMode: "vertical-rl",
+                textOrientation: "upright",
+                letterSpacing: "0.05em",
+              }}
+            >
+              {chirp}
+            </p>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
