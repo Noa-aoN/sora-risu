@@ -73,6 +73,18 @@ export function weatherCodeLabel(code?: number): string {
   return "—";
 }
 
+export function isThunderstormCode(code: number): boolean {
+  return code >= 95;
+}
+
+export function isSnowCode(code: number): boolean {
+  return (code >= 71 && code <= 77) || (code >= 85 && code <= 86);
+}
+
+export function isFogCode(code: number): boolean {
+  return code >= 45 && code <= 48;
+}
+
 export function summarizeDayWeather(hourly: HourlyPoint[]): string {
   if (hourly.length === 0) return "—";
   const buckets = [

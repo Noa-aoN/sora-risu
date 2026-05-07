@@ -1,10 +1,33 @@
 import type { SoraRisuPose } from "@/components/brand/SoraRisuPopover";
 import type { NormalizedWeather, WeatherCondition } from "@/types/weather";
+import { isFogCode, isSnowCode, isThunderstormCode } from "../../lib/labels.ts";
 
 export type RisuMood = {
   pose: SoraRisuPose;
   message: string;
 };
+
+function dayHasCode(
+  highlight: WeatherCondition | null,
+  weather: NormalizedWeather | null,
+  predicate: (code: number) => boolean,
+): boolean {
+  if (highlight?.weatherCode !== undefined && predicate(highlight.weatherCode))
+    return true;
+  const day = weather?.daily[0];
+  if (day && predicate(day.weatherCode)) return true;
+  if (day && weather) {
+    const dateStr = day.date;
+    if (
+      weather.hourly.some(
+        (p) => p.time.startsWith(dateStr) && predicate(p.weatherCode),
+      )
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
 
 export function pickRisuMood(
   highlight: WeatherCondition | null,
@@ -27,6 +50,14 @@ export function pickRisuMood(
     };
   }
 
+  if (dayHasCode(highlight, weather, isThunderstormCode)) {
+    return {
+      pose: "umbrella",
+      message:
+        "雷雨のおそれ。\n音が聞こえたらすぐ建物の中へ。屋外の予定は短めに。",
+    };
+  }
+
   if (dailyTempMax !== undefined && dailyTempMax >= 35) {
     return {
       pose: "sunny",
@@ -40,6 +71,14 @@ export function pickRisuMood(
       pose: "sunny",
       message:
         "夜になっても気温が下がりにくい予報。\n寝苦しい時は冷房や保冷剤で、ぐっすり眠れるように。",
+    };
+  }
+
+  if (dayHasCode(highlight, weather, isSnowCode)) {
+    return {
+      pose: "blanket",
+      message:
+        "雪が降る予報。\n滑りにくい靴と防水の上着で、足元と頭から冷えを守ろう。",
     };
   }
 
@@ -74,6 +113,14 @@ export function pickRisuMood(
       pose: "blanket",
       message:
         "夜は氷点下になりそう。\n足元の凍結に気をつけて、滑りにくい靴がおすすめ。",
+    };
+  }
+
+  if (dayHasCode(highlight, weather, isFogCode)) {
+    return {
+      pose: "pressure_calm",
+      message:
+        "霧が出やすい予報。\n運転や自転車は早めにライトを点けて、いつもよりゆっくりめが安心。",
     };
   }
 

@@ -1,18 +1,49 @@
 import type { SkyLetter } from "@/types/recommendation";
 import type { NormalizedWeather, WeatherCondition } from "@/types/weather";
+import { isFogCode, isSnowCode, isThunderstormCode } from "../../lib/labels.ts";
 
 import {
   CALM,
   EXTREME_COLD,
   EXTREME_HEAT,
+  FOG_DAY,
   HEAVY_RAIN,
   HIGH_POLLEN,
   NO_DATA,
   PRESSURE_SWING,
+  SNOW_DAY,
   TEMP_SWING,
+  THUNDERSTORM,
   type LetterPattern,
   type Season,
 } from "./letterMessages.ts";
+
+function dayHasCode(
+  conditions: WeatherCondition[],
+  weather: NormalizedWeather | null,
+  predicate: (code: number) => boolean,
+): boolean {
+  if (
+    conditions.some(
+      (c) => c.weatherCode !== undefined && predicate(c.weatherCode),
+    )
+  ) {
+    return true;
+  }
+  const day = weather?.daily[0];
+  if (day && predicate(day.weatherCode)) return true;
+  if (day && weather) {
+    const dateStr = day.date;
+    if (
+      weather.hourly.some(
+        (p) => p.time.startsWith(dateStr) && predicate(p.weatherCode),
+      )
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
 
 function dayIndex(date: Date = new Date()): number {
   return Math.floor(date.getTime() / 86_400_000);
@@ -52,6 +83,8 @@ function pickPattern(
   );
   if (hasBigPressureSwing) return PRESSURE_SWING;
 
+  if (dayHasCode(conditions, weather, isThunderstormCode)) return THUNDERSTORM;
+
   const dailyTempMax = weather?.daily[0]?.tempMax;
   const dailyTempMin = weather?.daily[0]?.tempMin;
 
@@ -61,6 +94,8 @@ function pickPattern(
   ) {
     return EXTREME_HEAT;
   }
+
+  if (dayHasCode(conditions, weather, isSnowCode)) return SNOW_DAY;
 
   const hasHeavyRain = conditions.some((c) => c.precipitation.level === "high");
   if (hasHeavyRain) return HEAVY_RAIN;
@@ -76,6 +111,8 @@ function pickPattern(
   ) {
     return EXTREME_COLD;
   }
+
+  if (dayHasCode(conditions, weather, isFogCode)) return FOG_DAY;
 
   const tempValues = conditions.map((c) => c.temperature.value);
   const slotMax = tempValues.length ? Math.max(...tempValues) : 0;
