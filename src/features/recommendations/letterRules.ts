@@ -4,11 +4,13 @@ import { isFogCode, isSnowCode, isThunderstormCode } from "../../lib/labels.ts";
 
 import {
   CALM,
+  DRY_AIR,
   EXTREME_COLD,
   EXTREME_HEAT,
   FOG_DAY,
   HEAVY_RAIN,
   HIGH_POLLEN,
+  MUGGY,
   NO_DATA,
   PRESSURE_SWING,
   SNOW_DAY,
@@ -17,6 +19,20 @@ import {
   type LetterPattern,
   type Season,
 } from "./letterMessages.ts";
+
+function dayHumidityRange(
+  weather: NormalizedWeather | null,
+): { min: number; max: number } | null {
+  const day = weather?.daily[0];
+  if (!day || !weather) return null;
+  const todayPoints = weather.hourly.filter((p) => p.time.startsWith(day.date));
+  if (todayPoints.length === 0) return null;
+  const values = todayPoints.map((p) => p.humidity);
+  return {
+    min: Math.min(...values),
+    max: Math.max(...values),
+  };
+}
 
 function dayHasCode(
   conditions: WeatherCondition[],
@@ -95,6 +111,16 @@ function pickPattern(
     return EXTREME_HEAT;
   }
 
+  const humidityRange = dayHumidityRange(weather);
+  if (
+    humidityRange &&
+    humidityRange.max >= 80 &&
+    dailyTempMax !== undefined &&
+    dailyTempMax >= 28
+  ) {
+    return MUGGY;
+  }
+
   if (dayHasCode(conditions, weather, isSnowCode)) return SNOW_DAY;
 
   const hasHeavyRain = conditions.some((c) => c.precipitation.level === "high");
@@ -111,6 +137,8 @@ function pickPattern(
   ) {
     return EXTREME_COLD;
   }
+
+  if (humidityRange && humidityRange.min <= 30) return DRY_AIR;
 
   if (dayHasCode(conditions, weather, isFogCode)) return FOG_DAY;
 

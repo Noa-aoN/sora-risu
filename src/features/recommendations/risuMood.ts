@@ -7,6 +7,20 @@ export type RisuMood = {
   message: string;
 };
 
+function dayHumidityRange(
+  weather: NormalizedWeather | null,
+): { min: number; max: number } | null {
+  const day = weather?.daily[0];
+  if (!day || !weather) return null;
+  const todayPoints = weather.hourly.filter((p) => p.time.startsWith(day.date));
+  if (todayPoints.length === 0) return null;
+  const values = todayPoints.map((p) => p.humidity);
+  return {
+    min: Math.min(...values),
+    max: Math.max(...values),
+  };
+}
+
 function dayHasCode(
   highlight: WeatherCondition | null,
   weather: NormalizedWeather | null,
@@ -74,6 +88,20 @@ export function pickRisuMood(
     };
   }
 
+  const humidityRange = dayHumidityRange(weather);
+  if (
+    humidityRange &&
+    humidityRange.max >= 80 &&
+    dailyTempMax !== undefined &&
+    dailyTempMax >= 28
+  ) {
+    return {
+      pose: "sunny",
+      message:
+        "今日は蒸し暑い予報。\n通気のいい服でこまめに水分・塩分、無理せずクールダウンしよう。",
+    };
+  }
+
   if (dayHasCode(highlight, weather, isSnowCode)) {
     return {
       pose: "blanket",
@@ -113,6 +141,14 @@ export function pickRisuMood(
       pose: "blanket",
       message:
         "夜は氷点下になりそう。\n足元の凍結に気をつけて、滑りにくい靴がおすすめ。",
+    };
+  }
+
+  if (humidityRange && humidityRange.min <= 30) {
+    return {
+      pose: "pressure_calm",
+      message:
+        "空気が乾燥しやすい一日。\nのどとお肌の保湿、こまめな水分補給でいたわってね。",
     };
   }
 
