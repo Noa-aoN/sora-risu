@@ -140,12 +140,12 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
       </div>
       <CardContent className="space-y-5">
         <div className="space-y-1.5">
-          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
             <p className="font-brand text-2xl leading-snug text-ink-800">
               {weatherCodeLabel(weatherCode)}
             </p>
             <span className="text-[11px] text-ink-400">
-              今日 0-24h のざっくり予報
+              今日 0-24h のざっくり予報（今この瞬間の天気）
             </span>
           </div>
           <p className="text-xs text-ink-500">
