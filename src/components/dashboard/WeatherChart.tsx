@@ -489,7 +489,7 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
           <ChartAnchorToggle />
         </div>
         {range === "24h" && (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-[10px] text-ink-400">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-3 text-[10px] text-ink-400">
             <span className="inline-flex items-center gap-1">
               <span className="inline-block h-2.5 w-4 rounded-sm bg-pollen-100" />
               朝
