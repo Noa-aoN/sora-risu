@@ -166,7 +166,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               : "—"}
             {currentHourly && (
               <span className="ml-2 text-ink-400">
-                現在 {currentHourly.temp}℃
+                （現在 {currentHourly.temp}℃）
               </span>
             )}
           </p>
