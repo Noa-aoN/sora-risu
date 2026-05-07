@@ -9,6 +9,7 @@ const HOURLY_FIELDS = [
   "precipitation",
   "weathercode",
   "wind_speed_10m",
+  "uv_index",
 ] as const;
 
 const DAILY_FIELDS = [
@@ -19,6 +20,7 @@ const DAILY_FIELDS = [
   "weathercode",
   "sunrise",
   "sunset",
+  "uv_index_max",
 ] as const;
 
 export type RawForecastResponse = {
@@ -35,6 +37,7 @@ export type RawForecastResponse = {
     precipitation: number[];
     weathercode: number[];
     wind_speed_10m: number[];
+    uv_index: number[];
   };
   daily: {
     time: string[];
@@ -45,6 +48,7 @@ export type RawForecastResponse = {
     weathercode: number[];
     sunrise: string[];
     sunset: string[];
+    uv_index_max: number[];
   };
 };
 

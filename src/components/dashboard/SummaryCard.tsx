@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/card";
 import { pickRisuMood } from "@/features/recommendations/risuMood";
 import {
-  pressureTrendLabel,
   rainIntensityLabel,
   summarizeDayWeather,
   weatherCodeLabel,
@@ -43,7 +42,6 @@ function pickCurrentHourly(
 ): {
   code: number;
   temp: number;
-  prob: number;
   pressure: number;
 } | null {
   if (!weather) return null;
@@ -56,7 +54,6 @@ function pickCurrentHourly(
   return {
     code: point.weatherCode,
     temp: Math.round(point.temperature),
-    prob: point.precipitationProbability,
     pressure: Math.round(point.pressure),
   };
 }
@@ -81,6 +78,16 @@ function pickHighlightCondition(
   return conditions[0] ?? null;
 }
 
+function dayPressureTrendLabel(pressures: number[]): string | null {
+  if (pressures.length < 2) return null;
+  const first = pressures[0];
+  const last = pressures[pressures.length - 1];
+  if (first === undefined || last === undefined) return null;
+  const diff = last - first;
+  if (Math.abs(diff) < 0.8) return "安定";
+  return diff > 0 ? "上昇傾向" : "下降傾向";
+}
+
 export function SummaryCard({ conditions, slots, weather }: Props) {
   const highlight = pickHighlightCondition(conditions, slots);
   const slot = highlight
@@ -102,13 +109,33 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
   const dayWeatherSummary = todayHourly.length
     ? summarizeDayWeather(todayHourly)
     : weatherCodeLabel(weather?.daily[0]?.weatherCode);
+
+  const todayPressures = todayHourly.map((p) => p.pressure);
+  const todayMaxPressure = todayPressures.length
+    ? Math.round(Math.max(...todayPressures))
+    : null;
+  const todayMinPressure = todayPressures.length
+    ? Math.round(Math.min(...todayPressures))
+    : null;
+  const todayPressureTrend = dayPressureTrendLabel(todayPressures);
+
   const todayPrecipProbMax = weather?.daily[0]?.precipitationProbabilityMax;
   const todayPeakHourlyPrecip = todayHourly.length
     ? Math.max(...todayHourly.map((p) => p.precipitation))
     : null;
-  const todayMaxWind = todayHourly.length
-    ? Math.max(...todayHourly.map((p) => p.windSpeed))
+
+  const todayWinds = todayHourly.map((p) => p.windSpeed);
+  const todayMaxWind = todayWinds.length ? Math.max(...todayWinds) : null;
+  const todayAvgWind = todayWinds.length
+    ? todayWinds.reduce((a, b) => a + b, 0) / todayWinds.length
     : null;
+
+  const todayMaxUv = weather?.daily[0]?.uvIndexMax;
+  const todayHumidities = todayHourly.map((p) => p.humidity);
+  const todayMaxHumidity = todayHumidities.length
+    ? Math.round(Math.max(...todayHumidities))
+    : null;
+
   const precipHint =
     todayPeakHourlyPrecip !== null
       ? `降水量 最大 ${todayPeakHourlyPrecip.toFixed(1)} mm（${rainIntensityLabel(todayPeakHourlyPrecip)}）`
@@ -160,26 +187,14 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
       </div>
       <CardContent className="space-y-5">
         <div className="space-y-1.5">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-            <p className="font-brand text-2xl leading-snug text-ink-800">
-              {dayWeatherSummary}
-            </p>
-            {currentHourly && (
-              <span className="font-brand text-sm text-[#b86a6a]">
-                （現在 {weatherCodeLabel(currentHourly.code)}）
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-ink-500">
-            {tempMax !== null && tempMin !== null
-              ? `最高 ${tempMax}℃ / 最低 ${tempMin}℃`
-              : "—"}
-            {currentHourly && (
-              <span className="ml-2 text-[11px] text-[#b86a6a]">
-                （現在 {currentHourly.temp}℃）
-              </span>
-            )}
+          <p className="font-brand text-2xl leading-snug text-ink-800">
+            {dayWeatherSummary}
           </p>
+          {currentHourly && (
+            <p className="text-xs text-[#b86a6a]">
+              （現在 {weatherCodeLabel(currentHourly.code)}）
+            </p>
+          )}
         </div>
 
         {highlight && slot && (
@@ -188,25 +203,41 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               icon={<Thermometer size={14} />}
               label="気温"
               value={
-                currentHourly
-                  ? `現在 ${currentHourly.temp}℃`
-                  : `${highlight.temperature.value}℃`
+                tempMax !== null && tempMin !== null
+                  ? `最高 ${tempMax} / 最低 ${tempMin}℃`
+                  : "—"
               }
               hint={
-                highlight.temperature.feelsLike !== undefined
-                  ? `体感 ${highlight.temperature.feelsLike}℃`
-                  : undefined
+                <>
+                  {highlight.temperature.feelsLike !== undefined && (
+                    <>体感 {highlight.temperature.feelsLike}℃</>
+                  )}
+                  {currentHourly && (
+                    <span className="ml-1 text-[#b86a6a]">
+                      （現在 {currentHourly.temp}℃）
+                    </span>
+                  )}
+                </>
               }
             />
             <SummaryStat
               icon={<Gauge size={14} />}
               label="気圧"
               value={
-                currentHourly
-                  ? `現在 ${currentHourly.pressure} hPa`
-                  : `${Math.round(highlight.pressure.value)} hPa`
+                todayMaxPressure !== null && todayMinPressure !== null
+                  ? `最大 ${todayMaxPressure} / 最小 ${todayMinPressure} hPa`
+                  : "—"
               }
-              hint={pressureTrendLabel(highlight.pressure.trend)}
+              hint={
+                <>
+                  {todayPressureTrend ?? "—"}
+                  {currentHourly && (
+                    <span className="ml-1 text-[#b86a6a]">
+                      （現在 {currentHourly.pressure} hPa）
+                    </span>
+                  )}
+                </>
+              }
             />
             <SummaryStat
               icon={<CloudRain size={14} />}
@@ -222,16 +253,22 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               icon={<Wind size={14} />}
               label="風"
               value={
-                todayMaxWind !== null
-                  ? `最大 ${todayMaxWind.toFixed(1)} m/s`
-                  : highlight.wind
-                    ? `${highlight.wind.speed} m/s`
-                    : "—"
+                todayMaxWind !== null && todayAvgWind !== null
+                  ? `最大 ${todayMaxWind.toFixed(1)} / 平均 ${todayAvgWind.toFixed(1)} m/s`
+                  : "—"
               }
               hint={
-                highlight.humidity
-                  ? `湿度 ${highlight.humidity.value}%`
-                  : undefined
+                <>
+                  {todayMaxHumidity !== null && (
+                    <>湿度 最大 {todayMaxHumidity}%</>
+                  )}
+                  {todayMaxUv !== undefined && (
+                    <>
+                      {todayMaxHumidity !== null && " / "}
+                      UV 最大 {todayMaxUv.toFixed(0)}
+                    </>
+                  )}
+                </>
               }
             />
           </div>
@@ -254,7 +291,7 @@ function SummaryStat({
   icon: React.ReactNode;
   label: string;
   value: string;
-  hint?: string;
+  hint?: React.ReactNode;
 }) {
   return (
     <div className="rounded-2xl bg-cream-50 px-4 py-3">

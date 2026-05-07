@@ -18,6 +18,7 @@ export type HourlyPoint = {
   windSpeed: number;
   humidity: number;
   weatherCode: number;
+  uvIndex: number;
 };
 
 export type DailyPoint = {
@@ -29,6 +30,7 @@ export type DailyPoint = {
   weatherCode: number;
   sunrise: string;
   sunset: string;
+  uvIndexMax: number;
 };
 
 export type PollenHourlyPoint = {
