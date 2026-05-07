@@ -1,18 +1,24 @@
 import type { SoraRisuPose } from "@/components/brand/SoraRisuPopover";
-import type { WeatherCondition } from "@/types/weather";
+import type { NormalizedWeather, WeatherCondition } from "@/types/weather";
 
 export type RisuMood = {
   pose: SoraRisuPose;
   message: string;
 };
 
-export function pickRisuMood(highlight: WeatherCondition | null): RisuMood {
+export function pickRisuMood(
+  highlight: WeatherCondition | null,
+  weather: NormalizedWeather | null = null,
+): RisuMood {
   if (!highlight) {
     return {
       pose: "on-cloud",
       message: "今、空のようすを聞きにいってるよ。\n少し待っていてね。",
     };
   }
+
+  const dailyTempMax = weather?.daily[0]?.tempMax;
+  const dailyTempMin = weather?.daily[0]?.tempMin;
 
   if (highlight.pressure.changeLevel === "high") {
     return {
@@ -21,10 +27,27 @@ export function pickRisuMood(highlight: WeatherCondition | null): RisuMood {
     };
   }
 
+  if (dailyTempMax !== undefined && dailyTempMax >= 35) {
+    return {
+      pose: "sunny",
+      message:
+        "今日はかなり暑くなりそう。\n水分とこまめな休憩、日陰を上手に使って無理せずね。",
+    };
+  }
+
+  if (dailyTempMin !== undefined && dailyTempMin >= 25) {
+    return {
+      pose: "sunny",
+      message:
+        "夜になっても気温が下がりにくい予報。\n寝苦しい時は冷房や保冷剤で、ぐっすり眠れるように。",
+    };
+  }
+
   if (highlight.precipitation.level === "high") {
     return {
       pose: "umbrella",
-      message: "雨が近いみたい。\n折りたたみ傘を持っていくと安心だよ。",
+      message:
+        "しっかり雨が降る時間があるよ。\n大きめの傘と濡れにくい靴で、足元から守ろう。",
     };
   }
 
@@ -38,6 +61,22 @@ export function pickRisuMood(highlight: WeatherCondition | null): RisuMood {
     };
   }
 
+  if (dailyTempMax !== undefined && dailyTempMax < 5) {
+    return {
+      pose: "blanket",
+      message:
+        "今日は冷え込みそう。\n厚手の上着と、手袋・マフラーで首・手首を温めて出かけよう。",
+    };
+  }
+
+  if (dailyTempMin !== undefined && dailyTempMin < 0) {
+    return {
+      pose: "blanket",
+      message:
+        "夜は氷点下になりそう。\n足元の凍結に気をつけて、滑りにくい靴がおすすめ。",
+    };
+  }
+
   if (highlight.wind && highlight.wind.level === "high") {
     return {
       pose: "blanket",
@@ -48,7 +87,8 @@ export function pickRisuMood(highlight: WeatherCondition | null): RisuMood {
   if (highlight.precipitation.level === "medium") {
     return {
       pose: "rain",
-      message: "ぱらつく時間がありそう。\n出かける前に空を見てから決めよう。",
+      message:
+        "ぱらつく時間がありそう。\n出かける前に空を見てから決めよう。",
     };
   }
 

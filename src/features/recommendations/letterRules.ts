@@ -1,8 +1,10 @@
 import type { SkyLetter } from "@/types/recommendation";
-import type { WeatherCondition } from "@/types/weather";
+import type { NormalizedWeather, WeatherCondition } from "@/types/weather";
 
 import {
   CALM,
+  EXTREME_COLD,
+  EXTREME_HEAT,
   HEAVY_RAIN,
   HIGH_POLLEN,
   NO_DATA,
@@ -41,11 +43,24 @@ function pickFromPattern(
   };
 }
 
-function pickPattern(conditions: WeatherCondition[]): LetterPattern {
+function pickPattern(
+  conditions: WeatherCondition[],
+  weather: NormalizedWeather | null,
+): LetterPattern {
   const hasBigPressureSwing = conditions.some(
     (c) => c.pressure.changeLevel === "high",
   );
   if (hasBigPressureSwing) return PRESSURE_SWING;
+
+  const dailyTempMax = weather?.daily[0]?.tempMax;
+  const dailyTempMin = weather?.daily[0]?.tempMin;
+
+  if (
+    (dailyTempMax !== undefined && dailyTempMax >= 35) ||
+    (dailyTempMin !== undefined && dailyTempMin >= 25)
+  ) {
+    return EXTREME_HEAT;
+  }
 
   const hasHeavyRain = conditions.some((c) => c.precipitation.level === "high");
   if (hasHeavyRain) return HEAVY_RAIN;
@@ -55,15 +70,25 @@ function pickPattern(conditions: WeatherCondition[]): LetterPattern {
   );
   if (hasHighPollen) return HIGH_POLLEN;
 
+  if (
+    (dailyTempMax !== undefined && dailyTempMax < 5) ||
+    (dailyTempMin !== undefined && dailyTempMin < 0)
+  ) {
+    return EXTREME_COLD;
+  }
+
   const tempValues = conditions.map((c) => c.temperature.value);
-  const tempMax = tempValues.length ? Math.max(...tempValues) : 0;
-  const tempMin = tempValues.length ? Math.min(...tempValues) : 0;
-  if (tempMax - tempMin >= 8) return TEMP_SWING;
+  const slotMax = tempValues.length ? Math.max(...tempValues) : 0;
+  const slotMin = tempValues.length ? Math.min(...tempValues) : 0;
+  if (slotMax - slotMin >= 8) return TEMP_SWING;
 
   return CALM;
 }
 
-export function buildSkyLetter(conditions: WeatherCondition[]): SkyLetter {
+export function buildSkyLetter(
+  conditions: WeatherCondition[],
+  weather: NormalizedWeather | null = null,
+): SkyLetter {
   if (conditions.length === 0) return pickFromPattern(NO_DATA);
-  return pickFromPattern(pickPattern(conditions));
+  return pickFromPattern(pickPattern(conditions, weather));
 }

@@ -92,7 +92,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
   const tempMin =
     weather && weather.daily[0] ? Math.round(weather.daily[0].tempMin) : null;
   const currentHourly = pickCurrentHourly(weather);
-  const mood = pickRisuMood(highlight);
+  const mood = pickRisuMood(highlight, weather);
 
   const todayDateStr = weather?.daily[0]?.date;
   const todayHourly =
