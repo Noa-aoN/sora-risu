@@ -166,7 +166,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               ? `最高 ${tempMax}℃ / 最低 ${tempMin}℃`
               : "—"}
             {currentHourly && (
-              <span className="ml-2 text-[#b86a6a]">
+              <span className="ml-2 text-[11px] text-[#b86a6a]">
                 （現在 {currentHourly.temp}℃）
               </span>
             )}
