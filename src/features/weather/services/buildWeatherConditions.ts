@@ -68,10 +68,10 @@ function classifyPressureTrend(points: HourlyPoint[]): {
 }
 
 function classifyPrecip(probability: number, amount: number): PrecipLevel {
-  if (probability < 10 && amount < 0.1) return "none";
-  if (probability < 30 && amount < 1) return "low";
-  if (probability < 60 && amount < 5) return "medium";
-  return "high";
+  if (amount >= 5) return "high";
+  if (amount >= 1) return "medium";
+  if (amount >= 0.1 || probability >= 50) return "low";
+  return "none";
 }
 
 function classifyWind(speed: number): ChangeLevel {
