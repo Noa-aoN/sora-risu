@@ -95,20 +95,13 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
       ? weather.hourly.filter((p) => p.time.startsWith(todayDateStr))
       : [];
   const todayPrecipProbMax = weather?.daily[0]?.precipitationProbabilityMax;
-  const todayPrecipSum = weather?.daily[0]?.precipitationSum;
   const todayPeakHourlyPrecip = todayHourly.length
     ? Math.max(...todayHourly.map((p) => p.precipitation))
-    : 0;
-  const precipHint = (() => {
-    const parts: string[] = [];
-    if (currentHourly) parts.push(`今 ${currentHourly.prob}%`);
-    if (todayPrecipSum !== undefined) {
-      parts.push(
-        `累積 ${todayPrecipSum.toFixed(1)} mm（${rainIntensityLabel(todayPeakHourlyPrecip)}）`,
-      );
-    }
-    return parts.length > 0 ? parts.join(" / ") : undefined;
-  })();
+    : null;
+  const precipHint =
+    todayPeakHourlyPrecip !== null
+      ? `降水量 最大 ${todayPeakHourlyPrecip.toFixed(1)} mm（${rainIntensityLabel(todayPeakHourlyPrecip)}）`
+      : undefined;
 
   return (
     <Card className="relative">
