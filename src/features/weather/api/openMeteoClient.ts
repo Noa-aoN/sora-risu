@@ -9,6 +9,7 @@ const HOURLY_FIELDS = [
   "precipitation",
   "weathercode",
   "wind_speed_10m",
+  "wind_gusts_10m",
   "uv_index",
 ] as const;
 
@@ -20,6 +21,7 @@ const DAILY_FIELDS = [
   "weathercode",
   "sunrise",
   "sunset",
+  "wind_gusts_10m_max",
   "uv_index_max",
 ] as const;
 
@@ -37,6 +39,7 @@ export type RawForecastResponse = {
     precipitation: number[];
     weathercode: number[];
     wind_speed_10m: number[];
+    wind_gusts_10m: number[];
     uv_index: number[];
   };
   daily: {
@@ -48,6 +51,7 @@ export type RawForecastResponse = {
     weathercode: number[];
     sunrise: string[];
     sunset: string[];
+    wind_gusts_10m_max: number[];
     uv_index_max: number[];
   };
 };
@@ -119,6 +123,7 @@ export async function fetchForecast({
     timezone: "auto",
     forecast_days: forecastDays.toString(),
     past_days: pastDays.toString(),
+    wind_speed_unit: "ms",
   });
 
   let json: unknown;

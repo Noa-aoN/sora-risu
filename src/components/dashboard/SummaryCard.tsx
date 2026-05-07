@@ -139,6 +139,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
   const todayWinds = todayHourly.map((p) => p.windSpeed);
   const todayMaxWind = todayWinds.length ? Math.max(...todayWinds) : null;
   const todayMinWind = todayWinds.length ? Math.min(...todayWinds) : null;
+  const todayMaxGust = weather?.daily[0]?.windGustMax;
 
   const todayMaxUv = weather?.daily[0]?.uvIndexMax;
   const todayHumidities = todayHourly.map((p) => p.humidity);
@@ -276,7 +277,9 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               label="風・湿度・紫外線"
               value={
                 todayMaxWind !== null && todayMinWind !== null
-                  ? `${todayMinWind.toFixed(1)} ~ ${todayMaxWind.toFixed(1)} m/s`
+                  ? todayMaxGust !== undefined && todayMaxGust > 0
+                    ? `${todayMinWind.toFixed(1)} ~ ${todayMaxWind.toFixed(1)} m/s（突風 ${todayMaxGust.toFixed(1)}）`
+                    : `${todayMinWind.toFixed(1)} ~ ${todayMaxWind.toFixed(1)} m/s`
                   : "—"
               }
               hint={

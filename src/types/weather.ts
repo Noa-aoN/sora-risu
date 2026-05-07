@@ -16,6 +16,7 @@ export type HourlyPoint = {
   precipitationProbability: number;
   precipitation: number;
   windSpeed: number;
+  windGust: number;
   humidity: number;
   weatherCode: number;
   uvIndex: number;
@@ -30,6 +31,7 @@ export type DailyPoint = {
   weatherCode: number;
   sunrise: string;
   sunset: string;
+  windGustMax: number;
   uvIndexMax: number;
 };
 
