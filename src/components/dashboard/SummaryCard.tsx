@@ -120,9 +120,28 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
   const todayPressureTrend = dayPressureTrendLabel(todayPressures);
 
   const todayPrecipProbMax = weather?.daily[0]?.precipitationProbabilityMax;
+  const todayPeakProbHour = (() => {
+    if (todayHourly.length === 0) return null;
+    let peakProb = -1;
+    let peakHour: number | null = null;
+    for (const p of todayHourly) {
+      if (p.precipitationProbability > peakProb) {
+        peakProb = p.precipitationProbability;
+        peakHour = new Date(p.time).getHours();
+      }
+    }
+    return peakProb > 0 ? peakHour : null;
+  })();
   const todayPeakHourlyPrecip = todayHourly.length
     ? Math.max(...todayHourly.map((p) => p.precipitation))
     : null;
+  const currentRainStatus = (() => {
+    if (!currentHourly) return null;
+    const c = currentHourly.code;
+    if ((c >= 51 && c <= 67) || (c >= 80 && c <= 82) || c >= 95) return "雨";
+    if ((c >= 71 && c <= 77) || (c >= 85 && c <= 86)) return "雪";
+    return "非雨";
+  })();
 
   const todayWinds = todayHourly.map((p) => p.windSpeed);
   const todayMaxWind = todayWinds.length ? Math.max(...todayWinds) : null;
@@ -204,18 +223,21 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               label="気温"
               value={
                 tempMax !== null && tempMin !== null
-                  ? `最高 ${tempMax} / 最低 ${tempMin}℃`
+                  ? `最高 ${tempMax} ・ 最低 ${tempMin}℃`
                   : "—"
               }
               hint={
                 <>
-                  {highlight.temperature.feelsLike !== undefined && (
-                    <>体感 {highlight.temperature.feelsLike}℃</>
-                  )}
                   {currentHourly && (
-                    <span className="ml-1 text-[#b86a6a]">
+                    <span className="text-[#b86a6a]">
                       （現在 {currentHourly.temp}℃）
                     </span>
+                  )}
+                  {currentHourly &&
+                    highlight.temperature.feelsLike !== undefined &&
+                    " "}
+                  {highlight.temperature.feelsLike !== undefined && (
+                    <>体感 {highlight.temperature.feelsLike}℃</>
                   )}
                 </>
               }
@@ -225,17 +247,18 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               label="気圧"
               value={
                 todayMaxPressure !== null && todayMinPressure !== null
-                  ? `最大 ${todayMaxPressure} / 最小 ${todayMinPressure} hPa`
+                  ? `最大 ${todayMaxPressure} ・ 最小 ${todayMinPressure} hPa`
                   : "—"
               }
               hint={
                 <>
-                  {todayPressureTrend ?? "—"}
                   {currentHourly && (
-                    <span className="ml-1 text-[#b86a6a]">
+                    <span className="text-[#b86a6a]">
                       （現在 {currentHourly.pressure} hPa）
                     </span>
                   )}
+                  {currentHourly && todayPressureTrend && " "}
+                  {todayPressureTrend ?? null}
                 </>
               }
             />
@@ -244,17 +267,29 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               label="降水確率"
               value={
                 todayPrecipProbMax !== undefined
-                  ? `最大 ${todayPrecipProbMax}%`
+                  ? todayPeakProbHour !== null
+                    ? `最大 ${todayPrecipProbMax}% ・ ピーク ${todayPeakProbHour}時`
+                    : `最大 ${todayPrecipProbMax}%`
                   : `${highlight.precipitation.probability ?? 0}%`
               }
-              hint={precipHint}
+              hint={
+                <>
+                  {currentRainStatus && (
+                    <span className="text-[#b86a6a]">
+                      （現在 {currentRainStatus}）
+                    </span>
+                  )}
+                  {currentRainStatus && precipHint && " "}
+                  {precipHint}
+                </>
+              }
             />
             <SummaryStat
               icon={<Wind size={14} />}
-              label="風"
+              label="風・湿度・紫外線"
               value={
                 todayMaxWind !== null && todayAvgWind !== null
-                  ? `最大 ${todayMaxWind.toFixed(1)} / 平均 ${todayAvgWind.toFixed(1)} m/s`
+                  ? `最大 ${todayMaxWind.toFixed(1)} ・ 平均 ${todayAvgWind.toFixed(1)} m/s`
                   : "—"
               }
               hint={
@@ -264,7 +299,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                   )}
                   {todayMaxUv !== undefined && (
                     <>
-                      {todayMaxHumidity !== null && " / "}
+                      {todayMaxHumidity !== null && " ・ "}
                       UV 最大 {todayMaxUv.toFixed(0)}
                     </>
                   )}
