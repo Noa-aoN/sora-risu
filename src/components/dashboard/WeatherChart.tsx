@@ -360,12 +360,17 @@ function buildChartContext(
   pollen: NormalizedPollen | null,
   range: TimelineRange,
   anchor: ChartAnchor,
+  isMobile: boolean = false,
 ): ChartContext {
   const isHourly = range === "1d";
-  const data =
+  const rawData =
     range === "1d"
       ? build1dWindow(weather, pollen)
       : buildDailyWindow(weather, pollen, dailyCountForRange(range), anchor);
+  const data =
+    isMobile && (range === "7d" || range === "14d")
+      ? thinChartData(rawData, 3)
+      : rawData;
 
   const nowMs = Date.now();
   const halfMs = rangeHalfMs(range);
@@ -437,11 +442,43 @@ function useNowTick(intervalMs = 60_000): number {
   return tick;
 }
 
+function useIsMobile(): boolean {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(max-width: 640px)");
+    const update = () => setIsMobile(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
+  return isMobile;
+}
+
+function thinChartData<T extends { t: number }>(
+  data: T[],
+  interval: number,
+): T[] {
+  if (interval <= 1 || data.length <= 1) return data;
+  const result: T[] = [];
+  for (let i = 0; i < data.length; i += interval) {
+    const p = data[i];
+    if (p) result.push(p);
+  }
+  const last = data[data.length - 1];
+  const lastInResult = result[result.length - 1];
+  if (last && lastInResult && lastInResult.t !== last.t) {
+    result.push(last);
+  }
+  return result;
+}
+
 export function WeatherChart({ weather, pollen, range, isError }: Props) {
   const chartSeries = useAppStore((s) => s.chartSeries);
   const chartAnchor = useAppStore((s) => s.chartAnchor);
   const nowMs = useNowTick();
   const nowLabel = formatNowLabel(nowMs);
+  const isMobile = useIsMobile();
 
   if (!weather) {
     return (
@@ -461,7 +498,7 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
     );
   }
 
-  const ctx = buildChartContext(weather, pollen, range, chartAnchor);
+  const ctx = buildChartContext(weather, pollen, range, chartAnchor, isMobile);
 
   const showPressure = chartSeries.pressure;
   const showTemperature = chartSeries.temperature;
@@ -940,6 +977,26 @@ function commonOverlays(ctx: ChartContext, yAxisId?: string, withLabel = false) 
         {...axisProp}
       />,
     );
+  }
+  if (!ctx.isHourly) {
+    let cur = dayStartMs(ctx.domain[0]);
+    while (cur < ctx.domain[1]) {
+      cur += 24 * 60 * 60 * 1000;
+      if (cur > ctx.domain[0] && cur < ctx.domain[1]) {
+        overlays.push(
+          <ReferenceLine
+            key={`day-${cur}`}
+            x={cur}
+            stroke="#9aa39a"
+            strokeOpacity={0.3}
+            strokeDasharray="2 3"
+            strokeWidth={1}
+            ifOverflow="hidden"
+            {...axisProp}
+          />,
+        );
+      }
+    }
   }
   for (const b of ctx.bands) {
     overlays.push(
