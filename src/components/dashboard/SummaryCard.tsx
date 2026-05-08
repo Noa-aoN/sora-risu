@@ -263,7 +263,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
           {currentHourly && (
             <p className="text-xs text-[#b86a6a]">
               現在（{weatherCodeLabel(currentHourly.code)}・
-              {currentHourly.temp}℃・{currentHourly.pressure} hPa）
+              {currentHourly.temp} ℃・{currentHourly.pressure} hPa）
             </p>
           )}
         </div>
@@ -276,14 +276,14 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               value={
                 tempMax !== null && tempMin !== null
                   ? todayMinHumidity !== null && todayMaxHumidity !== null
-                    ? `${tempMin} ~ ${tempMax}℃ / ${todayMinHumidity} ~ ${todayMaxHumidity}%`
+                    ? `${tempMin} ~ ${tempMax} ℃ / ${todayMinHumidity} ~ ${todayMaxHumidity} %`
                     : `${tempMin} ~ ${tempMax} ℃`
                   : "—"
               }
               hint={
                 <>
                   {highlight.temperature.feelsLike !== undefined && (
-                    <>体感 {highlight.temperature.feelsLike}℃</>
+                    <>体感 {highlight.temperature.feelsLike} ℃</>
                   )}
                   {highlight.temperature.feelsLike !== undefined &&
                     tempWarning &&
