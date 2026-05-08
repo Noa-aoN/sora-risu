@@ -243,11 +243,6 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                       （現在 {currentHourly.temp}℃）
                     </span>
                   )}
-                  {tempWarning && (
-                    <span className="ml-1 text-[#0284c7]">
-                      ：{tempWarning}
-                    </span>
-                  )}
                 </>
               }
               value={
@@ -256,9 +251,17 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                   : "—"
               }
               hint={
-                highlight.temperature.feelsLike !== undefined ? (
-                  <>体感 {highlight.temperature.feelsLike}℃</>
-                ) : null
+                <>
+                  {highlight.temperature.feelsLike !== undefined && (
+                    <>体感 {highlight.temperature.feelsLike}℃</>
+                  )}
+                  {highlight.temperature.feelsLike !== undefined &&
+                    tempWarning &&
+                    " ・ "}
+                  {tempWarning && (
+                    <span className="text-[#0284c7]">{tempWarning}</span>
+                  )}
+                </>
               }
             />
             <SummaryStat
@@ -271,11 +274,6 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                       （現在 {currentHourly.pressure} hPa）
                     </span>
                   )}
-                  {pressureWarning && (
-                    <span className="ml-1 text-[#0284c7]">
-                      ：{pressureWarning}
-                    </span>
-                  )}
                 </>
               }
               value={
@@ -283,7 +281,15 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                   ? `${todayMinPressure} ~ ${todayMaxPressure} hPa`
                   : "—"
               }
-              hint={todayPressureTrend ?? null}
+              hint={
+                <>
+                  {todayPressureTrend ?? null}
+                  {todayPressureTrend && pressureWarning && " ・ "}
+                  {pressureWarning && (
+                    <span className="text-[#0284c7]">{pressureWarning}</span>
+                  )}
+                </>
+              }
             />
             <SummaryStat
               icon={<CloudRain size={14} />}
