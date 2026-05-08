@@ -84,16 +84,24 @@ function pickHighlightCondition(
 
 function pickPeakHour(todayHourly: HourlyPoint[]): number | null {
   if (todayHourly.length === 0) return null;
-  const peakProb = Math.max(
-    ...todayHourly.map((p) => p.precipitationProbability),
-  );
-  if (peakProb <= 0) return null;
-  for (const p of todayHourly) {
-    if (p.precipitationProbability === peakProb) {
-      return new Date(p.time).getHours();
+  const findPeak = (points: HourlyPoint[]) => {
+    if (points.length === 0) return null;
+    const peakProb = Math.max(
+      ...points.map((p) => p.precipitationProbability),
+    );
+    if (peakProb <= 0) return null;
+    for (const p of points) {
+      if (p.precipitationProbability === peakProb) {
+        return new Date(p.time).getHours();
+      }
     }
-  }
-  return null;
+    return null;
+  };
+  // 生活時間帯 (6 時以降) を優先、無ければ全体（深夜のみピークの日対応）
+  const dayTimeHourly = todayHourly.filter(
+    (p) => new Date(p.time).getHours() >= 6,
+  );
+  return findPeak(dayTimeHourly) ?? findPeak(todayHourly);
 }
 
 function dayPressureTrendLabel(pressures: number[]): string | null {
