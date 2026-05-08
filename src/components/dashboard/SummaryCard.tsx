@@ -318,17 +318,20 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               label="降水確率・降水量"
               value={
                 todayPeakProb !== null
-                  ? todayPeakProb > 0 && todayPeakHourlyPrecip !== null
-                    ? `${todayPeakProb}% ・ ${todayPeakHourlyPrecip.toFixed(1)} mm（${rainIntensityLabel(todayPeakHourlyPrecip)}）`
+                  ? todayPeakProb > 0 && todayPeakProbHour !== null
+                    ? `${todayPeakProb}%（ピーク ${todayPeakProbHour}時）`
                     : `${todayPeakProb}%`
                   : `${highlight.precipitation.probability ?? 0}%`
               }
               hint={
                 <>
-                  {todayPeakProbHour !== null && (
-                    <>ピーク {todayPeakProbHour}時</>
+                  {todayPeakHourlyPrecip !== null && (
+                    <>
+                      {todayPeakHourlyPrecip.toFixed(1)} mm（
+                      {rainIntensityLabel(todayPeakHourlyPrecip)}）
+                    </>
                   )}
-                  {todayPeakProbHour !== null && precipWarning && " ・ "}
+                  {todayPeakHourlyPrecip !== null && precipWarning && " ・ "}
                   {precipWarning && (
                     <span className="inline-flex items-center gap-0.5">
                       <AlertTriangle size={11} aria-hidden />
