@@ -369,7 +369,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                         {todayMinWind.toFixed(1)} ~{" "}
                         {todayMaxWind.toFixed(1)} m/s
                       </span>
-                      <span className="text-[11px] sm:text-base">
+                      <span className="block text-[11px] sm:inline sm:text-base">
                         （突風 {todayMaxGust.toFixed(1)}）
                       </span>
                     </>
