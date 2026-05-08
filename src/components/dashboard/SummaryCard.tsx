@@ -172,7 +172,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
     todayMaxPressure !== null &&
     todayMinPressure !== null &&
     todayMaxPressure - todayMinPressure >= 6
-      ? "気圧急変"
+      ? "急変"
       : null;
 
   return (
