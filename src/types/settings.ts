@@ -19,7 +19,7 @@ export const DEFAULT_CHART_SERIES: ChartSeriesVisibility = {
   pollen: true,
 };
 
-export type ChartAnchor = "center" | "left";
+export type ChartAnchor = "center" | "left" | "day";
 
 export type AppSettings = {
   location: GeoLocation | null;

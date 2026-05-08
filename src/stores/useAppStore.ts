@@ -47,7 +47,7 @@ const initial: AppSettings = {
   displayTarget: "summary",
   carryChecks: {},
   chartSeries: DEFAULT_CHART_SERIES,
-  chartAnchor: "center",
+  chartAnchor: "day",
 };
 
 function clampDayWindow(n: number): number {

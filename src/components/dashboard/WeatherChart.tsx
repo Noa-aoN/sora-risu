@@ -197,6 +197,15 @@ function build24hWindow(
   if (points.length === 0) return points;
   const nowMs = Date.now();
 
+  if (anchor === "day") {
+    const todayStart = dayStartMs(nowMs);
+    const todayEnd = todayStart + 24 * 60 * 60 * 1000;
+    const sliced = points.filter((p) => p.t >= todayStart && p.t < todayEnd);
+    if (!pollen || !pollen.available) return sliced;
+    const pollenMap = buildPollenHourlyMap(pollen);
+    return sliced.map((p) => ({ ...p, pollen: pollenMap.get(p.t) }));
+  }
+
   let nowIdx = 0;
   let bestDiff = Infinity;
   for (let i = 0; i < points.length; i++) {
