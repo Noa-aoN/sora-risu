@@ -332,7 +332,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
             />
             <SummaryStat
               icon={<CloudRain size={14} />}
-              label="降水"
+              label="降水確率・量"
               value={
                 todayPeakProb !== null
                   ? todayPeakProb > 0 && todayPeakProbHour !== null
