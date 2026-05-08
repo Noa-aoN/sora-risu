@@ -82,26 +82,27 @@ function pickHighlightCondition(
   return conditions[0] ?? null;
 }
 
-function pickPeakHour(todayHourly: HourlyPoint[]): number | null {
+function pickPeakHourLabel(todayHourly: HourlyPoint[]): string | null {
   if (todayHourly.length === 0) return null;
-  const findPeak = (points: HourlyPoint[]) => {
-    if (points.length === 0) return null;
+  const findPeakHours = (points: HourlyPoint[]): number[] => {
+    if (points.length === 0) return [];
     const peakProb = Math.max(
       ...points.map((p) => p.precipitationProbability),
     );
-    if (peakProb <= 0) return null;
-    for (const p of points) {
-      if (p.precipitationProbability === peakProb) {
-        return new Date(p.time).getHours();
-      }
-    }
-    return null;
+    if (peakProb <= 0) return [];
+    return points
+      .filter((p) => p.precipitationProbability === peakProb)
+      .map((p) => new Date(p.time).getHours());
   };
-  // 生活時間帯 (6 時以降) を優先、無ければ全体（深夜のみピークの日対応）
   const dayTimeHourly = todayHourly.filter(
     (p) => new Date(p.time).getHours() >= 6,
   );
-  return findPeak(dayTimeHourly) ?? findPeak(todayHourly);
+  const dayHours = findPeakHours(dayTimeHourly);
+  const hours = dayHours.length > 0 ? dayHours : findPeakHours(todayHourly);
+  if (hours.length === 0) return null;
+  const min = Math.min(...hours);
+  const max = Math.max(...hours);
+  return min === max ? `${min}時` : `${min}〜${max}時`;
 }
 
 function dayPressureTrendLabel(pressures: number[]): string | null {
@@ -148,7 +149,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
   const todayPeakProb = todayHourly.length
     ? Math.max(...todayHourly.map((p) => p.precipitationProbability))
     : null;
-  const todayPeakProbHour = pickPeakHour(todayHourly);
+  const todayPeakProbLabel = pickPeakHourLabel(todayHourly);
   const todayPeakHourlyPrecip = todayHourly.length
     ? Math.max(...todayHourly.map((p) => p.precipitation))
     : null;
@@ -267,7 +268,8 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
           </p>
           {currentHourly && (
             <p className="text-xs text-[#b86a6a]">
-              （現在 {weatherCodeLabel(currentHourly.code)}）
+              （現在 {weatherCodeLabel(currentHourly.code)}、
+              {currentHourly.temp}℃、{currentHourly.pressure} hPa）
             </p>
           )}
         </div>
@@ -276,16 +278,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <SummaryStat
               icon={<Thermometer size={14} />}
-              label={
-                <>
-                  気温
-                  {currentHourly && (
-                    <span className="ml-1 text-[#b86a6a]">
-                      （現在 {currentHourly.temp}℃）
-                    </span>
-                  )}
-                </>
-              }
+              label="気温"
               value={
                 tempMax !== null && tempMin !== null
                   ? `${tempMin} ~ ${tempMax} ℃`
@@ -310,16 +303,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
             />
             <SummaryStat
               icon={<Gauge size={14} />}
-              label={
-                <>
-                  気圧
-                  {currentHourly && (
-                    <span className="ml-1 text-[#b86a6a]">
-                      （現在 {currentHourly.pressure} hPa）
-                    </span>
-                  )}
-                </>
-              }
+              label="気圧"
               value={
                 todayMaxPressure !== null && todayMinPressure !== null
                   ? `${todayMinPressure} ~ ${todayMaxPressure} hPa`
@@ -350,10 +334,10 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               }
               hint={
                 <>
-                  {todayPeakProbHour !== null && (
-                    <>ピーク {todayPeakProbHour}時</>
+                  {todayPeakProbLabel !== null && (
+                    <>ピーク {todayPeakProbLabel}</>
                   )}
-                  {todayPeakProbHour !== null && precipWarning && " ・ "}
+                  {todayPeakProbLabel !== null && precipWarning && " ・ "}
                   {precipWarning && (
                     <span className="inline-flex items-center gap-0.5">
                       <AlertTriangle size={11} aria-hidden />
