@@ -43,11 +43,11 @@ const initial: AppSettings = {
     bodyType: "neutral",
     scenes: DEFAULT_SCENES,
   },
-  timelineRange: "24h",
+  timelineRange: "1d",
   displayTarget: "summary",
   carryChecks: {},
   chartSeries: DEFAULT_CHART_SERIES,
-  chartAnchor: "day",
+  chartAnchor: "center",
 };
 
 function clampDayWindow(n: number): number {
@@ -124,7 +124,7 @@ export const useAppStore = create<AppStore>()(
     }),
     {
       name: "sora-risu:settings",
-      version: 6,
+      version: 7,
       migrate: (persisted: unknown, version: number) => {
         const state = (persisted as Partial<AppSettings> & {
           outfitChecks?: Record<string, boolean>;
@@ -155,6 +155,11 @@ export const useAppStore = create<AppStore>()(
         }
         if (version < 6 && !next.chartAnchor) {
           next = { ...next, chartAnchor: "center" };
+        }
+        if (version < 7) {
+          if ((next.chartAnchor as string) === "day") {
+            next = { ...next, chartAnchor: "center" };
+          }
         }
         return next;
       },

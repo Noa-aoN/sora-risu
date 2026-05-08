@@ -197,15 +197,6 @@ function build24hWindow(
   if (points.length === 0) return points;
   const nowMs = Date.now();
 
-  if (anchor === "day") {
-    const todayStart = dayStartMs(nowMs);
-    const todayEnd = todayStart + 24 * 60 * 60 * 1000;
-    const sliced = points.filter((p) => p.t >= todayStart && p.t <= todayEnd);
-    if (!pollen || !pollen.available) return sliced;
-    const pollenMap = buildPollenHourlyMap(pollen);
-    return sliced.map((p) => ({ ...p, pollen: pollenMap.get(p.t) }));
-  }
-
   let nowIdx = 0;
   let bestDiff = Infinity;
   for (let i = 0; i < points.length; i++) {
@@ -226,6 +217,27 @@ function build24hWindow(
       : Math.min(points.length, nowIdx + 13);
   const sliced = points.slice(startIdx, endIdx);
 
+  if (!pollen || !pollen.available) return sliced;
+  const pollenMap = buildPollenHourlyMap(pollen);
+  return sliced.map((p) => ({ ...p, pollen: pollenMap.get(p.t) }));
+}
+
+function build1dWindow(
+  weather: NormalizedWeather,
+  pollen: NormalizedPollen | null,
+): ChartPoint[] {
+  const points: ChartPoint[] = weather.hourly.map((p) => ({
+    t: parseLocalISOToMs(p.time),
+    pressure: Math.round(p.pressure),
+    temperature: Math.round(p.temperature * 10) / 10,
+    precip: p.precipitation,
+    precipProb: p.precipitationProbability,
+    weatherCode: p.weatherCode,
+  }));
+  if (points.length === 0) return points;
+  const todayStart = dayStartMs(Date.now());
+  const todayEnd = todayStart + 24 * 60 * 60 * 1000;
+  const sliced = points.filter((p) => p.t >= todayStart && p.t <= todayEnd);
   if (!pollen || !pollen.available) return sliced;
   const pollenMap = buildPollenHourlyMap(pollen);
   return sliced.map((p) => ({ ...p, pollen: pollenMap.get(p.t) }));
@@ -362,6 +374,7 @@ type ChartContext = {
 
 function rangeHalfMs(range: TimelineRange): number {
   switch (range) {
+    case "1d":
     case "24h":
       return 12 * 60 * 60 * 1000;
     case "3d":
@@ -379,22 +392,25 @@ function buildChartContext(
   range: TimelineRange,
   anchor: ChartAnchor,
 ): ChartContext {
-  const isHourly = range === "24h";
-  const data = isHourly
-    ? build24hWindow(weather, pollen, anchor)
-    : buildDailyWindow(weather, pollen, dailyCountForRange(range), anchor);
+  const isHourly = range === "24h" || range === "1d";
+  const data =
+    range === "1d"
+      ? build1dWindow(weather, pollen)
+      : range === "24h"
+        ? build24hWindow(weather, pollen, anchor)
+        : buildDailyWindow(weather, pollen, dailyCountForRange(range), anchor);
 
   const nowMs = Date.now();
   const halfMs = rangeHalfMs(range);
   const first = data[0];
   const last = data[data.length - 1];
   const domain: [number, number] =
-    !isHourly && first && last
-      ? first.t === last.t
-        ? [first.t - 12 * 60 * 60 * 1000, first.t + 12 * 60 * 60 * 1000]
-        : [first.t, last.t]
-      : anchor === "day"
-        ? [dayStartMs(nowMs), dayStartMs(nowMs) + 24 * 60 * 60 * 1000]
+    range === "1d"
+      ? [dayStartMs(nowMs), dayStartMs(nowMs) + 24 * 60 * 60 * 1000]
+      : !isHourly && first && last
+        ? first.t === last.t
+          ? [first.t - 12 * 60 * 60 * 1000, first.t + 12 * 60 * 60 * 1000]
+          : [first.t, last.t]
         : anchor === "left"
           ? [nowMs, nowMs + 2 * halfMs]
           : [nowMs - halfMs, nowMs + halfMs];
@@ -497,9 +513,9 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
         </div>
         <div className="flex flex-col gap-2 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <ChartSeriesPicker showPollen showPressure />
-          <ChartAnchorToggle />
+          {range !== "1d" && <ChartAnchorToggle />}
         </div>
-        {range === "24h" && (
+        {(range === "24h" || range === "1d") && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-3 text-[10px] text-ink-400">
             <span className="inline-flex items-center gap-1">
               <span className="inline-block h-2.5 w-4 rounded-sm bg-pollen-100" />

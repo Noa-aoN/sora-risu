@@ -72,6 +72,7 @@ export function buildTimeSlots(
   now: Date = new Date(),
 ): TimeSlot[] {
   switch (range) {
+    case "1d":
     case "24h":
       return build24hSlots(now);
     case "3d":
