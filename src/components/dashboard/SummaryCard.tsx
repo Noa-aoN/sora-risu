@@ -277,8 +277,8 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
           </p>
           {currentHourly && (
             <p className="text-xs text-[#b86a6a]">
-              （現在 {weatherCodeLabel(currentHourly.code)}・
-              {currentHourly.temp}℃・{currentHourly.pressure} hPa）
+              現在：{weatherCodeLabel(currentHourly.code)}・
+              {currentHourly.temp}℃・{currentHourly.pressure} hPa
             </p>
           )}
         </div>
