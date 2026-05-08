@@ -95,6 +95,14 @@ function formatHourTick(ms: number): string {
   return pad2(new Date(ms).getHours()) + "時";
 }
 
+function makeDayTickFormatter(todayStart: number): (ms: number) => string {
+  const dayEnd = todayStart + 24 * 60 * 60 * 1000;
+  return (ms) => {
+    if (ms === dayEnd) return "24時";
+    return pad2(new Date(ms).getHours()) + "時";
+  };
+}
+
 function formatNowLabel(ms: number): string {
   const d = new Date(ms);
   return `現在 (${pad2(d.getHours())}:${pad2(d.getMinutes())})`;
@@ -274,7 +282,7 @@ function buildDailyWindow(
         weatherCode: isWeatherIconHour ? daily?.weatherCode : undefined,
       } satisfies ChartPoint;
     })
-    .filter((p) => p.t >= minMs && p.t < maxMs);
+    .filter((p) => p.t >= minMs && p.t <= maxMs);
 
   if (!pollen || !pollen.available) return points;
   const pollenHourly = buildPollenHourlyMap(pollen);
@@ -432,7 +440,12 @@ function buildChartContext(
     nowX: nowMs,
     bands: isHourly ? buildHourlyBands(data) : [],
     domain,
-    tickFormatter: isHourly ? formatHourTick : formatDayTick,
+    tickFormatter:
+      range === "1d"
+        ? makeDayTickFormatter(dayStartMs(nowMs))
+        : isHourly
+          ? formatHourTick
+          : formatDayTick,
     tooltipFormatter: isHourly ? formatHourTooltip : formatDayTooltip,
     minTickGap: isHourly ? 30 : 0,
     ticks: isHourly ? undefined : buildDayCenterTicks(data),
