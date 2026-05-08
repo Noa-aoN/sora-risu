@@ -156,11 +156,6 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
     ? Math.round(Math.max(...todayHumidities))
     : null;
 
-  const rainStateLabel =
-    todayPeakHourlyPrecip !== null
-      ? rainIntensityLabel(todayPeakHourlyPrecip)
-      : null;
-
   const tempWarning = (() => {
     if (tempMax !== null && tempMax >= 35) return "猛暑日";
     if (tempMin !== null && tempMin >= 25) return "熱帯夜";
@@ -168,12 +163,20 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
     if (tempMin !== null && tempMin < 0) return "氷点下あり";
     return null;
   })();
-  const pressureWarning =
-    todayMaxPressure !== null &&
-    todayMinPressure !== null &&
-    todayMaxPressure - todayMinPressure >= 6
-      ? "急変あり"
-      : null;
+  const todayMaxPressureDrop = (() => {
+    if (todayPressures.length < 2) return 0;
+    const first = todayPressures[0];
+    if (first === undefined) return 0;
+    let runningMax = first;
+    let maxDrop = 0;
+    for (const p of todayPressures) {
+      if (p > runningMax) runningMax = p;
+      const drop = runningMax - p;
+      if (drop > maxDrop) maxDrop = drop;
+    }
+    return maxDrop;
+  })();
+  const pressureWarning = todayMaxPressureDrop >= 6 ? "急変あり" : null;
 
   const precipWarning = (() => {
     if (todayPeakHourlyPrecip !== null && todayPeakHourlyPrecip >= 10)
@@ -333,20 +336,16 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               value={
                 todayPeakProb !== null
                   ? todayPeakProb > 0 && todayPeakHourlyPrecip !== null
-                    ? `${todayPeakProb}% ・ ${todayPeakHourlyPrecip.toFixed(1)} mm`
+                    ? `${todayPeakProb}% ・ ${todayPeakHourlyPrecip.toFixed(1)} mm（${rainIntensityLabel(todayPeakHourlyPrecip)}）`
                     : `${todayPeakProb}%`
                   : `${highlight.precipitation.probability ?? 0}%`
               }
               hint={
                 <>
-                  {rainStateLabel}
-                  {rainStateLabel && todayPeakProbHour !== null && " ・ "}
                   {todayPeakProbHour !== null && (
                     <>ピーク {todayPeakProbHour}時</>
                   )}
-                  {(rainStateLabel || todayPeakProbHour !== null) &&
-                    precipWarning &&
-                    " ・ "}
+                  {todayPeakProbHour !== null && precipWarning && " ・ "}
                   {precipWarning && (
                     <span className="inline-flex items-center gap-0.5">
                       <AlertTriangle size={11} aria-hidden />
