@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { CloudRain, Gauge, Thermometer, Wind } from "lucide-react";
+import { AlertTriangle, CloudRain, Gauge, Thermometer, Wind } from "lucide-react";
 
 import { AcornIcon } from "@/components/brand/AcornIcon";
 import { SoraRisuPopover } from "@/components/brand/SoraRisuPopover";
@@ -259,7 +259,10 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                     tempWarning &&
                     " ・ "}
                   {tempWarning && (
-                    <span className="text-[#0284c7]">{tempWarning}</span>
+                    <span className="inline-flex items-center gap-0.5">
+                      <AlertTriangle size={11} aria-hidden />
+                      {tempWarning}
+                    </span>
                   )}
                 </>
               }
@@ -286,7 +289,10 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                   {todayPressureTrend ?? null}
                   {todayPressureTrend && pressureWarning && " ・ "}
                   {pressureWarning && (
-                    <span className="text-[#0284c7]">{pressureWarning}</span>
+                    <span className="inline-flex items-center gap-0.5">
+                      <AlertTriangle size={11} aria-hidden />
+                      {pressureWarning}
+                    </span>
                   )}
                 </>
               }
