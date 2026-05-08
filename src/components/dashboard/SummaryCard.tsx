@@ -82,27 +82,36 @@ function pickHighlightCondition(
   return conditions[0] ?? null;
 }
 
-function pickPeakHourLabel(todayHourly: HourlyPoint[]): string | null {
+function pickPeakSlotLabel(todayHourly: HourlyPoint[]): string | null {
   if (todayHourly.length === 0) return null;
-  const findPeakHours = (points: HourlyPoint[]): number[] => {
-    if (points.length === 0) return [];
-    const peakProb = Math.max(
-      ...points.map((p) => p.precipitationProbability),
-    );
-    if (peakProb <= 0) return [];
-    return points
-      .filter((p) => p.precipitationProbability === peakProb)
-      .map((p) => new Date(p.time).getHours());
-  };
-  const dayTimeHourly = todayHourly.filter(
-    (p) => new Date(p.time).getHours() >= 6,
-  );
-  const dayHours = findPeakHours(dayTimeHourly);
-  const hours = dayHours.length > 0 ? dayHours : findPeakHours(todayHourly);
-  if (hours.length === 0) return null;
-  const min = Math.min(...hours);
-  const max = Math.max(...hours);
-  return min === max ? `${min}時` : `${min}〜${max}時`;
+  const slots = [
+    { name: "朝", from: 6, to: 11 },
+    { name: "昼", from: 11, to: 15 },
+    { name: "夕方", from: 15, to: 19 },
+    { name: "夜", from: 19, to: 24 },
+  ];
+  const slotMaxes = slots
+    .map((slot) => {
+      const points = todayHourly.filter((p) => {
+        const h = new Date(p.time).getHours();
+        return h >= slot.from && h < slot.to;
+      });
+      if (points.length === 0) return null;
+      return {
+        name: slot.name,
+        max: Math.max(...points.map((p) => p.precipitationProbability)),
+      };
+    })
+    .filter((x): x is { name: string; max: number } => x !== null);
+  if (slotMaxes.length === 0) return null;
+  const peakProb = Math.max(...slotMaxes.map((s) => s.max));
+  if (peakProb <= 0) return null;
+  const peakSlots = slotMaxes
+    .filter((s) => s.max === peakProb)
+    .map((s) => s.name);
+  if (peakSlots.length === 0) return null;
+  if (peakSlots.length === 1) return peakSlots[0]!;
+  return `${peakSlots[0]}〜${peakSlots[peakSlots.length - 1]}`;
 }
 
 function dayPressureTrendLabel(pressures: number[]): string | null {
@@ -149,7 +158,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
   const todayPeakProb = todayHourly.length
     ? Math.max(...todayHourly.map((p) => p.precipitationProbability))
     : null;
-  const todayPeakProbLabel = pickPeakHourLabel(todayHourly);
+  const todayPeakProbLabel = pickPeakSlotLabel(todayHourly);
   const todayPeakHourlyPrecip = todayHourly.length
     ? Math.max(...todayHourly.map((p) => p.precipitation))
     : null;
@@ -268,8 +277,8 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
           </p>
           {currentHourly && (
             <p className="text-xs text-[#b86a6a]">
-              （現在 {weatherCodeLabel(currentHourly.code)}、
-              {currentHourly.temp}℃、{currentHourly.pressure} hPa）
+              （現在 {weatherCodeLabel(currentHourly.code)}・
+              {currentHourly.temp}℃・{currentHourly.pressure} hPa）
             </p>
           )}
         </div>
