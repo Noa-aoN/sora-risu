@@ -175,6 +175,36 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
       ? "急変あり"
       : null;
 
+  const precipWarning = (() => {
+    if (todayPeakHourlyPrecip !== null && todayPeakHourlyPrecip >= 10)
+      return "強雨あり";
+    if (todayHourly.some((p) => p.weatherCode >= 95)) return "雷雨あり";
+    if (
+      todayHourly.some(
+        (p) =>
+          (p.weatherCode >= 71 && p.weatherCode <= 77) ||
+          (p.weatherCode >= 85 && p.weatherCode <= 86),
+      )
+    )
+      return "雪あり";
+    return null;
+  })();
+  const windCardWarning = (() => {
+    if (todayMaxGust !== undefined && todayMaxGust >= 25) return "暴風あり";
+    if (todayMaxGust !== undefined && todayMaxGust >= 13) return "強風あり";
+    if (
+      todayMaxHumidity !== null &&
+      todayMaxHumidity >= 80 &&
+      tempMax !== null &&
+      tempMax >= 28
+    )
+      return "蒸し暑さあり";
+    if (todayHumidities.length > 0 && Math.min(...todayHumidities) <= 30)
+      return "乾燥あり";
+    if (todayMaxUv !== undefined && todayMaxUv >= 8) return "強紫外線";
+    return null;
+  })();
+
   return (
     <Card className="relative">
       <CardHeader>
@@ -314,6 +344,15 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                   {todayPeakProbHour !== null && (
                     <>ピーク {todayPeakProbHour}時</>
                   )}
+                  {(rainStateLabel || todayPeakProbHour !== null) &&
+                    precipWarning &&
+                    " ・ "}
+                  {precipWarning && (
+                    <span className="inline-flex items-center gap-0.5">
+                      <AlertTriangle size={11} aria-hidden />
+                      {precipWarning}
+                    </span>
+                  )}
                 </>
               }
             />
@@ -335,6 +374,16 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                       {todayMaxHumidity !== null && " ・ "}
                       UV {todayMaxUv.toFixed(0)}
                     </>
+                  )}
+                  {(todayMaxHumidity !== null ||
+                    todayMaxUv !== undefined) &&
+                    windCardWarning &&
+                    " ・ "}
+                  {windCardWarning && (
+                    <span className="inline-flex items-center gap-0.5">
+                      <AlertTriangle size={11} aria-hidden />
+                      {windCardWarning}
+                    </span>
                   )}
                 </>
               }
