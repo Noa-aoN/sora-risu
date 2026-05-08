@@ -393,9 +393,11 @@ function buildChartContext(
       ? first.t === last.t
         ? [first.t - 12 * 60 * 60 * 1000, first.t + 12 * 60 * 60 * 1000]
         : [first.t, last.t]
-      : anchor === "left"
-        ? [nowMs, nowMs + 2 * halfMs]
-        : [nowMs - halfMs, nowMs + halfMs];
+      : anchor === "day"
+        ? [dayStartMs(nowMs), dayStartMs(nowMs) + 24 * 60 * 60 * 1000]
+        : anchor === "left"
+          ? [nowMs, nowMs + 2 * halfMs]
+          : [nowMs - halfMs, nowMs + halfMs];
 
   const pollenAvailable = pollen !== null && pollen.available;
   let pollenGrayoutFromMs: number | null = null;
