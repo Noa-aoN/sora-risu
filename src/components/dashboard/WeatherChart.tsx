@@ -95,6 +95,14 @@ function formatHourTick(ms: number): string {
   return pad2(new Date(ms).getHours()) + "時";
 }
 
+function makeDayTickFormatter(todayStart: number): (ms: number) => string {
+  const dayEnd = todayStart + 24 * 60 * 60 * 1000;
+  return (ms) => {
+    if (ms === dayEnd) return "24時";
+    return pad2(new Date(ms).getHours()) + "時";
+  };
+}
+
 function formatNowLabel(ms: number): string {
   const d = new Date(ms);
   return `現在 (${pad2(d.getHours())}:${pad2(d.getMinutes())})`;
@@ -115,7 +123,10 @@ function formatDayTooltip(ms: number): string {
   return `${d.getMonth() + 1}/${d.getDate()} (${WEEKDAYS[d.getDay()]}) ${pad2(d.getHours())}:00`;
 }
 
-function buildDayCenterTicks(data: ChartPoint[]): number[] {
+function buildDayCenterTicks(
+  data: ChartPoint[],
+  maxDays?: number,
+): number[] {
   const seen = new Set<string>();
   const ticks: number[] = [];
   for (const p of data) {
@@ -130,6 +141,7 @@ function buildDayCenterTicks(data: ChartPoint[]): number[] {
       12,
     ).getTime();
     ticks.push(noon);
+    if (maxDays !== undefined && ticks.length >= maxDays) break;
   }
   return ticks;
 }
@@ -180,10 +192,9 @@ function localDateStringFromMs(ms: number): string {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 }
 
-function build24hWindow(
+function build1dWindow(
   weather: NormalizedWeather,
   pollen: NormalizedPollen | null,
-  anchor: ChartAnchor,
 ): ChartPoint[] {
   const points: ChartPoint[] = weather.hourly.map((p) => ({
     t: parseLocalISOToMs(p.time),
@@ -193,30 +204,10 @@ function build24hWindow(
     precipProb: p.precipitationProbability,
     weatherCode: p.weatherCode,
   }));
-
   if (points.length === 0) return points;
-  const nowMs = Date.now();
-
-  let nowIdx = 0;
-  let bestDiff = Infinity;
-  for (let i = 0; i < points.length; i++) {
-    const candidate = points[i];
-    if (!candidate) continue;
-    const diff = Math.abs(candidate.t - nowMs);
-    if (diff < bestDiff) {
-      bestDiff = diff;
-      nowIdx = i;
-    }
-  }
-
-  const startIdx =
-    anchor === "left" ? nowIdx : Math.max(0, nowIdx - 12);
-  const endIdx =
-    anchor === "left"
-      ? Math.min(points.length, nowIdx + 25)
-      : Math.min(points.length, nowIdx + 13);
-  const sliced = points.slice(startIdx, endIdx);
-
+  const todayStart = dayStartMs(Date.now());
+  const todayEnd = todayStart + 24 * 60 * 60 * 1000;
+  const sliced = points.filter((p) => p.t >= todayStart && p.t <= todayEnd);
   if (!pollen || !pollen.available) return sliced;
   const pollenMap = buildPollenHourlyMap(pollen);
   return sliced.map((p) => ({ ...p, pollen: pollenMap.get(p.t) }));
@@ -253,7 +244,7 @@ function buildDailyWindow(
         weatherCode: isWeatherIconHour ? daily?.weatherCode : undefined,
       } satisfies ChartPoint;
     })
-    .filter((p) => p.t >= minMs && p.t < maxMs);
+    .filter((p) => p.t >= minMs && p.t <= maxMs);
 
   if (!pollen || !pollen.available) return points;
   const pollenHourly = buildPollenHourlyMap(pollen);
@@ -353,7 +344,7 @@ type ChartContext = {
 
 function rangeHalfMs(range: TimelineRange): number {
   switch (range) {
-    case "24h":
+    case "1d":
       return 12 * 60 * 60 * 1000;
     case "3d":
       return 1.5 * 24 * 60 * 60 * 1000;
@@ -369,24 +360,38 @@ function buildChartContext(
   pollen: NormalizedPollen | null,
   range: TimelineRange,
   anchor: ChartAnchor,
+  isMobile: boolean = false,
 ): ChartContext {
-  const isHourly = range === "24h";
-  const data = isHourly
-    ? build24hWindow(weather, pollen, anchor)
-    : buildDailyWindow(weather, pollen, dailyCountForRange(range), anchor);
+  const isHourly = range === "1d";
+  const rawData =
+    range === "1d"
+      ? build1dWindow(weather, pollen)
+      : buildDailyWindow(weather, pollen, dailyCountForRange(range), anchor);
+  const data =
+    isMobile && (range === "7d" || range === "14d")
+      ? thinChartData(rawData, 3)
+      : rawData;
 
   const nowMs = Date.now();
   const halfMs = rangeHalfMs(range);
-  const first = data[0];
-  const last = data[data.length - 1];
-  const domain: [number, number] =
-    !isHourly && first && last
-      ? first.t === last.t
-        ? [first.t - 12 * 60 * 60 * 1000, first.t + 12 * 60 * 60 * 1000]
-        : [first.t, last.t]
-      : anchor === "left"
-        ? [nowMs, nowMs + 2 * halfMs]
-        : [nowMs - halfMs, nowMs + halfMs];
+  const domain: [number, number] = (() => {
+    if (range === "1d") {
+      const start = dayStartMs(nowMs);
+      return [start, start + 24 * 60 * 60 * 1000];
+    }
+    if (!isHourly) {
+      const todayMs = dayStartMs(nowMs);
+      const count = dailyCountForRange(range);
+      const startOffset =
+        anchor === "left" ? 0 : -Math.floor((count - 1) / 2);
+      const dailyMinMs = dayStartMs(todayMs, startOffset);
+      const dailyMaxMs = dayStartMs(dailyMinMs, count);
+      return [dailyMinMs, dailyMaxMs];
+    }
+    return anchor === "left"
+      ? [nowMs, nowMs + 2 * halfMs]
+      : [nowMs - halfMs, nowMs + halfMs];
+  })();
 
   const pollenAvailable = pollen !== null && pollen.available;
   let pollenGrayoutFromMs: number | null = null;
@@ -405,10 +410,17 @@ function buildChartContext(
     nowX: nowMs,
     bands: isHourly ? buildHourlyBands(data) : [],
     domain,
-    tickFormatter: isHourly ? formatHourTick : formatDayTick,
+    tickFormatter:
+      range === "1d"
+        ? makeDayTickFormatter(dayStartMs(nowMs))
+        : isHourly
+          ? formatHourTick
+          : formatDayTick,
     tooltipFormatter: isHourly ? formatHourTooltip : formatDayTooltip,
     minTickGap: isHourly ? 30 : 0,
-    ticks: isHourly ? undefined : buildDayCenterTicks(data),
+    ticks: isHourly
+      ? undefined
+      : buildDayCenterTicks(data, dailyCountForRange(range)),
     pollenAvailable,
     pollenGrayoutFromMs,
   };
@@ -430,11 +442,43 @@ function useNowTick(intervalMs = 60_000): number {
   return tick;
 }
 
+function useIsMobile(): boolean {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(max-width: 640px)");
+    const update = () => setIsMobile(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
+  return isMobile;
+}
+
+function thinChartData<T extends { t: number }>(
+  data: T[],
+  interval: number,
+): T[] {
+  if (interval <= 1 || data.length <= 1) return data;
+  const result: T[] = [];
+  for (let i = 0; i < data.length; i += interval) {
+    const p = data[i];
+    if (p) result.push(p);
+  }
+  const last = data[data.length - 1];
+  const lastInResult = result[result.length - 1];
+  if (last && lastInResult && lastInResult.t !== last.t) {
+    result.push(last);
+  }
+  return result;
+}
+
 export function WeatherChart({ weather, pollen, range, isError }: Props) {
   const chartSeries = useAppStore((s) => s.chartSeries);
   const chartAnchor = useAppStore((s) => s.chartAnchor);
   const nowMs = useNowTick();
   const nowLabel = formatNowLabel(nowMs);
+  const isMobile = useIsMobile();
 
   if (!weather) {
     return (
@@ -454,7 +498,7 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
     );
   }
 
-  const ctx = buildChartContext(weather, pollen, range, chartAnchor);
+  const ctx = buildChartContext(weather, pollen, range, chartAnchor, isMobile);
 
   const showPressure = chartSeries.pressure;
   const showTemperature = chartSeries.temperature;
@@ -486,9 +530,9 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
         </div>
         <div className="flex flex-col gap-2 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <ChartSeriesPicker showPollen showPressure />
-          <ChartAnchorToggle />
+          {range !== "1d" && <ChartAnchorToggle />}
         </div>
-        {range === "24h" && (
+        {range === "1d" && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-3 text-[10px] text-ink-400">
             <span className="inline-flex items-center gap-1">
               <span className="inline-block h-2.5 w-4 rounded-sm bg-pollen-100" />
@@ -512,10 +556,18 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
             </span>
           </div>
         )}
-        {range === "14d" && (
-          <p className="pt-1 text-[11px] leading-relaxed text-ink-500">
-            14 日先までは予報の精度が下がります。「これからの傾向」の目安としてご覧ください。
-          </p>
+        {range !== "1d" && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-3 text-[10px] text-ink-400">
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block h-0.5 w-3 bg-[#b86a6a]" />
+              {nowLabel}
+            </span>
+            {range === "14d" && (
+              <span className="leading-relaxed">
+                14 日先までは予報の精度が下がります（「これからの傾向」 の目安）
+              </span>
+            )}
+          </div>
         )}
       </CardHeader>
       <CardContent>
@@ -911,17 +963,54 @@ function commonAxisProps(ctx: ChartContext) {
 
 function commonOverlays(ctx: ChartContext, yAxisId?: string, withLabel = false) {
   const axisProp = yAxisId ? { yAxisId } : {};
-  const overlays: ReactElement[] = ctx.bands.map((b) => (
-    <ReferenceArea
-      key={b.key}
-      x1={b.x1}
-      x2={b.x2}
-      fill={b.fill}
-      fillOpacity={b.opacity}
-      ifOverflow="hidden"
-      {...axisProp}
-    />
-  ));
+  const overlays: ReactElement[] = [];
+  const pastEnd = Math.min(ctx.domain[1], ctx.nowX);
+  if (pastEnd > ctx.domain[0]) {
+    overlays.push(
+      <ReferenceArea
+        key="past-shade"
+        x1={ctx.domain[0]}
+        x2={pastEnd}
+        fill="#000"
+        fillOpacity={0.05}
+        ifOverflow="hidden"
+        {...axisProp}
+      />,
+    );
+  }
+  if (!ctx.isHourly) {
+    let cur = dayStartMs(ctx.domain[0]);
+    while (cur < ctx.domain[1]) {
+      cur += 24 * 60 * 60 * 1000;
+      if (cur > ctx.domain[0] && cur < ctx.domain[1]) {
+        overlays.push(
+          <ReferenceLine
+            key={`day-${cur}`}
+            x={cur}
+            stroke="#9aa39a"
+            strokeOpacity={0.3}
+            strokeDasharray="2 3"
+            strokeWidth={1}
+            ifOverflow="hidden"
+            {...axisProp}
+          />,
+        );
+      }
+    }
+  }
+  for (const b of ctx.bands) {
+    overlays.push(
+      <ReferenceArea
+        key={b.key}
+        x1={b.x1}
+        x2={b.x2}
+        fill={b.fill}
+        fillOpacity={b.opacity}
+        ifOverflow="hidden"
+        {...axisProp}
+      />,
+    );
+  }
   overlays.push(
     <ReferenceLine
       key="now"

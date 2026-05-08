@@ -1,4 +1,4 @@
-export type TimelineRange = "24h" | "3d" | "7d" | "14d";
+export type TimelineRange = "1d" | "3d" | "7d" | "14d";
 
 export type DisplayTarget =
   | "summary"

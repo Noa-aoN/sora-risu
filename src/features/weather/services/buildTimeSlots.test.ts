@@ -27,7 +27,7 @@ test("buildCardSlots covers requested day count", () => {
 
 test("buildTimeSlots respects timeline range", () => {
   const now = new Date(2026, 4, 4, 12, 0);
-  assert.equal(buildTimeSlots("24h", now).length, 4);
+  assert.equal(buildTimeSlots("1d", now).length, 4);
   assert.equal(buildTimeSlots("3d", now).length, 3);
   assert.equal(buildTimeSlots("7d", now).length, 7);
   assert.equal(buildTimeSlots("14d", now).length, 14);

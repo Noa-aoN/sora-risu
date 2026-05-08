@@ -1,6 +1,7 @@
 import type { SoraRisuPose } from "@/components/brand/SoraRisuPopover";
 import type { NormalizedWeather, WeatherCondition } from "@/types/weather";
 import { isFogCode, isSnowCode, isThunderstormCode } from "../../lib/labels.ts";
+import { pickTodayDaily } from "../../lib/todayDaily.ts";
 
 export type RisuMood = {
   pose: SoraRisuPose;
@@ -10,7 +11,7 @@ export type RisuMood = {
 function dayHumidityRange(
   weather: NormalizedWeather | null,
 ): { min: number; max: number } | null {
-  const day = weather?.daily[0];
+  const day = pickTodayDaily(weather);
   if (!day || !weather) return null;
   const todayPoints = weather.hourly.filter((p) => p.time.startsWith(day.date));
   if (todayPoints.length === 0) return null;
@@ -28,7 +29,7 @@ function dayHasCode(
 ): boolean {
   if (highlight?.weatherCode !== undefined && predicate(highlight.weatherCode))
     return true;
-  const day = weather?.daily[0];
+  const day = pickTodayDaily(weather);
   if (day && predicate(day.weatherCode)) return true;
   if (day && weather) {
     const dateStr = day.date;
@@ -54,8 +55,9 @@ export function pickRisuMood(
     };
   }
 
-  const dailyTempMax = weather?.daily[0]?.tempMax;
-  const dailyTempMin = weather?.daily[0]?.tempMin;
+  const todayDaily = pickTodayDaily(weather);
+  const dailyTempMax = todayDaily?.tempMax;
+  const dailyTempMin = todayDaily?.tempMin;
 
   if (highlight.pressure.changeLevel === "high") {
     return {
