@@ -162,7 +162,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
       : null;
 
   const tempWarning = (() => {
-    if (tempMax !== null && tempMax >= 35) return "猛暑日";
+    if (tempMax !== null && tempMax >= 35) return "猛暑";
     if (tempMin !== null && tempMin >= 25) return "熱帯夜";
     if (tempMax !== null && tempMax < 5) return "冷え込み";
     if (tempMin !== null && tempMin < 0) return "氷点下";
@@ -172,7 +172,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
     todayMaxPressure !== null &&
     todayMinPressure !== null &&
     todayMaxPressure - todayMinPressure >= 6
-      ? "気圧の急変"
+      ? "急変"
       : null;
 
   return (
