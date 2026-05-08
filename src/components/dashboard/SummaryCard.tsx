@@ -155,12 +155,24 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
   const todayMaxHumidity = todayHumidities.length
     ? Math.round(Math.max(...todayHumidities))
     : null;
+  const todayMinHumidity = todayHumidities.length
+    ? Math.round(Math.min(...todayHumidities))
+    : null;
 
   const tempWarning = (() => {
     if (tempMax !== null && tempMax >= 35) return "猛暑日";
     if (tempMin !== null && tempMin >= 25) return "熱帯夜";
     if (tempMax !== null && tempMax < 5) return "冷え込みあり";
     if (tempMin !== null && tempMin < 0) return "氷点下あり";
+    if (
+      todayMaxHumidity !== null &&
+      todayMaxHumidity >= 80 &&
+      tempMax !== null &&
+      tempMax >= 28
+    )
+      return "蒸し暑さあり";
+    if (todayMinHumidity !== null && todayMinHumidity <= 30)
+      return "乾燥あり";
     return null;
   })();
   const todayMaxPressureDrop = (() => {
@@ -195,15 +207,6 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
   const windCardWarning = (() => {
     if (todayMaxGust !== undefined && todayMaxGust >= 25) return "暴風あり";
     if (todayMaxGust !== undefined && todayMaxGust >= 13) return "強風あり";
-    if (
-      todayMaxHumidity !== null &&
-      todayMaxHumidity >= 80 &&
-      tempMax !== null &&
-      tempMax >= 28
-    )
-      return "蒸し暑さあり";
-    if (todayHumidities.length > 0 && Math.min(...todayHumidities) <= 30)
-      return "乾燥あり";
     if (todayMaxUv !== undefined && todayMaxUv >= 8) return "強紫外線";
     return null;
   })();
@@ -269,10 +272,12 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <SummaryStat
               icon={<Thermometer size={14} />}
-              label="気温"
+              label="気温・湿度"
               value={
                 tempMax !== null && tempMin !== null
-                  ? `${tempMin} ~ ${tempMax} ℃`
+                  ? todayMinHumidity !== null && todayMaxHumidity !== null
+                    ? `${tempMin} ~ ${tempMax}℃ / ${todayMinHumidity} ~ ${todayMaxHumidity}%`
+                    : `${tempMin} ~ ${tempMax} ℃`
                   : "—"
               }
               hint={
@@ -343,7 +348,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
             />
             <SummaryStat
               icon={<Wind size={14} />}
-              label="風・湿度・紫外線"
+              label="風・紫外線"
               value={
                 todayMaxWind !== null && todayMinWind !== null
                   ? todayMaxGust !== undefined && todayMaxGust > 0
@@ -353,17 +358,10 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               }
               hint={
                 <>
-                  {todayMaxHumidity !== null && <>湿度 {todayMaxHumidity}%</>}
                   {todayMaxUv !== undefined && (
-                    <>
-                      {todayMaxHumidity !== null && " ・ "}
-                      UV {todayMaxUv.toFixed(0)}
-                    </>
+                    <>UV {todayMaxUv.toFixed(0)}</>
                   )}
-                  {(todayMaxHumidity !== null ||
-                    todayMaxUv !== undefined) &&
-                    windCardWarning &&
-                    " ・ "}
+                  {todayMaxUv !== undefined && windCardWarning && " ・ "}
                   {windCardWarning && (
                     <span className="inline-flex items-center gap-0.5">
                       <AlertTriangle size={11} aria-hidden />
