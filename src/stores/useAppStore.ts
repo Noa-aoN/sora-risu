@@ -124,7 +124,7 @@ export const useAppStore = create<AppStore>()(
     }),
     {
       name: "sora-risu:settings",
-      version: 7,
+      version: 8,
       migrate: (persisted: unknown, version: number) => {
         const state = (persisted as Partial<AppSettings> & {
           outfitChecks?: Record<string, boolean>;
@@ -159,6 +159,11 @@ export const useAppStore = create<AppStore>()(
         if (version < 7) {
           if ((next.chartAnchor as string) === "day") {
             next = { ...next, chartAnchor: "center" };
+          }
+        }
+        if (version < 8) {
+          if ((next.timelineRange as string) === "24h") {
+            next = { ...next, timelineRange: "1d" };
           }
         }
         return next;

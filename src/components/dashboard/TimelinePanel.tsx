@@ -10,7 +10,6 @@ const TIMELINE_OPTIONS: Array<{
   disabled?: boolean;
 }> = [
   { value: "1d", label: "1D" },
-  { value: "24h", label: "24H" },
   { value: "3d", label: "3D" },
   { value: "7d", label: "7D" },
   { value: "14d", label: "14D" },
