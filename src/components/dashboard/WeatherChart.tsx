@@ -123,7 +123,10 @@ function formatDayTooltip(ms: number): string {
   return `${d.getMonth() + 1}/${d.getDate()} (${WEEKDAYS[d.getDay()]}) ${pad2(d.getHours())}:00`;
 }
 
-function buildDayCenterTicks(data: ChartPoint[]): number[] {
+function buildDayCenterTicks(
+  data: ChartPoint[],
+  maxDays?: number,
+): number[] {
   const seen = new Set<string>();
   const ticks: number[] = [];
   for (const p of data) {
@@ -138,6 +141,7 @@ function buildDayCenterTicks(data: ChartPoint[]): number[] {
       12,
     ).getTime();
     ticks.push(noon);
+    if (maxDays !== undefined && ticks.length >= maxDays) break;
   }
   return ticks;
 }
@@ -409,7 +413,9 @@ function buildChartContext(
           : formatDayTick,
     tooltipFormatter: isHourly ? formatHourTooltip : formatDayTooltip,
     minTickGap: isHourly ? 30 : 0,
-    ticks: isHourly ? undefined : buildDayCenterTicks(data),
+    ticks: isHourly
+      ? undefined
+      : buildDayCenterTicks(data, dailyCountForRange(range)),
     pollenAvailable,
     pollenGrayoutFromMs,
   };
@@ -519,12 +525,12 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
               <span className="inline-block h-0.5 w-3 bg-[#b86a6a]" />
               {nowLabel}
             </span>
+            {range === "14d" && (
+              <span className="leading-relaxed">
+                14 日先までは予報の精度が下がります（「これからの傾向」 の目安）
+              </span>
+            )}
           </div>
-        )}
-        {range === "14d" && (
-          <p className="pt-1 text-[11px] leading-relaxed text-ink-500">
-            14 日先までは予報の精度が下がります。「これからの傾向」の目安としてご覧ください。
-          </p>
         )}
       </CardHeader>
       <CardContent>
