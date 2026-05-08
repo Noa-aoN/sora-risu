@@ -1,16 +1,65 @@
 import type { SkyLetter } from "@/types/recommendation";
-import type { WeatherCondition } from "@/types/weather";
+import type { NormalizedWeather, WeatherCondition } from "@/types/weather";
+import { isFogCode, isSnowCode, isThunderstormCode } from "../../lib/labels.ts";
 
 import {
   CALM,
+  DRY_AIR,
+  EXTREME_COLD,
+  EXTREME_HEAT,
+  FOG_DAY,
   HEAVY_RAIN,
   HIGH_POLLEN,
+  MUGGY,
   NO_DATA,
   PRESSURE_SWING,
+  SNOW_DAY,
   TEMP_SWING,
+  THUNDERSTORM,
   type LetterPattern,
   type Season,
 } from "./letterMessages.ts";
+
+function dayHumidityRange(
+  weather: NormalizedWeather | null,
+): { min: number; max: number } | null {
+  const day = weather?.daily[0];
+  if (!day || !weather) return null;
+  const todayPoints = weather.hourly.filter((p) => p.time.startsWith(day.date));
+  if (todayPoints.length === 0) return null;
+  const values = todayPoints.map((p) => p.humidity);
+  return {
+    min: Math.min(...values),
+    max: Math.max(...values),
+  };
+}
+
+function dayHasCode(
+  conditions: WeatherCondition[],
+  weather: NormalizedWeather | null,
+  predicate: (code: number) => boolean,
+): boolean {
+  if (
+    conditions.some(
+      (c) => c.weatherCode !== undefined && predicate(c.weatherCode),
+    )
+  ) {
+    return true;
+  }
+  const day = weather?.daily[0];
+  if (day && predicate(day.weatherCode)) return true;
+  if (day && weather) {
+    const dateStr = day.date;
+    if (
+      weather.hourly.some(
+        (p) => p.time.startsWith(dateStr) && predicate(p.weatherCode),
+      )
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
 
 function dayIndex(date: Date = new Date()): number {
   return Math.floor(date.getTime() / 86_400_000);
@@ -41,11 +90,38 @@ function pickFromPattern(
   };
 }
 
-function pickPattern(conditions: WeatherCondition[]): LetterPattern {
+function pickPattern(
+  conditions: WeatherCondition[],
+  weather: NormalizedWeather | null,
+): LetterPattern {
   const hasBigPressureSwing = conditions.some(
     (c) => c.pressure.changeLevel === "high",
   );
   if (hasBigPressureSwing) return PRESSURE_SWING;
+
+  if (dayHasCode(conditions, weather, isThunderstormCode)) return THUNDERSTORM;
+
+  const dailyTempMax = weather?.daily[0]?.tempMax;
+  const dailyTempMin = weather?.daily[0]?.tempMin;
+
+  if (
+    (dailyTempMax !== undefined && dailyTempMax >= 35) ||
+    (dailyTempMin !== undefined && dailyTempMin >= 25)
+  ) {
+    return EXTREME_HEAT;
+  }
+
+  const humidityRange = dayHumidityRange(weather);
+  if (
+    humidityRange &&
+    humidityRange.max >= 80 &&
+    dailyTempMax !== undefined &&
+    dailyTempMax >= 28
+  ) {
+    return MUGGY;
+  }
+
+  if (dayHasCode(conditions, weather, isSnowCode)) return SNOW_DAY;
 
   const hasHeavyRain = conditions.some((c) => c.precipitation.level === "high");
   if (hasHeavyRain) return HEAVY_RAIN;
@@ -55,15 +131,29 @@ function pickPattern(conditions: WeatherCondition[]): LetterPattern {
   );
   if (hasHighPollen) return HIGH_POLLEN;
 
+  if (
+    (dailyTempMax !== undefined && dailyTempMax < 5) ||
+    (dailyTempMin !== undefined && dailyTempMin < 0)
+  ) {
+    return EXTREME_COLD;
+  }
+
+  if (humidityRange && humidityRange.min <= 30) return DRY_AIR;
+
+  if (dayHasCode(conditions, weather, isFogCode)) return FOG_DAY;
+
   const tempValues = conditions.map((c) => c.temperature.value);
-  const tempMax = tempValues.length ? Math.max(...tempValues) : 0;
-  const tempMin = tempValues.length ? Math.min(...tempValues) : 0;
-  if (tempMax - tempMin >= 8) return TEMP_SWING;
+  const slotMax = tempValues.length ? Math.max(...tempValues) : 0;
+  const slotMin = tempValues.length ? Math.min(...tempValues) : 0;
+  if (slotMax - slotMin >= 8) return TEMP_SWING;
 
   return CALM;
 }
 
-export function buildSkyLetter(conditions: WeatherCondition[]): SkyLetter {
+export function buildSkyLetter(
+  conditions: WeatherCondition[],
+  weather: NormalizedWeather | null = null,
+): SkyLetter {
   if (conditions.length === 0) return pickFromPattern(NO_DATA);
-  return pickFromPattern(pickPattern(conditions));
+  return pickFromPattern(pickPattern(conditions, weather));
 }

@@ -1,15 +1,28 @@
 "use client";
 
 import Image from "next/image";
-import { CloudRain, Gauge, Thermometer, Wind } from "lucide-react";
+import { AlertTriangle, CloudRain, Gauge, Thermometer, Wind } from "lucide-react";
 
 import { AcornIcon } from "@/components/brand/AcornIcon";
 import { SoraRisuPopover } from "@/components/brand/SoraRisuPopover";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { pickRisuMood } from "@/features/recommendations/risuMood";
-import { pressureTrendLabel, weatherCodeLabel } from "@/lib/labels";
+import {
+  rainIntensityLabel,
+  summarizeDayWeather,
+  weatherCodeLabel,
+} from "@/lib/labels";
 import type { TimeSlot } from "@/types/timeline";
-import type { NormalizedWeather, WeatherCondition } from "@/types/weather";
+import type {
+  HourlyPoint,
+  NormalizedWeather,
+  WeatherCondition,
+} from "@/types/weather";
 
 type Props = {
   conditions: WeatherCondition[];
@@ -28,16 +41,25 @@ function findCurrentSlot(slots: TimeSlot[]): TimeSlot | null {
   );
 }
 
-function pickCurrentHourlyCode(
+function pickCurrentHourly(
   weather: NormalizedWeather | null,
-): number | undefined {
-  if (!weather) return undefined;
+): {
+  code: number;
+  temp: number;
+  pressure: number;
+} | null {
+  if (!weather) return null;
   const nowMs = Date.now();
   const point = weather.hourly.find((p) => {
     const t = new Date(p.time).getTime();
     return t <= nowMs && nowMs < t + 60 * 60 * 1000;
   });
-  return point?.weatherCode;
+  if (!point) return null;
+  return {
+    code: point.weatherCode,
+    temp: Math.round(point.temperature),
+    pressure: Math.round(point.pressure),
+  };
 }
 
 function pickHighlightCondition(
@@ -60,6 +82,48 @@ function pickHighlightCondition(
   return conditions[0] ?? null;
 }
 
+function pickPeakSlotLabel(todayHourly: HourlyPoint[]): string | null {
+  if (todayHourly.length === 0) return null;
+  const slots = [
+    { name: "朝", from: 6, to: 11 },
+    { name: "昼", from: 11, to: 15 },
+    { name: "夕方", from: 15, to: 19 },
+    { name: "夜", from: 19, to: 24 },
+  ];
+  const slotMaxes = slots
+    .map((slot) => {
+      const points = todayHourly.filter((p) => {
+        const h = new Date(p.time).getHours();
+        return h >= slot.from && h < slot.to;
+      });
+      if (points.length === 0) return null;
+      return {
+        name: slot.name,
+        max: Math.max(...points.map((p) => p.precipitationProbability)),
+      };
+    })
+    .filter((x): x is { name: string; max: number } => x !== null);
+  if (slotMaxes.length === 0) return null;
+  const peakProb = Math.max(...slotMaxes.map((s) => s.max));
+  if (peakProb <= 0) return null;
+  const peakSlots = slotMaxes
+    .filter((s) => s.max === peakProb)
+    .map((s) => s.name);
+  if (peakSlots.length === 0) return null;
+  if (peakSlots.length === 1) return peakSlots[0]!;
+  return `${peakSlots[0]}〜${peakSlots[peakSlots.length - 1]}`;
+}
+
+function dayPressureTrendLabel(pressures: number[]): string | null {
+  if (pressures.length < 2) return null;
+  const first = pressures[0];
+  const last = pressures[pressures.length - 1];
+  if (first === undefined || last === undefined) return null;
+  const diff = last - first;
+  if (Math.abs(diff) < 0.8) return "安定";
+  return diff > 0 ? "上昇傾向" : "下降傾向";
+}
+
 export function SummaryCard({ conditions, slots, weather }: Props) {
   const highlight = pickHighlightCondition(conditions, slots);
   const slot = highlight
@@ -70,9 +134,97 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
     weather && weather.daily[0] ? Math.round(weather.daily[0].tempMax) : null;
   const tempMin =
     weather && weather.daily[0] ? Math.round(weather.daily[0].tempMin) : null;
-  const weatherCode =
-    pickCurrentHourlyCode(weather) ?? weather?.daily[0]?.weatherCode;
-  const mood = pickRisuMood(highlight);
+  const currentHourly = pickCurrentHourly(weather);
+  const mood = pickRisuMood(highlight, weather);
+
+  const todayDateStr = weather?.daily[0]?.date;
+  const todayHourly =
+    todayDateStr && weather
+      ? weather.hourly.filter((p) => p.time.startsWith(todayDateStr))
+      : [];
+  const dayWeatherSummary = todayHourly.length
+    ? summarizeDayWeather(todayHourly)
+    : weatherCodeLabel(weather?.daily[0]?.weatherCode);
+
+  const todayPressures = todayHourly.map((p) => p.pressure);
+  const todayMaxPressure = todayPressures.length
+    ? Math.round(Math.max(...todayPressures))
+    : null;
+  const todayMinPressure = todayPressures.length
+    ? Math.round(Math.min(...todayPressures))
+    : null;
+  const todayPressureTrend = dayPressureTrendLabel(todayPressures);
+
+  const todayPeakProb = todayHourly.length
+    ? Math.max(...todayHourly.map((p) => p.precipitationProbability))
+    : null;
+  const todayPeakProbLabel = pickPeakSlotLabel(todayHourly);
+  const todayPeakHourlyPrecip = todayHourly.length
+    ? Math.max(...todayHourly.map((p) => p.precipitation))
+    : null;
+
+  const todayWinds = todayHourly.map((p) => p.windSpeed);
+  const todayMaxWind = todayWinds.length ? Math.max(...todayWinds) : null;
+  const todayMinWind = todayWinds.length ? Math.min(...todayWinds) : null;
+  const todayMaxGust = weather?.daily[0]?.windGustMax;
+
+  const todayMaxUv = weather?.daily[0]?.uvIndexMax;
+  const todayHumidities = todayHourly.map((p) => p.humidity);
+  const todayMaxHumidity = todayHumidities.length
+    ? Math.round(Math.max(...todayHumidities))
+    : null;
+
+  const tempWarning = (() => {
+    if (tempMax !== null && tempMax >= 35) return "猛暑日";
+    if (tempMin !== null && tempMin >= 25) return "熱帯夜";
+    if (tempMax !== null && tempMax < 5) return "冷え込みあり";
+    if (tempMin !== null && tempMin < 0) return "氷点下あり";
+    return null;
+  })();
+  const todayMaxPressureDrop = (() => {
+    if (todayPressures.length < 2) return 0;
+    const first = todayPressures[0];
+    if (first === undefined) return 0;
+    let runningMax = first;
+    let maxDrop = 0;
+    for (const p of todayPressures) {
+      if (p > runningMax) runningMax = p;
+      const drop = runningMax - p;
+      if (drop > maxDrop) maxDrop = drop;
+    }
+    return maxDrop;
+  })();
+  const pressureWarning = todayMaxPressureDrop >= 6 ? "急変あり" : null;
+
+  const precipWarning = (() => {
+    if (todayPeakHourlyPrecip !== null && todayPeakHourlyPrecip >= 10)
+      return "強雨あり";
+    if (todayHourly.some((p) => p.weatherCode >= 95)) return "雷雨あり";
+    if (
+      todayHourly.some(
+        (p) =>
+          (p.weatherCode >= 71 && p.weatherCode <= 77) ||
+          (p.weatherCode >= 85 && p.weatherCode <= 86),
+      )
+    )
+      return "雪あり";
+    return null;
+  })();
+  const windCardWarning = (() => {
+    if (todayMaxGust !== undefined && todayMaxGust >= 25) return "暴風あり";
+    if (todayMaxGust !== undefined && todayMaxGust >= 13) return "強風あり";
+    if (
+      todayMaxHumidity !== null &&
+      todayMaxHumidity >= 80 &&
+      tempMax !== null &&
+      tempMax >= 28
+    )
+      return "蒸し暑さあり";
+    if (todayHumidities.length > 0 && Math.min(...todayHumidities) <= 30)
+      return "乾燥あり";
+    if (todayMaxUv !== undefined && todayMaxUv >= 8) return "強紫外線";
+    return null;
+  })();
 
   return (
     <Card className="relative">
@@ -121,13 +273,14 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
       <CardContent className="space-y-5">
         <div className="space-y-1.5">
           <p className="font-brand text-2xl leading-snug text-ink-800">
-            {weatherCodeLabel(weatherCode)}
+            {dayWeatherSummary}
           </p>
-          <p className="text-xs text-ink-500">
-            {tempMax !== null && tempMin !== null
-              ? `最高 ${tempMax}℃ / 最低 ${tempMin}℃`
-              : "—"}
-          </p>
+          {currentHourly && (
+            <p className="text-xs text-[#b86a6a]">
+              現在：{weatherCodeLabel(currentHourly.code)}・
+              {currentHourly.temp}℃・{currentHourly.pressure} hPa
+            </p>
+          )}
         </div>
 
         {highlight && slot && (
@@ -135,39 +288,104 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
             <SummaryStat
               icon={<Thermometer size={14} />}
               label="気温"
-              value={`${highlight.temperature.value}℃`}
+              value={
+                tempMax !== null && tempMin !== null
+                  ? `${tempMin} ~ ${tempMax} ℃`
+                  : "—"
+              }
               hint={
-                highlight.temperature.feelsLike !== undefined
-                  ? `体感 ${highlight.temperature.feelsLike}℃`
-                  : undefined
+                <>
+                  {highlight.temperature.feelsLike !== undefined && (
+                    <>体感 {highlight.temperature.feelsLike}℃</>
+                  )}
+                  {highlight.temperature.feelsLike !== undefined &&
+                    tempWarning &&
+                    " ・ "}
+                  {tempWarning && (
+                    <span className="inline-flex items-center gap-0.5">
+                      <AlertTriangle size={11} aria-hidden />
+                      {tempWarning}
+                    </span>
+                  )}
+                </>
               }
             />
             <SummaryStat
               icon={<Gauge size={14} />}
               label="気圧"
-              value={`${Math.round(highlight.pressure.value)} hPa`}
-              hint={pressureTrendLabel(highlight.pressure.trend)}
+              value={
+                todayMaxPressure !== null && todayMinPressure !== null
+                  ? `${todayMinPressure} ~ ${todayMaxPressure} hPa`
+                  : "—"
+              }
+              hint={
+                <>
+                  {todayPressureTrend ?? null}
+                  {todayPressureTrend && pressureWarning && " ・ "}
+                  {pressureWarning && (
+                    <span className="inline-flex items-center gap-0.5">
+                      <AlertTriangle size={11} aria-hidden />
+                      {pressureWarning}
+                    </span>
+                  )}
+                </>
+              }
             />
             <SummaryStat
               icon={<CloudRain size={14} />}
-              label="降水確率"
-              value={`${highlight.precipitation.probability ?? 0}%`}
+              label="降水確率・降水量"
+              value={
+                todayPeakProb !== null
+                  ? todayPeakProb > 0 && todayPeakHourlyPrecip !== null
+                    ? `${todayPeakProb}% ・ ${todayPeakHourlyPrecip.toFixed(1)} mm（${rainIntensityLabel(todayPeakHourlyPrecip)}）`
+                    : `${todayPeakProb}%`
+                  : `${highlight.precipitation.probability ?? 0}%`
+              }
               hint={
-                highlight.precipitation.amount !== undefined
-                  ? `${highlight.precipitation.amount} mm`
-                  : undefined
+                <>
+                  {todayPeakProbLabel !== null && (
+                    <>ピーク {todayPeakProbLabel}</>
+                  )}
+                  {todayPeakProbLabel !== null && precipWarning && " ・ "}
+                  {precipWarning && (
+                    <span className="inline-flex items-center gap-0.5">
+                      <AlertTriangle size={11} aria-hidden />
+                      {precipWarning}
+                    </span>
+                  )}
+                </>
               }
             />
             <SummaryStat
               icon={<Wind size={14} />}
-              label="風"
+              label="風・湿度・紫外線"
               value={
-                highlight.wind ? `${highlight.wind.speed} m/s` : "—"
+                todayMaxWind !== null && todayMinWind !== null
+                  ? todayMaxGust !== undefined && todayMaxGust > 0
+                    ? `${todayMinWind.toFixed(1)} ~ ${todayMaxWind.toFixed(1)} m/s（突風 ${todayMaxGust.toFixed(1)}）`
+                    : `${todayMinWind.toFixed(1)} ~ ${todayMaxWind.toFixed(1)} m/s`
+                  : "—"
               }
               hint={
-                highlight.humidity
-                  ? `湿度 ${highlight.humidity.value}%`
-                  : undefined
+                <>
+                  {todayMaxHumidity !== null && <>湿度 {todayMaxHumidity}%</>}
+                  {todayMaxUv !== undefined && (
+                    <>
+                      {todayMaxHumidity !== null && " ・ "}
+                      UV {todayMaxUv.toFixed(0)}
+                    </>
+                  )}
+                  {(todayMaxHumidity !== null ||
+                    todayMaxUv !== undefined) &&
+                    windCardWarning &&
+                    " ・ "}
+                  {windCardWarning && (
+                    <span className="inline-flex items-center gap-0.5">
+                      <AlertTriangle size={11} aria-hidden />
+                      {windCardWarning}
+                    </span>
+                  )}
+                </>
               }
             />
           </div>
@@ -188,9 +406,9 @@ function SummaryStat({
   hint,
 }: {
   icon: React.ReactNode;
-  label: string;
+  label: React.ReactNode;
   value: string;
-  hint?: string;
+  hint?: React.ReactNode;
 }) {
   return (
     <div className="rounded-2xl bg-cream-50 px-4 py-3">

@@ -1,4 +1,9 @@
-import type { PollenLevel, PrecipLevel, PressureTrend } from "@/types/weather";
+import type {
+  HourlyPoint,
+  PollenLevel,
+  PrecipLevel,
+  PressureTrend,
+} from "@/types/weather";
 
 export function pressureTrendLabel(trend: PressureTrend): string {
   switch (trend) {
@@ -22,6 +27,18 @@ export function precipLevelLabel(level: PrecipLevel): string {
     case "high":
       return "多い";
   }
+}
+
+export function rainIntensityLabel(mmPerHour: number): string {
+  if (!Number.isFinite(mmPerHour) || mmPerHour <= 0) return "降水なし";
+  if (mmPerHour < 0.5) return "霧雨";
+  if (mmPerHour < 3) return "弱い雨";
+  if (mmPerHour < 10) return "普通の雨";
+  if (mmPerHour < 20) return "やや強い雨";
+  if (mmPerHour < 30) return "強い雨";
+  if (mmPerHour < 50) return "激しい雨";
+  if (mmPerHour < 80) return "非常に激しい雨";
+  return "猛烈な雨";
 }
 
 export function pollenLevelLabel(level: PollenLevel): string {
@@ -54,4 +71,52 @@ export function weatherCodeLabel(code?: number): string {
   if (code >= 85 && code <= 86) return "雪";
   if (code >= 95) return "雷雨";
   return "—";
+}
+
+export function isThunderstormCode(code: number): boolean {
+  return code >= 95;
+}
+
+export function isSnowCode(code: number): boolean {
+  return (code >= 71 && code <= 77) || (code >= 85 && code <= 86);
+}
+
+export function isFogCode(code: number): boolean {
+  return code >= 45 && code <= 48;
+}
+
+export function summarizeDayWeather(hourly: HourlyPoint[]): string {
+  if (hourly.length === 0) return "—";
+  const buckets = [
+    { from: 6, to: 12 },
+    { from: 12, to: 18 },
+    { from: 18, to: 24 },
+  ];
+  const labels: string[] = [];
+  for (const b of buckets) {
+    const points = hourly.filter((p) => {
+      const h = new Date(p.time).getHours();
+      return h >= b.from && h < b.to;
+    });
+    const first = points[0];
+    if (!first) continue;
+    const counts = new Map<number, number>();
+    for (const p of points) {
+      counts.set(p.weatherCode, (counts.get(p.weatherCode) ?? 0) + 1);
+    }
+    let topCode = first.weatherCode;
+    let topCount = 0;
+    for (const [code, count] of counts) {
+      if (count > topCount) {
+        topCount = count;
+        topCode = code;
+      }
+    }
+    const label = weatherCodeLabel(topCode);
+    if (label !== "—" && labels[labels.length - 1] !== label) {
+      labels.push(label);
+    }
+  }
+  if (labels.length === 0) return "—";
+  return labels.join("のち");
 }

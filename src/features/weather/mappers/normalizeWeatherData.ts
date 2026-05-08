@@ -19,8 +19,10 @@ export function normalizeForecast(raw: RawForecastResponse): NormalizedWeather {
     precipitationProbability: h.precipitation_probability[i] ?? 0,
     precipitation: h.precipitation[i] ?? 0,
     windSpeed: h.wind_speed_10m[i] ?? 0,
+    windGust: h.wind_gusts_10m[i] ?? 0,
     humidity: h.relative_humidity_2m[i] ?? 0,
     weatherCode: h.weathercode[i] ?? 0,
+    uvIndex: h.uv_index[i] ?? 0,
   }));
 
   const daily: DailyPoint[] = d.time.map((date, i) => ({
@@ -32,6 +34,8 @@ export function normalizeForecast(raw: RawForecastResponse): NormalizedWeather {
     weatherCode: d.weathercode[i] ?? 0,
     sunrise: d.sunrise[i] ?? "",
     sunset: d.sunset[i] ?? "",
+    windGustMax: d.wind_gusts_10m_max[i] ?? 0,
+    uvIndexMax: d.uv_index_max[i] ?? 0,
   }));
 
   return {

@@ -6,7 +6,7 @@ import type {
   SkyLetter,
   UserProfile,
 } from "@/types/recommendation";
-import type { WeatherCondition } from "@/types/weather";
+import type { NormalizedWeather, WeatherCondition } from "@/types/weather";
 
 import { buildActionItems } from "./actionRules";
 import { buildCarryItems } from "./carryItemRules";
@@ -52,6 +52,7 @@ function filterByScene<T extends { category: string }>(
 export function buildRecommendations(
   conditions: WeatherCondition[],
   profile: UserProfile,
+  weather: NormalizedWeather | null = null,
 ): Recommendations {
   const outfit = filterByScene(
     conditions.flatMap((c) => buildOutfitItems(c, profile)),
@@ -69,7 +70,7 @@ export function buildRecommendations(
     profile.scenes,
     OUTDOOR_ACTION_CATEGORIES,
   );
-  const letter = buildSkyLetter(conditions);
+  const letter = buildSkyLetter(conditions, weather);
 
   return { outfit, carry, action, letter };
 }

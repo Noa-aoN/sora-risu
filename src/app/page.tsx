@@ -60,8 +60,8 @@ export default function HomePage() {
     [weather, pollen, cardSlots],
   );
   const recommendations = useMemo(
-    () => buildRecommendations(cardConditions, profile),
-    [cardConditions, profile],
+    () => buildRecommendations(cardConditions, profile, weather),
+    [cardConditions, profile, weather],
   );
 
   const todaySlots = useMemo(
