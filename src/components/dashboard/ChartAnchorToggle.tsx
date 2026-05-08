@@ -5,8 +5,8 @@ import { useAppStore } from "@/stores/useAppStore";
 import type { ChartAnchor } from "@/types/settings";
 
 const OPTIONS: Array<{ value: ChartAnchor; label: string }> = [
-  { value: "center", label: "中央" },
-  { value: "left", label: "左端" },
+  { value: "center", label: "過去含む" },
+  { value: "left", label: "未来のみ" },
 ];
 
 export function ChartAnchorToggle() {
