@@ -200,7 +200,7 @@ function build24hWindow(
   if (anchor === "day") {
     const todayStart = dayStartMs(nowMs);
     const todayEnd = todayStart + 24 * 60 * 60 * 1000;
-    const sliced = points.filter((p) => p.t >= todayStart && p.t < todayEnd);
+    const sliced = points.filter((p) => p.t >= todayStart && p.t <= todayEnd);
     if (!pollen || !pollen.available) return sliced;
     const pollenMap = buildPollenHourlyMap(pollen);
     return sliced.map((p) => ({ ...p, pollen: pollenMap.get(p.t) }));
