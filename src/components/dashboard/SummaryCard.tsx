@@ -17,6 +17,7 @@ import {
   summarizeDayWeather,
   weatherCodeLabel,
 } from "@/lib/labels";
+import { pickTodayDaily } from "@/lib/todayDaily";
 import type { TimeSlot } from "@/types/timeline";
 import type {
   HourlyPoint,
@@ -112,21 +113,20 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
     ? slots.find((s) => s.id === highlight.slotId)
     : undefined;
 
-  const tempMax =
-    weather && weather.daily[0] ? Math.round(weather.daily[0].tempMax) : null;
-  const tempMin =
-    weather && weather.daily[0] ? Math.round(weather.daily[0].tempMin) : null;
+  const todayDaily = pickTodayDaily(weather);
+  const tempMax = todayDaily ? Math.round(todayDaily.tempMax) : null;
+  const tempMin = todayDaily ? Math.round(todayDaily.tempMin) : null;
   const currentHourly = pickCurrentHourly(weather);
   const mood = pickRisuMood(highlight, weather);
 
-  const todayDateStr = weather?.daily[0]?.date;
+  const todayDateStr = todayDaily?.date;
   const todayHourly =
     todayDateStr && weather
       ? weather.hourly.filter((p) => p.time.startsWith(todayDateStr))
       : [];
   const dayWeatherSummary = todayHourly.length
     ? summarizeDayWeather(todayHourly)
-    : weatherCodeLabel(weather?.daily[0]?.weatherCode);
+    : weatherCodeLabel(todayDaily?.weatherCode);
 
   const todayPressures = todayHourly.map((p) => p.pressure);
   const todayMaxPressure = todayPressures.length
@@ -148,9 +148,9 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
   const todayWinds = todayHourly.map((p) => p.windSpeed);
   const todayMaxWind = todayWinds.length ? Math.max(...todayWinds) : null;
   const todayMinWind = todayWinds.length ? Math.min(...todayWinds) : null;
-  const todayMaxGust = weather?.daily[0]?.windGustMax;
+  const todayMaxGust = todayDaily?.windGustMax;
 
-  const todayMaxUv = weather?.daily[0]?.uvIndexMax;
+  const todayMaxUv = todayDaily?.uvIndexMax;
   const todayHumidities = todayHourly.map((p) => p.humidity);
   const todayMaxHumidity = todayHumidities.length
     ? Math.round(Math.max(...todayHumidities))

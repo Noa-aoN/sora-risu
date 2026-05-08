@@ -1,6 +1,7 @@
 import type { SkyLetter } from "@/types/recommendation";
 import type { NormalizedWeather, WeatherCondition } from "@/types/weather";
 import { isFogCode, isSnowCode, isThunderstormCode } from "../../lib/labels.ts";
+import { pickTodayDaily } from "../../lib/todayDaily.ts";
 
 import {
   CALM,
@@ -23,7 +24,7 @@ import {
 function dayHumidityRange(
   weather: NormalizedWeather | null,
 ): { min: number; max: number } | null {
-  const day = weather?.daily[0];
+  const day = pickTodayDaily(weather);
   if (!day || !weather) return null;
   const todayPoints = weather.hourly.filter((p) => p.time.startsWith(day.date));
   if (todayPoints.length === 0) return null;
@@ -46,7 +47,7 @@ function dayHasCode(
   ) {
     return true;
   }
-  const day = weather?.daily[0];
+  const day = pickTodayDaily(weather);
   if (day && predicate(day.weatherCode)) return true;
   if (day && weather) {
     const dateStr = day.date;
@@ -101,8 +102,8 @@ function pickPattern(
 
   if (dayHasCode(conditions, weather, isThunderstormCode)) return THUNDERSTORM;
 
-  const dailyTempMax = weather?.daily[0]?.tempMax;
-  const dailyTempMin = weather?.daily[0]?.tempMin;
+  const dailyTempMax = pickTodayDaily(weather)?.tempMax;
+  const dailyTempMin = pickTodayDaily(weather)?.tempMin;
 
   if (
     (dailyTempMax !== undefined && dailyTempMax >= 35) ||
