@@ -88,15 +88,12 @@ function pickPeakHour(todayHourly: HourlyPoint[]): number | null {
     ...todayHourly.map((p) => p.precipitationProbability),
   );
   if (peakProb <= 0) return null;
-  const peakCandidates = todayHourly.filter(
-    (p) => p.precipitationProbability === peakProb,
-  );
-  let best = peakCandidates[0];
-  if (!best) return null;
-  for (const p of peakCandidates) {
-    if (p.precipitation > best.precipitation) best = p;
+  for (const p of todayHourly) {
+    if (p.precipitationProbability === peakProb) {
+      return new Date(p.time).getHours();
+    }
   }
-  return new Date(best.time).getHours();
+  return null;
 }
 
 function dayPressureTrendLabel(pressures: number[]): string | null {
@@ -246,6 +243,11 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                       （現在 {currentHourly.temp}℃）
                     </span>
                   )}
+                  {tempWarning && (
+                    <span className="ml-1 text-[#0284c7]">
+                      ：{tempWarning}
+                    </span>
+                  )}
                 </>
               }
               value={
@@ -254,17 +256,9 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                   : "—"
               }
               hint={
-                <>
-                  {highlight.temperature.feelsLike !== undefined && (
-                    <>体感 {highlight.temperature.feelsLike}℃</>
-                  )}
-                  {highlight.temperature.feelsLike !== undefined &&
-                    tempWarning &&
-                    " ・ "}
-                  {tempWarning && (
-                    <span className="text-[#b86a6a]">{tempWarning}</span>
-                  )}
-                </>
+                highlight.temperature.feelsLike !== undefined ? (
+                  <>体感 {highlight.temperature.feelsLike}℃</>
+                ) : null
               }
             />
             <SummaryStat
@@ -277,6 +271,11 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                       （現在 {currentHourly.pressure} hPa）
                     </span>
                   )}
+                  {pressureWarning && (
+                    <span className="ml-1 text-[#0284c7]">
+                      ：{pressureWarning}
+                    </span>
+                  )}
                 </>
               }
               value={
@@ -284,15 +283,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                   ? `${todayMinPressure} ~ ${todayMaxPressure} hPa`
                   : "—"
               }
-              hint={
-                <>
-                  {todayPressureTrend ?? null}
-                  {todayPressureTrend && pressureWarning && " ・ "}
-                  {pressureWarning && (
-                    <span className="text-[#b86a6a]">{pressureWarning}</span>
-                  )}
-                </>
-              }
+              hint={todayPressureTrend ?? null}
             />
             <SummaryStat
               icon={<CloudRain size={14} />}
