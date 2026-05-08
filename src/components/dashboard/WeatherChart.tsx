@@ -513,6 +513,14 @@ export function WeatherChart({ weather, pollen, range, isError }: Props) {
             </span>
           </div>
         )}
+        {range !== "1d" && (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-3 text-[10px] text-ink-400">
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block h-0.5 w-3 bg-[#b86a6a]" />
+              {nowLabel}
+            </span>
+          </div>
+        )}
         {range === "14d" && (
           <p className="pt-1 text-[11px] leading-relaxed text-ink-500">
             14 日先までは予報の精度が下がります。「これからの傾向」の目安としてご覧ください。
