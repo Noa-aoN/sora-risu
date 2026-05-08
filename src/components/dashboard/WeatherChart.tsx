@@ -365,18 +365,24 @@ function buildChartContext(
 
   const nowMs = Date.now();
   const halfMs = rangeHalfMs(range);
-  const first = data[0];
-  const last = data[data.length - 1];
-  const domain: [number, number] =
-    range === "1d"
-      ? [dayStartMs(nowMs), dayStartMs(nowMs) + 24 * 60 * 60 * 1000]
-      : !isHourly && first && last
-        ? first.t === last.t
-          ? [first.t - 12 * 60 * 60 * 1000, first.t + 12 * 60 * 60 * 1000]
-          : [first.t, last.t]
-        : anchor === "left"
-          ? [nowMs, nowMs + 2 * halfMs]
-          : [nowMs - halfMs, nowMs + halfMs];
+  const domain: [number, number] = (() => {
+    if (range === "1d") {
+      const start = dayStartMs(nowMs);
+      return [start, start + 24 * 60 * 60 * 1000];
+    }
+    if (!isHourly) {
+      const todayMs = dayStartMs(nowMs);
+      const count = dailyCountForRange(range);
+      const startOffset =
+        anchor === "left" ? 0 : -Math.floor((count - 1) / 2);
+      const dailyMinMs = dayStartMs(todayMs, startOffset);
+      const dailyMaxMs = dayStartMs(dailyMinMs, count);
+      return [dailyMinMs, dailyMaxMs];
+    }
+    return anchor === "left"
+      ? [nowMs, nowMs + 2 * halfMs]
+      : [nowMs - halfMs, nowMs + halfMs];
+  })();
 
   const pollenAvailable = pollen !== null && pollen.available;
   let pollenGrayoutFromMs: number | null = null;
