@@ -906,17 +906,34 @@ function commonAxisProps(ctx: ChartContext) {
 
 function commonOverlays(ctx: ChartContext, yAxisId?: string, withLabel = false) {
   const axisProp = yAxisId ? { yAxisId } : {};
-  const overlays: ReactElement[] = ctx.bands.map((b) => (
-    <ReferenceArea
-      key={b.key}
-      x1={b.x1}
-      x2={b.x2}
-      fill={b.fill}
-      fillOpacity={b.opacity}
-      ifOverflow="hidden"
-      {...axisProp}
-    />
-  ));
+  const overlays: ReactElement[] = [];
+  const pastEnd = Math.min(ctx.domain[1], ctx.nowX);
+  if (pastEnd > ctx.domain[0]) {
+    overlays.push(
+      <ReferenceArea
+        key="past-shade"
+        x1={ctx.domain[0]}
+        x2={pastEnd}
+        fill="#000"
+        fillOpacity={0.05}
+        ifOverflow="hidden"
+        {...axisProp}
+      />,
+    );
+  }
+  for (const b of ctx.bands) {
+    overlays.push(
+      <ReferenceArea
+        key={b.key}
+        x1={b.x1}
+        x2={b.x2}
+        fill={b.fill}
+        fillOpacity={b.opacity}
+        ifOverflow="hidden"
+        {...axisProp}
+      />,
+    );
+  }
   overlays.push(
     <ReferenceLine
       key="now"
