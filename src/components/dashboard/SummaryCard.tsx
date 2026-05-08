@@ -274,11 +274,23 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               icon={<Thermometer size={14} />}
               label="気温・湿度"
               value={
-                tempMax !== null && tempMin !== null
-                  ? todayMinHumidity !== null && todayMaxHumidity !== null
-                    ? `${tempMin} ~ ${tempMax} ℃ / ${todayMinHumidity} ~ ${todayMaxHumidity} %`
-                    : `${tempMin} ~ ${tempMax} ℃`
-                  : "—"
+                tempMax !== null && tempMin !== null ? (
+                  todayMinHumidity !== null && todayMaxHumidity !== null ? (
+                    <>
+                      <span>
+                        {tempMin} ~ {tempMax} ℃
+                      </span>
+                      <span className="hidden sm:inline"> / </span>
+                      <span className="block sm:inline">
+                        {todayMinHumidity} ~ {todayMaxHumidity} %
+                      </span>
+                    </>
+                  ) : (
+                    `${tempMin} ~ ${tempMax} ℃`
+                  )
+                ) : (
+                  "—"
+                )
               }
               hint={
                 <>
@@ -350,11 +362,23 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
               icon={<Wind size={14} />}
               label="風・紫外線"
               value={
-                todayMaxWind !== null && todayMinWind !== null
-                  ? todayMaxGust !== undefined && todayMaxGust > 0
-                    ? `${todayMinWind.toFixed(1)} ~ ${todayMaxWind.toFixed(1)} m/s（突風 ${todayMaxGust.toFixed(1)}）`
-                    : `${todayMinWind.toFixed(1)} ~ ${todayMaxWind.toFixed(1)} m/s`
-                  : "—"
+                todayMaxWind !== null && todayMinWind !== null ? (
+                  todayMaxGust !== undefined && todayMaxGust > 0 ? (
+                    <>
+                      <span>
+                        {todayMinWind.toFixed(1)} ~{" "}
+                        {todayMaxWind.toFixed(1)} m/s
+                      </span>
+                      <span className="text-[11px] sm:text-base">
+                        （突風 {todayMaxGust.toFixed(1)}）
+                      </span>
+                    </>
+                  ) : (
+                    `${todayMinWind.toFixed(1)} ~ ${todayMaxWind.toFixed(1)} m/s`
+                  )
+                ) : (
+                  "—"
+                )
               }
               hint={
                 <>
@@ -390,7 +414,7 @@ function SummaryStat({
 }: {
   icon: React.ReactNode;
   label: React.ReactNode;
-  value: string;
+  value: React.ReactNode;
   hint?: React.ReactNode;
 }) {
   return (
