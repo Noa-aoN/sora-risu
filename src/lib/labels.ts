@@ -118,5 +118,5 @@ export function summarizeDayWeather(hourly: HourlyPoint[]): string {
     }
   }
   if (labels.length === 0) return "—";
-  return labels.join("のち");
+  return labels.join(" のち ");
 }
