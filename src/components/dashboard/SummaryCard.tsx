@@ -258,10 +258,19 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
       <CardContent className="space-y-5">
         <div className="space-y-1.5">
           <p className="font-brand text-2xl leading-snug text-ink-800">
-            {dayWeatherSummary}
+            {dayWeatherSummary.split(" のち ").map((part, i) => (
+              <span key={i}>
+                {i > 0 && (
+                  <span className="mx-1 text-base font-light text-ink-500">
+                    のち
+                  </span>
+                )}
+                {part}
+              </span>
+            ))}
           </p>
           {currentHourly && (
-            <p className="text-xs text-[#b86a6a]">
+            <p className="text-sm text-[#b86a6a]">
               現在（{weatherCodeLabel(currentHourly.code)}・
               {currentHourly.temp} ℃・{currentHourly.pressure} hPa）
             </p>
@@ -302,7 +311,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                     " ・ "}
                   {tempWarning && (
                     <span className="inline-flex items-center gap-0.5">
-                      <AlertTriangle size={11} aria-hidden />
+                      <AlertTriangle size={11} className="text-alert-700" aria-hidden />
                       {tempWarning}
                     </span>
                   )}
@@ -323,7 +332,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                   {todayPressureTrend && pressureWarning && " ・ "}
                   {pressureWarning && (
                     <span className="inline-flex items-center gap-0.5">
-                      <AlertTriangle size={11} aria-hidden />
+                      <AlertTriangle size={11} className="text-alert-700" aria-hidden />
                       {pressureWarning}
                     </span>
                   )}
@@ -351,7 +360,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                   {todayPeakHourlyPrecip !== null && precipWarning && " ・ "}
                   {precipWarning && (
                     <span className="inline-flex items-center gap-0.5">
-                      <AlertTriangle size={11} aria-hidden />
+                      <AlertTriangle size={11} className="text-alert-700" aria-hidden />
                       {precipWarning}
                     </span>
                   )}
@@ -388,7 +397,7 @@ export function SummaryCard({ conditions, slots, weather }: Props) {
                   {todayMaxUv !== undefined && windCardWarning && " ・ "}
                   {windCardWarning && (
                     <span className="inline-flex items-center gap-0.5">
-                      <AlertTriangle size={11} aria-hidden />
+                      <AlertTriangle size={11} className="text-alert-700" aria-hidden />
                       {windCardWarning}
                     </span>
                   )}

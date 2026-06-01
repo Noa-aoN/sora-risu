@@ -5,6 +5,7 @@ import type {
   UserProfile,
 } from "@/types/recommendation";
 import type { WeatherCondition } from "@/types/weather";
+import { pollenTypeSuffix } from "./pollenTypeSuffix.ts";
 
 type Bucket = "very_hot" | "hot" | "warm" | "mild" | "cool" | "cold" | "very_cold";
 
@@ -223,7 +224,7 @@ function adjustments(
     result.push({
       name: "花粉が付きにくい素材の上着",
       category: "outer",
-      reason: "花粉が多い時間帯のため",
+      reason: `花粉が多い時間帯のため${pollenTypeSuffix(pollen.types)}`,
       priority: "recommended",
       styleTags: ["simple", "office"],
     });
@@ -237,7 +238,7 @@ export function buildOutfitItems(
   profile: UserProfile,
 ): OutfitItem[] {
   const adjustedTemp = adjustTemperatureForBody(
-    condition.temperature.value,
+    condition.temperature.feelsLike ?? condition.temperature.value,
     profile.bodyType,
   );
   const bucket = pickBucket(adjustedTemp);
