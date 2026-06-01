@@ -1,11 +1,14 @@
 import type { CarryItem } from "@/types/recommendation";
 import type { WeatherCondition } from "@/types/weather";
+import { pollenTypeSuffix } from "./pollenTypeSuffix.ts";
 
 export function buildCarryItems(condition: WeatherCondition): CarryItem[] {
   const items: Array<Omit<CarryItem, "id" | "slotId">> = [];
   const precip = condition.precipitation;
   const t = condition.temperature;
+  const feels = t.feelsLike ?? t.value;
   const pollen = condition.pollen;
+  const pollenSuffix = pollenTypeSuffix(pollen.types);
 
   if ((precip.probability ?? 0) >= 50 || precip.level === "high") {
     items.push({
@@ -27,7 +30,7 @@ export function buildCarryItems(condition: WeatherCondition): CarryItem[] {
     items.push({
       name: "マスク",
       category: "mask",
-      reason: "花粉が多い見込みのため",
+      reason: `花粉が多い見込みのため${pollenSuffix}`,
       priority: "required",
     });
     items.push({
@@ -40,12 +43,12 @@ export function buildCarryItems(condition: WeatherCondition): CarryItem[] {
     items.push({
       name: "マスク",
       category: "mask",
-      reason: "花粉がやや多めの見込みのため",
+      reason: `花粉がやや多めの見込みのため${pollenSuffix}`,
       priority: "recommended",
     });
   }
 
-  if (t.value >= 28 || (t.max ?? 0) >= 28) {
+  if (feels >= 28 || (t.max ?? 0) >= 28) {
     items.push({
       name: "水分",
       category: "water",
@@ -54,7 +57,7 @@ export function buildCarryItems(condition: WeatherCondition): CarryItem[] {
     });
   }
 
-  if (t.value >= 28) {
+  if (feels >= 28) {
     items.push({
       name: "日傘または帽子",
       category: "sunshade",

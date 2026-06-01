@@ -15,6 +15,7 @@ export function normalizeForecast(raw: RawForecastResponse): NormalizedWeather {
   const hourly: HourlyPoint[] = h.time.map((time, i) => ({
     time,
     temperature: h.temperature_2m[i] ?? 0,
+    apparentTemperature: h.apparent_temperature[i] ?? (h.temperature_2m[i] ?? 0),
     pressure: h.pressure_msl[i] ?? 1013,
     precipitationProbability: h.precipitation_probability[i] ?? 0,
     precipitation: h.precipitation[i] ?? 0,

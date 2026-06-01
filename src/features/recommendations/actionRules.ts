@@ -1,9 +1,11 @@
 import type { ActionItem } from "@/types/recommendation";
 import type { WeatherCondition } from "@/types/weather";
+import { pollenTypeSuffix } from "./pollenTypeSuffix.ts";
 
 export function buildActionItems(condition: WeatherCondition): ActionItem[] {
   const items: Array<Omit<ActionItem, "id" | "slotId">> = [];
   const { pressure, precipitation, pollen, temperature } = condition;
+  const pollenSuffix = pollenTypeSuffix(pollen.types);
 
   if (pressure.changeLevel === "high") {
     items.push({
@@ -65,7 +67,7 @@ export function buildActionItems(condition: WeatherCondition): ActionItem[] {
       title: "洗濯物は室内干しの目安",
       category: "pollen_care",
       description: "外干しを避け、換気時間も短めにする",
-      reason: "花粉が多い時間帯のため",
+      reason: `花粉が多い時間帯のため${pollenSuffix}`,
       intensity: "low",
     });
   }

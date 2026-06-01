@@ -166,11 +166,7 @@ function buildHourlyCondition(
   const pressureClass = classifyPressureTrend(points);
   const avgTemp = average(points.map((p) => p.temperature));
   const avgFeel = points.length
-    ? average(
-        weather.hourly
-          .filter((p) => points.some((q) => q.time === p.time))
-          .map((p) => p.temperature),
-      )
+    ? average(points.map((p) => p.apparentTemperature))
     : avgTemp;
   const precipProb = points.length
     ? Math.max(...points.map((p) => p.precipitationProbability))
@@ -230,6 +226,9 @@ function buildDailyCondition(
       value: Math.round((tempMax + tempMin) / 2),
       min: Math.round(tempMin),
       max: Math.round(tempMax),
+      feelsLike: points.length
+        ? Math.round(average(points.map((p) => p.apparentTemperature)))
+        : Math.round((tempMax + tempMin) / 2),
     },
     precipitation: {
       probability: Math.round(precipProb),

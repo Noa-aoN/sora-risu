@@ -12,6 +12,7 @@ export type PollenLevel =
 export type HourlyPoint = {
   time: string;
   temperature: number;
+  apparentTemperature: number;
   pressure: number;
   precipitationProbability: number;
   precipitation: number;
