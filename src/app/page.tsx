@@ -12,6 +12,7 @@ import { TimeSyncedSection } from "@/components/dashboard/TimeSyncedSection";
 import { AppShell } from "@/components/layout/AppShell";
 import { LocationHeader } from "@/components/layout/LocationHeader";
 import { SettingsPanel } from "@/components/settings/SettingsPanel";
+import { Button } from "@/components/ui/button";
 import { useWeather } from "@/components/weather/useWeather";
 import { buildRecommendations } from "@/features/recommendations/buildRecommendations";
 import { buildCardSlots } from "@/features/weather/services/buildTimeSlots";
@@ -49,7 +50,8 @@ export default function HomePage() {
   const profile = useAppStore((s) => s.profile);
   const dayWindowStart = useAppStore((s) => s.dayWindowStart);
 
-  const { weather, pollen, isLoading, isError } = useWeather(location);
+  const { weather, pollen, isLoading, isFetching, isError, refetch } =
+    useWeather(location);
 
   const cardSlots = useMemo(
     () => (mounted ? buildCardSlots(dayWindowStart, 1) : []),
@@ -82,8 +84,21 @@ export default function HomePage() {
         <LocationHeader />
 
         {isError && (
-          <div className="rounded-2xl border border-alert-100 bg-alert-50/50 px-4 py-3 text-sm text-alert-700">
-            天気データの取得に失敗しました。ネットワークを確認してから、再度お試しください。
+          <div
+            role="alert"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-alert-100 bg-alert-50/50 px-4 py-3 text-sm text-alert-700"
+          >
+            <p>
+              天気データの取得に失敗しました。ネットワークを確認してから、再度お試しください。
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void refetch()}
+              disabled={isFetching}
+            >
+              {isFetching ? "再取得中…" : "再試行"}
+            </Button>
           </div>
         )}
 
